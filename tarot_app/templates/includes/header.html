@@ -1,0 +1,87 @@
+{% load static %}
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="bi bi-moon-stars-fill me-2" style="color: #8b5cf6;"></i>
+                <span style="background: linear-gradient(45deg, #8b5cf6, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    Мистический портал
+                </span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="bi bi-house-door me-1"></i>Главная
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/taro' in request.path %}active{% endif %}" href="{% url 'tarot' %}">
+                            <i class="bi bi-grid-3x3-gap-fill me-1"></i>Таро
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/runes' in request.path %}active{% endif %}" href="{% url 'runes' %}">
+                            <i class="bi bi-gem me-1"></i>Руны
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/moon-calendar' in request.path %}active{% endif %}" href="{% url 'moon_calendar' %}">
+                            <i class="bi bi-moon-stars me-1"></i>Лунный календарь
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if '/human-design' in request.path %}active{% endif %}" href="{% url 'human_design' %}">
+                            <i class="bi bi-person-standing-dress me-1"></i>HumanDesign
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<style>
+    .navbar {
+        background: linear-gradient(180deg, rgba(26, 26, 46, 0.95), rgba(15, 15, 35, 0.98));
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid #8b5cf6;
+        padding: 1rem 0;
+    }
+
+    .navbar .nav-link {
+        color: #f4f4f4 !important;
+        font-family: 'Georgia', serif;
+        padding: 0.5rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .navbar .nav-link:hover,
+    .navbar .nav-link.active {
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        transform: translateY(-2px);
+    }
+
+    .navbar .nav-link i {
+        transition: transform 0.3s ease;
+    }
+
+    .navbar .nav-link:hover i {
+        transform: rotate(360deg);
+    }
+
+    @media (max-width: 991px) {
+        .navbar .nav-link {
+            margin: 0.5rem 0;
+            text-align: center;
+        }
+    }
+</style>

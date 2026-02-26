@@ -1,0 +1,164 @@
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <h5 class="mb-4">
+                    <i class="bi bi-moon-stars-fill me-2" style="color: #8b5cf6;"></i>
+                    О портале
+                </h5>
+                <p class="text-secondary" style="line-height: 1.8;">
+                    Добро пожаловать в Мистический портал - место, где древние знания
+                    встречаются с современностью. Исследуйте тайны Таро, Рун,
+                    Лунного календаря и HumanDesign.
+                </p>
+                <div class="social-links mt-4">
+                    <a href="#" class="social-link"><i class="bi bi-telegram"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-vk"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="bi bi-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <h5 class="mb-4">
+                    <i class="bi bi-compass me-2" style="color: #8b5cf6;"></i>
+                    Путешествие
+                </h5>
+                <ul class="footer-links">
+                    <li><a href="{% url 'tarot' %}"><i class="bi bi-arrow-right-short"></i>Таро - Путь мудрости</a></li>
+                    <li><a href="{% url 'runes' %}"><i class="bi bi-arrow-right-short"></i>Руны - Сила предков</a></li>
+                    <li><a href="{% url 'moon_calendar' %}"><i class="bi bi-arrow-right-short"></i>Лунный календарь</a></li>
+                    <li><a href="{% url 'human_design' %}"><i class="bi bi-arrow-right-short"></i>HumanDesign</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-4">
+                <h5 class="mb-4">
+                    <i class="bi bi-pentagon me-2" style="color: #8b5cf6;"></i>
+                    Контакты
+                </h5>
+                <ul class="contact-info">
+                    <li>
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Храм знаний, ул. Мистическая 13</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-envelope"></i>
+                        <span>portal@mystic.ru</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-telephone"></i>
+                        <span>+7 (999) 666-13-13</span>
+                    </li>
+                    <li>
+                        <i class="bi bi-clock"></i>
+                        <span>Круглосуточно 24/7</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mystic-divider my-4">
+            <span class="mystic-divider-line"></span>
+            <i class="bi bi-star-fill"></i>
+            <span class="mystic-divider-line"></span>
+        </div>
+
+        <div class="text-center">
+            <p class="mb-0 text-secondary">
+                <i class="bi bi-c-circle me-1"></i>2024 Мистический портал.
+                <span style="color: #8b5cf6;">Все тайны мира в одном месте</span>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<style>
+    .footer {
+        background: linear-gradient(0deg, #0f0f23, #1a1a2e);
+        border-top: 2px solid #8b5cf6;
+        padding: 3rem 0 2rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .footer::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, #8b5cf6, #ec4899, #8b5cf6, transparent);
+    }
+
+    .social-link {
+        display: inline-flex;
+        width: 40px;
+        height: 40px;
+        border: 2px solid #8b5cf6;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        color: #f4f4f4;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .social-link:hover {
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        border-color: transparent;
+        transform: translateY(-3px) rotate(360deg);
+    }
+
+    .footer-links {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 1rem;
+    }
+
+    .footer-links a {
+        color: #f4f4f4;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+    .footer-links a:hover {
+        color: #ec4899;
+        transform: translateX(10px);
+    }
+
+    .footer-links i {
+        color: #8b5cf6;
+        margin-right: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .footer-links a:hover i {
+        transform: translateX(5px);
+    }
+
+    .contact-info {
+        list-style: none;
+        padding: 0;
+    }
+
+    .contact-info li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 1rem;
+        color: #f4f4f4;
+    }
+
+    .contact-info i {
+        color: #8b5cf6;
+        font-size: 1.2rem;
+        width: 24px;
+    }
+</style>

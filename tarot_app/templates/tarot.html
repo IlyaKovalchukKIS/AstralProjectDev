@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Таро - Мистический портал{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/tarot.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12 text-center fade-in">
+            <h1 class="display-3 mb-4">
+                <i class="bi bi-card-headline me-3" style="color: #8b5cf6;"></i>
+                Колода Таро
+                <i class="bi bi-stars ms-3" style="color: #ec4899;"></i>
+            </h1>
+            <div class="mystic-divider">
+                <span class="mystic-divider-line"></span>
+                <i class="bi bi-crystal"></i>
+                <span class="mystic-divider-line"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка тасовки -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <button class="mystic-btn shuffle-btn" id="shuffleBtn">
+                <i class="bi bi-arrow-repeat me-2"></i>Перетасовать колоду
+            </button>
+        </div>
+    </div>
+
+    <!-- Колода карт -->
+    <div class="row">
+        <div class="col-12">
+            <div class="deck-container" id="deck">
+                {% for card in cards %}
+                <div class="card"
+                     data-name="{{ card.name }}"
+                     data-description="{{ card.description|safe }}"
+                     data-description-flip="{{ card.description_flip|default:''|safe }}"
+                     data-image="{% if card.image %}{{ card.image.url }}{% endif %}">
+                    <div class="card-inner">
+                        <div class="card-back">
+                            <img src="{% static 'img/back_card.webp' %}" alt="Рубашка карты">
+                        </div>
+                        <div class="card-front">
+                            {% if card.image %}
+                            <img src="{{ card.image.url }}" alt="{{ card.name }}" loading="lazy">
+                            {% else %}
+                            <div class="no-image">
+                                Нет изображения
+                            </div>
+                            {% endif %}
+                            <div class="card-name">{{ card.name }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center p-5">
+                    <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
+                    <p class="lead mt-3">Карты не найдены</p>
+                    <p class="text-secondary">Добавьте карты через админ-панель</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно с Bootstrap -->
+<div class="modal fade" id="cardModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content mystic-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="modalTitle">Карта Таро</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" class="modal-image" src="" alt="" style="display: none;">
+                <p class="modal-description" id="modalDesc"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deckContainer = document.getElementById('deck');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const modal = new bootstrap.Modal(document.getElementById('cardModal'));
+    let cards = Array.from(document.querySelectorAll('.card'));
+
+    function shuffleDeck() {
+        deckContainer.classList.add('tasovka', 'shuffling');
+        
+        setTimeout(() => {
+            // Перемешиваем карты
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+            
+            // Сбрасываем состояния
+            cards.forEach(card => {
+                card.classList.remove('upside-down', 'flipped');
+                if (Math.random() < 0.3) {
+                    card.classList.add('upside-down');
+                }
+            });
+            
+            // Перестраиваем DOM
+            deckContainer.innerHTML = '';
+            cards.forEach(card => deckContainer.appendChild(card));
+            
+            deckContainer.classList.remove('tasovka', 'shuffling');
+            rebindCards();
+        }, 1500);
+    }
+
+    function rebindCards() {
+        cards = Array.from(document.querySelectorAll('.card'));
+        cards.forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('flipped')) return;
+                
+                this.classList.add('flipped');
+                
+                const name = this.dataset.name;
+                const description = this.dataset.description;
+                const descriptionFlip = this.dataset.descriptionFlip || '';
+                const imageUrl = this.dataset.image || '';
+                const isUpsideDown = this.classList.contains('upside-down');
+                const selectedDescription = isUpsideDown ? descriptionFlip : description;
+
+                setTimeout(() => {
+                    document.getElementById('modalTitle').textContent = name;
+                    document.getElementById('modalDesc').textContent = selectedDescription;
+                    
+                    const modalImage = document.getElementById('modalImage');
+                    if (imageUrl) {
+                        modalImage.src = imageUrl;
+                        modalImage.style.display = 'block';
+                        modalImage.alt = name;
+                        modalImage.style.transform = isUpsideDown ? 'rotate(180deg)' : 'rotate(0deg)';
+                    } else {
+                        modalImage.style.display = 'none';
+                    }
+                    
+                    modal.show();
+                }, 400);
+            });
+        });
+    }
+
+    shuffleBtn.addEventListener('click', shuffleDeck);
+    
+    // Сброс переворота карт при закрытии модалки
+    document.getElementById('cardModal').addEventListener('hidden.bs.modal', function() {
+        cards.forEach(card => card.classList.remove('flipped'));
+    });
+
+    rebindCards();
+});
+</script>
+{% endblock %}

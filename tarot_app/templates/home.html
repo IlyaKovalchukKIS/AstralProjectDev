@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная - Мистический портал{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Заголовок -->
+    <div class="row">
+        <div class="col-12 text-center fade-in">
+            <h1 class="display-3 mb-4">
+                <i class="bi bi-moon-stars-fill me-3 float-animation" style="color: #8b5cf6;"></i>
+                Мистический портал
+                <i class="bi bi-stars ms-3 float-animation-delayed" style="color: #ec4899;"></i>
+            </h1>
+            <div class="mystic-divider">
+                <span class="mystic-divider-line"></span>
+                <i class="bi bi-crystal sparkle-animation"></i>
+                <span class="mystic-divider-line"></span>
+            </div>
+            <p class="lead text-secondary" style="font-size: 1.3rem; max-width: 800px; margin: 2rem auto;">
+                "Открой врата в мир древних знаний и мистических откровений"
+            </p>
+        </div>
+    </div>
+
+    <!-- Карточки разделов -->
+    <div class="row g-4 mt-4">
+        <!-- Таро -->
+        <div class="col-md-6 col-lg-3 fade-in" style="animation-delay: 0.1s;">
+            <a href="{% url 'tarot' %}" class="card-link">
+                <div class="mystic-card text-center">
+                    <div class="icon-wrapper taro-icon">
+                        <i class="bi-grid-3x3-gap-fill"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Таро</h3>
+                    <p class="text-secondary mb-4">
+                        22 аркана судьбы и 56 тайн повседневности. Познай себя через древние символы.
+                    </p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Руны -->
+        <div class="col-md-6 col-lg-3 fade-in" style="animation-delay: 0.2s;">
+            <a href="{% url 'runes' %}" class="card-link">
+                <div class="mystic-card text-center">
+                    <div class="icon-wrapper runes-icon">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Руны</h3>
+                    <p class="text-secondary mb-4">
+                        Древние символы силы северных богов. Голос предков в каждом знаке.
+                    </p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Лунный календарь -->
+        <div class="col-md-6 col-lg-3 fade-in" style="animation-delay: 0.3s;">
+            <a href="{% url 'moon_calendar' %}" class="card-link">
+                <div class="mystic-card text-center">
+                    <div class="icon-wrapper moon-icon">
+                        <i class="bi bi-moon-stars"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Лунный календарь</h3>
+                    <p class="text-secondary mb-4">
+                        Следуй ритмам ночного светила. Открывай тайны времени и судьбы.
+                    </p>
+                </div>
+            </a>
+        </div>
+
+        <!-- HumanDesign -->
+        <div class="col-md-6 col-lg-3 fade-in" style="animation-delay: 0.4s;">
+            <a href="{% url 'human_design' %}" class="card-link">
+                <div class="mystic-card text-center">
+                    <div class="icon-wrapper human-icon">
+                        <i class="bi bi-person-standing-dress"></i>
+                    </div>
+                    <h3 class="h4 mb-3">HumanDesign</h3>
+                    <p class="text-secondary mb-4">
+                        Код твоей души. Узнай свою истинную природу через науку о уникальности.
+                    </p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Дополнительная информация -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="mystic-card text-center p-5">
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-star-fill display-4 feature-icon"></i>
+                        </div>
+                        <h5 class="mt-3">Точные знания</h5>
+                        <p class="text-secondary mb-0">Проверенные веками практики</p>
+                    </div>
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-shield-shaded display-4 feature-icon"></i>
+                        </div>
+                        <h5 class="mt-3">Защита</h5>
+                        <p class="text-secondary mb-0">Ваши тайны под охраной</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-icon-wrapper">
+                            <i class="bi bi-infinity display-4 feature-icon"></i>
+                        </div>
+                        <h5 class="mt-3">Безграничность</h5>
+                        <p class="text-secondary mb-0">Познание без пределов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
