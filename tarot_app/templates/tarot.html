@@ -13,7 +13,7 @@
         <div class="col-12 text-center fade-in">
             <h1 class="display-3 mb-4">
                 <i class="bi bi-card-headline me-3" style="color: #8b5cf6;"></i>
-                Колода Таро
+                Расклады Таро
                 <i class="bi bi-stars ms-3" style="color: #ec4899;"></i>
             </h1>
             <div class="mystic-divider">
@@ -21,68 +21,58 @@
                 <i class="bi bi-crystal"></i>
                 <span class="mystic-divider-line"></span>
             </div>
+            {% if total_cards %}
+            <p class="text-secondary mt-3">Доступно карт в колоде: {{ total_cards }}</p>
+            {% endif %}
         </div>
     </div>
 
-    <!-- Кнопка тасовки -->
-    <div class="row mb-4">
-        <div class="col-12 text-center">
-            <button class="mystic-btn shuffle-btn" id="shuffleBtn">
-                <i class="bi bi-arrow-repeat me-2"></i>Перетасовать колоду
-            </button>
+    <!-- Кнопки выбора расклада -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="spread-selector">
+                <button class="spread-btn" id="spreadOne">
+                    <i class="bi bi-1-circle-fill"></i> Одна карта
+                </button>
+                <button class="spread-btn" id="spreadThree">
+                    <i class="bi bi-3-circle-fill"></i> Три карты
+                </button>
+                <button class="spread-btn" id="spreadCeltic">
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Кельтский крест
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Колода карт -->
+    <!-- Контейнер для карт -->
     <div class="row">
         <div class="col-12">
-            <div class="deck-container" id="deck">
-                {% for card in cards %}
-                <div class="card"
-                     data-name="{{ card.name }}"
-                     data-description="{{ card.description|safe }}"
-                     data-description-flip="{{ card.description_flip|default:''|safe }}"
-                     data-image="{% if card.image %}{{ card.image.url }}{% endif %}">
-                    <div class="card-inner">
-                        <div class="card-back">
-                            <img src="{% static 'img/back_card.webp' %}" alt="Рубашка карты">
-                        </div>
-                        <div class="card-front">
-                            {% if card.image %}
-                            <img src="{{ card.image.url }}" alt="{{ card.name }}" loading="lazy">
-                            {% else %}
-                            <div class="no-image">
-                                Нет изображения
-                            </div>
-                            {% endif %}
-                            <div class="card-name">{{ card.name }}</div>
-                        </div>
-                    </div>
+            <div class="spread-container" id="spreadContainer">
+                <div class="text-center text-secondary" id="spreadPlaceholder">
+                    <i class="bi bi-hand-index-thumb" style="font-size: 3rem;"></i>
+                    <p class="mt-3">Выберите тип расклада, чтобы начать гадание</p>
                 </div>
-                {% empty %}
-                <div class="text-center p-5">
-                    <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
-                    <p class="lead mt-3">Карты не найдены</p>
-                    <p class="text-secondary">Добавьте карты через админ-панель</p>
-                </div>
-                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Модальное окно с Bootstrap -->
-<div class="modal fade" id="cardModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content mystic-card">
-            <div class="modal-header border-0">
-                <h5 class="modal-title" id="modalTitle">Карта Таро</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="modalImage" class="modal-image" src="" alt="" style="display: none;">
-                <p class="modal-description" id="modalDesc"></p>
-            </div>
+<!-- Кастомное модальное окно (проще и надежнее) -->
+<div class="custom-modal" id="cardModal">
+    <div class="custom-modal-content">
+        <button class="custom-modal-close" id="closeModalBtn">&times;</button>
+        <h2 class="custom-modal-title" id="modalTitle">Карта Таро</h2>
+        <div class="text-center">
+            <img id="modalImage" class="custom-modal-image" src="" alt="" style="display: none;">
+            <p class="custom-modal-description" id="modalDesc"></p>
+        </div>
+        <div class="custom-modal-footer" id="modalFooter" style="display: none;">
+            <button class="modal-btn" id="showUpright">
+                <i class="bi bi-sun"></i> Прямое значение
+            </button>
+            <button class="modal-btn" id="showReversed">
+                <i class="bi bi-moon"></i> Перевернутое
+            </button>
         </div>
     </div>
 </div>
@@ -90,82 +80,295 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const deckContainer = document.getElementById('deck');
-    const shuffleBtn = document.getElementById('shuffleBtn');
-    const modal = new bootstrap.Modal(document.getElementById('cardModal'));
-    let cards = Array.from(document.querySelectorAll('.card'));
+    document.addEventListener('DOMContentLoaded', function() {
+        // Элементы DOM
+        const spreadOne = document.getElementById('spreadOne');
+        const spreadThree = document.getElementById('spreadThree');
+        const spreadCeltic = document.getElementById('spreadCeltic');
+        const spreadContainer = document.getElementById('spreadContainer');
+        const spreadPlaceholder = document.getElementById('spreadPlaceholder');
 
-    function shuffleDeck() {
-        deckContainer.classList.add('tasovka', 'shuffling');
-        
-        setTimeout(() => {
-            // Перемешиваем карты
-            for (let i = cards.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [cards[i], cards[j]] = [cards[j], cards[i]];
+        // Элементы модального окна
+        const modal = document.getElementById('cardModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalImage = document.getElementById('modalImage');
+        const modalFooter = document.getElementById('modalFooter');
+        const showUpright = document.getElementById('showUpright');
+        const showReversed = document.getElementById('showReversed');
+
+        // Все карты из базы данных
+        const allCards = [
+            {% for card in cards %}
+            {
+                id: {{ card.id }},
+                name: "{{ card.name|escapejs }}",
+                description: `{{ card.description|escapejs }}`,
+                description_flip: `{{ card.description_flip|default:''|escapejs }}`,
+                image_url: "{% if card.image %}{{ card.image.url }}{% endif %}"
+            },
+            {% endfor %}
+        ];
+
+        let currentCard = null;
+
+        // Функции для модального окна
+        function openModal() {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden'; // запрещаем прокрутку фона
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = ''; // возвращаем прокрутку
+        }
+
+        // Закрытие по клику на фон
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
             }
-            
-            // Сбрасываем состояния
-            cards.forEach(card => {
-                card.classList.remove('upside-down', 'flipped');
-                if (Math.random() < 0.3) {
-                    card.classList.add('upside-down');
-                }
-            });
-            
-            // Перестраиваем DOM
-            deckContainer.innerHTML = '';
-            cards.forEach(card => deckContainer.appendChild(card));
-            
-            deckContainer.classList.remove('tasovka', 'shuffling');
-            rebindCards();
-        }, 1500);
-    }
-
-    function rebindCards() {
-        cards = Array.from(document.querySelectorAll('.card'));
-        cards.forEach(card => {
-            card.addEventListener('click', function() {
-                if (this.classList.contains('flipped')) return;
-                
-                this.classList.add('flipped');
-                
-                const name = this.dataset.name;
-                const description = this.dataset.description;
-                const descriptionFlip = this.dataset.descriptionFlip || '';
-                const imageUrl = this.dataset.image || '';
-                const isUpsideDown = this.classList.contains('upside-down');
-                const selectedDescription = isUpsideDown ? descriptionFlip : description;
-
-                setTimeout(() => {
-                    document.getElementById('modalTitle').textContent = name;
-                    document.getElementById('modalDesc').textContent = selectedDescription;
-                    
-                    const modalImage = document.getElementById('modalImage');
-                    if (imageUrl) {
-                        modalImage.src = imageUrl;
-                        modalImage.style.display = 'block';
-                        modalImage.alt = name;
-                        modalImage.style.transform = isUpsideDown ? 'rotate(180deg)' : 'rotate(0deg)';
-                    } else {
-                        modalImage.style.display = 'none';
-                    }
-                    
-                    modal.show();
-                }, 400);
-            });
         });
-    }
 
-    shuffleBtn.addEventListener('click', shuffleDeck);
-    
-    // Сброс переворота карт при закрытии модалки
-    document.getElementById('cardModal').addEventListener('hidden.bs.modal', function() {
-        cards.forEach(card => card.classList.remove('flipped'));
+        // Закрытие по Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
+            }
+        });
+
+        // Закрытие по кнопке
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Функция перемешивания массива
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Получение случайных карт
+        function getRandomCards(count) {
+            if (allCards.length === 0) return [];
+            const shuffled = shuffleArray([...allCards]);
+            const selected = shuffled.slice(0, count);
+
+            return selected.map(card => ({
+                ...card,
+                is_upside_down: Math.random() < 0.3
+            }));
+        }
+
+        // Отображение карт
+        function renderCards(cards, spreadType) {
+            if (!cards || cards.length === 0) {
+                spreadContainer.innerHTML = `
+                    <div class="text-center p-5">
+                        <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
+                        <p class="lead mt-3">Недостаточно карт в колоде</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            if (spreadType === 'celtic') {
+                html = '<div class="celtic-cross">';
+                const positions = [
+                    'Настоящее', 'Препятствие', 'Прошлое', 'Будущее',
+                    'Сознание', 'Подсознание', 'Совет', 'Окружение',
+                    'Надежды', 'Итог'
+                ];
+
+                cards.forEach((card, index) => {
+                    html += `
+                        <div class="card-wrapper"
+                             data-id="${card.id}"
+                             data-name="${card.name}"
+                             data-description="${card.description.replace(/"/g, '&quot;')}"
+                             data-description-flip="${card.description_flip ? card.description_flip.replace(/"/g, '&quot;') : ''}"
+                             data-image="${card.image_url || ''}"
+                             data-upside-down="${card.is_upside_down}">
+                            <div class="card-position">${index + 1}. ${positions[index]}</div>
+                            <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
+                                ${card.image_url ?
+                                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html = '<div class="cards-grid">';
+                cards.forEach(card => {
+                    html += `
+                        <div class="card-wrapper"
+                             data-id="${card.id}"
+                             data-name="${card.name}"
+                             data-description="${card.description.replace(/"/g, '&quot;')}"
+                             data-description-flip="${card.description_flip ? card.description_flip.replace(/"/g, '&quot;') : ''}"
+                             data-image="${card.image_url || ''}"
+                             data-upside-down="${card.is_upside_down}">
+                            <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
+                                ${card.image_url ?
+                                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+
+            html += `
+                <div class="text-center mt-4 text-secondary">
+                    <i class="bi bi-info-circle"></i>
+                    Нажмите на карту, чтобы увидеть описание
+                </div>
+            `;
+
+            spreadContainer.innerHTML = html;
+            spreadPlaceholder.style.display = 'none';
+
+            addCardClickHandlers();
+        }
+
+        // Обработчики клика на карты
+        function addCardClickHandlers() {
+            document.querySelectorAll('.card-wrapper').forEach(wrapper => {
+                wrapper.addEventListener('click', function() {
+                    const card = {
+                        id: this.dataset.id,
+                        name: this.dataset.name,
+                        description: this.dataset.description,
+                        description_flip: this.dataset.descriptionFlip,
+                        image_url: this.dataset.image,
+                        is_upside_down: this.dataset.upsideDown === 'true'
+                    };
+
+                    showCardModal(card);
+                });
+            });
+        }
+
+        // Показать модальное окно с картой
+        function showCardModal(card) {
+            currentCard = card;
+
+            modalTitle.textContent = card.name;
+
+            const description = card.is_upside_down && card.description_flip ?
+                card.description_flip : card.description;
+            modalDesc.textContent = description;
+
+            if (card.image_url) {
+                modalImage.src = card.image_url;
+                modalImage.style.display = 'block';
+                modalImage.style.transform = card.is_upside_down ? 'rotate(180deg)' : 'none';
+            } else {
+                modalImage.style.display = 'none';
+            }
+
+            modalFooter.style.display = card.description_flip ? 'flex' : 'none';
+
+            openModal();
+        }
+
+        // Обработчики кнопок раскладов
+        spreadOne.addEventListener('click', function() {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Расклад одной карты...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const cards = getRandomCards(1);
+                renderCards(cards, 'one');
+            }, 500);
+        });
+
+        spreadThree.addEventListener('click', function() {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Расклад трёх карт...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const cards = getRandomCards(3);
+                renderCards(cards, 'three');
+            }, 500);
+        });
+
+        spreadCeltic.addEventListener('click', function() {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Кельтский крест...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const cards = getRandomCards(10);
+                renderCards(cards, 'celtic');
+            }, 500);
+        });
+
+        // Кнопки переключения значений в модалке
+        showUpright.addEventListener('click', function() {
+            if (currentCard) {
+                modalDesc.textContent = currentCard.description;
+                if (modalImage.style.display !== 'none') {
+                    modalImage.style.transform = 'none';
+                }
+            }
+        });
+
+        showReversed.addEventListener('click', function() {
+            if (currentCard && currentCard.description_flip) {
+                modalDesc.textContent = currentCard.description_flip;
+                if (modalImage.style.display !== 'none') {
+                    modalImage.style.transform = 'rotate(180deg)';
+                }
+            }
+        });
+
+        // Проверка наличия карт
+        if (allCards.length === 0) {
+            spreadContainer.innerHTML = `
+                <div class="text-center p-5">
+                    <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
+                    <p class="lead mt-3">Карты не найдены</p>
+                    <p class="text-secondary">Добавьте карты через админ-панель</p>
+                </div>
+            `;
+            spreadPlaceholder.style.display = 'none';
+
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            });
+        }
     });
-
-    rebindCards();
-});
 </script>
 {% endblock %}

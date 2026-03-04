@@ -36,9 +36,23 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["quarterly-expensive-toadfish.cloudpub.ru", "127.0.0.1"]
 
+# CSRF_TRUSTED_ORIGINS (это важно!)
+CSRF_TRUSTED_ORIGINS = [
+    'https://quarterly-expensive-toadfish.cloudpub.ru',
+    'http://quarterly-expensive-toadfish.cloudpub.ru',  # если используете http
+]
+
+if not DEBUG:
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
 # Application definition
+
+# Telegram Bot
+TELEGRAM_BOT_TOKEN = config('BOT_TOKEN')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -49,6 +63,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'tarot_app',
+    'tg_bot',
+    'user_app'
 ]
 
 MIDDLEWARE = [
@@ -111,9 +127,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -128,3 +144,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# AUTH_USER_MODEL = 'tg_bot.User'

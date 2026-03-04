@@ -24,3 +24,30 @@ class TarotCard(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Rune(models.Model):
+    """Модель руны (заглушка)"""
+    name = models.CharField(max_length=50, unique=True, verbose_name="Название")
+    symbol = models.CharField(max_length=10, blank=True, verbose_name="Символ")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Руна"
+        verbose_name_plural = "Руны"
+
+
+class HumanDesign(models.Model):
+    """Модель Human Design (заглушка) — предполагается, что у пользователя может быть один профиль"""
+    profile_data = models.JSONField(default=dict, verbose_name="Данные Human Design")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+
+    def __str__(self):
+        return f"HumanDesign #{self.id}"
+
+    class Meta:
+        verbose_name = "Human Design"
+        verbose_name_plural = "Human Designs"
+
