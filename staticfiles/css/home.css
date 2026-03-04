@@ -1,0 +1,325 @@
+/* ========== АНИМАЦИИ ДЛЯ ИКОНОК ========== */
+
+/* Основные анимации для иконок */
+.icon-wrapper {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s ease;
+}
+
+.icon-wrapper i {
+    transition: all 0.4s ease;
+}
+
+/* Анимация для Таро - вращение и свечение */
+.taro-icon {
+    animation: tarotGlow 3s ease-in-out infinite;
+}
+
+.taro-icon i {
+    animation: tarotSpin 4s linear infinite;
+}
+
+@keyframes tarotGlow {
+    0%, 100% {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+    }
+    50% {
+        border-color: #ec4899;
+        box-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+    }
+}
+
+@keyframes tarotSpin {
+    0% {
+        transform: rotateY(0deg);
+    }
+    50% {
+        transform: rotateY(180deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+/* Анимация для Рун - пульсация */
+.runes-icon {
+    animation: runesPulse 2s ease-in-out infinite;
+}
+
+.runes-icon i {
+    animation: runesShake 3s ease-in-out infinite;
+}
+
+@keyframes runesPulse {
+    0%, 100% {
+        border-color: #8b5cf6;
+        transform: scale(1);
+    }
+    50% {
+        border-color: #ec4899;
+        transform: scale(1.05);
+    }
+}
+
+@keyframes runesShake {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    25% {
+        transform: rotate(-10deg);
+    }
+    75% {
+        transform: rotate(10deg);
+    }
+}
+
+/* Анимация для Луны - смена фаз */
+.moon-icon {
+    animation: moonOrbit 8s linear infinite;
+}
+
+.moon-icon i {
+    animation: moonPhase 4s ease-in-out infinite;
+}
+
+@keyframes moonOrbit {
+    0% {
+        border-color: #8b5cf6;
+    }
+    25% {
+        border-color: #ec4899;
+    }
+    50% {
+        border-color: #8b5cf6;
+    }
+    75% {
+        border-color: #ec4899;
+    }
+    100% {
+        border-color: #8b5cf6;
+    }
+}
+
+@keyframes moonPhase {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1) rotate(180deg);
+        opacity: 0.8;
+    }
+}
+
+/* Анимация для HumanDesign - мерцание */
+.human-icon {
+    animation: humanPulse 3s ease-in-out infinite;
+}
+
+.human-icon i {
+    animation: humanFloat 2.5s ease-in-out infinite;
+}
+
+@keyframes humanPulse {
+    0%, 100% {
+        border-color: #8b5cf6;
+        background: rgba(139, 92, 246, 0.1);
+    }
+    50% {
+        border-color: #ec4899;
+        background: rgba(236, 72, 153, 0.2);
+    }
+}
+
+@keyframes humanFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* ========== АНИМАЦИИ ДЛЯ НИЖНЕЙ СЕКЦИИ ========== */
+
+.feature-icon-wrapper {
+    display: inline-block;
+    padding: 15px;
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+.feature-icon {
+    animation: featurePulse 2s ease-in-out infinite;
+    transition: all 0.4s ease;
+}
+
+.feature-icon-wrapper:hover {
+    transform: scale(1.1);
+}
+
+.feature-icon-wrapper:hover .feature-icon {
+    animation: none;
+    transform: rotate(360deg) scale(1.2);
+    color: #ec4899;
+}
+
+@keyframes featurePulse {
+    0%, 100% {
+        transform: scale(1);
+        color: #8b5cf6;
+    }
+    50% {
+        transform: scale(1.1);
+        color: #ec4899;
+    }
+}
+
+/* ========== АНИМАЦИИ ДЛЯ ЗАГОЛОВКА ========== */
+
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotate(5deg);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+        color: #ec4899;
+    }
+}
+
+/* ========== ЭФФЕКТЫ ПРИ НАВЕДЕНИИ ========== */
+
+.mystic-card:hover .icon-wrapper {
+    animation-play-state: paused;
+}
+
+.mystic-card:hover .icon-wrapper i {
+    animation-play-state: paused;
+    transform: scale(1.2);
+    color: #ec4899;
+}
+
+/* Специфичные эффекты для каждой иконки при наведении */
+.mystic-card:hover .taro-icon i {
+    transform: rotateY(360deg) scale(1.2);
+}
+
+.mystic-card:hover .runes-icon i {
+    transform: rotate(-360deg) scale(1.2);
+}
+
+.mystic-card:hover .moon-icon i {
+    transform: rotate(360deg) scale(1.2);
+}
+
+.mystic-card:hover .human-icon i {
+    transform: translateY(-10px) scale(1.2);
+}
+
+/* ========== ДОПОЛНИТЕЛЬНЫЕ ЭФФЕКТЫ ========== */
+
+.float-animation {
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+.float-animation-delayed {
+    animation: floatIcon 3s ease-in-out infinite 1.5s;
+}
+
+.sparkle-animation {
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+/* ========== АДАПТИВНОСТЬ ========== */
+
+@media (max-width: 768px) {
+    .taro-icon i,
+    .runes-icon i,
+    .moon-icon i,
+    .human-icon i {
+        animation-duration: 3s; /* Ускоряем анимацию на мобильных */
+    }
+
+    .feature-icon-wrapper {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .taro-icon,
+    .runes-icon,
+    .moon-icon,
+    .human-icon {
+        animation-duration: 2s; /* Еще быстрее на маленьких экранах */
+    }
+}
+
+/* ========== ПРЕФЕРЕНСЫ ПОЛЬЗОВАТЕЛЯ ========== */
+
+@media (prefers-reduced-motion: reduce) {
+    .taro-icon,
+    .runes-icon,
+    .moon-icon,
+    .human-icon,
+    .feature-icon,
+    .float-animation,
+    .sparkle-animation {
+        animation: none !important;
+    }
+
+    .mystic-card:hover .icon-wrapper i {
+        transform: scale(1.1);
+    }
+}
+
+/* ========== СТИЛИ ДЛЯ ССЫЛОК-КАРТОЧЕК ========== */
+
+/* Убираем стандартные стили ссылок */
+.card-link,
+.card-link:hover,
+.card-link:focus,
+.card-link:active {
+    text-decoration: none;
+    outline: none;
+}
+
+/* Сохраняем анимации при наведении на карточку */
+.card-link:hover .taro-icon {
+    animation-play-state: running;
+}
+
+.card-link:hover .runes-icon {
+    animation-play-state: running;
+}
+
+.card-link:hover .moon-icon {
+    animation-play-state: running;
+}
+
+.card-link:hover .human-icon {
+    animation-play-state: running;
+}
+
+/* Адаптация для мобильных устройств */
+@media (max-width: 768px) {
+    .card-link:hover {
+        transform: translateY(-3px);
+    }
+
+    .card-link:active {
+        opacity: 0.8;
+    }
+}

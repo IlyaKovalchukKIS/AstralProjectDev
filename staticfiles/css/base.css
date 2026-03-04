@@ -1,0 +1,205 @@
+/* 🔥 ОСНОВНЫЕ СТИЛИ В СТИЛЕ ТАРО */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Georgia', serif;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0f23);
+    color: #f4f4f4;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M10 10 L90 10 L90 90 L10 90 Z" fill="none" stroke="%238b5cf6" stroke-width="0.3" opacity="0.1"/><circle cx="50" cy="50" r="2" fill="%238b5cf6" opacity="0.1"/></svg>');
+    pointer-events: none;
+    z-index: 0;
+}
+
+.main-container {
+    min-height: calc(100vh - 200px);
+    padding: 100px 20px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 🔥 ЗАГОЛОВКИ */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Georgia', serif;
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+}
+
+/* 🔥 КАРТОЧКИ В СТИЛЕ ТАРО */
+.mystic-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+    border: 2px solid #8b5cf6;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.mystic-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
+}
+
+.mystic-card:hover {
+    transform: translateY(-10px);
+    border-color: #ec4899;
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+}
+
+.mystic-card:hover::before {
+    opacity: 1;
+}
+
+/* 🔥 ИКОНКИ */
+.icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border: 2px solid #8b5cf6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s ease;
+}
+
+.icon-wrapper i {
+    font-size: 2.5rem;
+    color: #f4f4f4;
+    transition: all 0.4s ease;
+}
+
+.mystic-card:hover .icon-wrapper {
+    border-color: #ec4899;
+    transform: rotate(360deg);
+}
+
+.mystic-card:hover .icon-wrapper i {
+    color: #ec4899;
+    transform: scale(1.1);
+}
+
+/* 🔥 КНОПКИ В СТИЛЕ ТАРО */
+.mystic-btn {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.mystic-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.mystic-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+    color: white;
+}
+
+.mystic-btn:hover::before {
+    left: 100%;
+}
+
+/* 🔥 РАЗДЕЛИТЕЛИ */
+.mystic-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 2rem 0;
+}
+
+.mystic-divider-line {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #8b5cf6, #ec4899, transparent);
+}
+
+.mystic-divider i {
+    color: #8b5cf6;
+    font-size: 1.2rem;
+}
+
+/* 🔥 АНИМАЦИИ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+/* 🔥 АДАПТИВНОСТЬ */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 80px 15px 60px;
+    }
+
+    .mystic-card {
+        padding: 1.5rem;
+    }
+
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+
+    .icon-wrapper i {
+        font-size: 2rem;
+    }
+}

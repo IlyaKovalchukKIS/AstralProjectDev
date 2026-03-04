@@ -1,0 +1,282 @@
+/* Простое модальное окно */
+.custom-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.custom-modal.show {
+    display: flex;
+}
+
+.custom-modal-content {
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #8b5cf6;
+    border-radius: 30px;
+    padding: 30px 30px 40px;
+    position: relative;
+    color: #f4f4f4;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 20px 40px rgba(139, 92, 246, 0.3);
+}
+
+/* Скрываем скроллбар для Chrome/Safari */
+.custom-modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-modal-content::-webkit-scrollbar-track {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 10px;
+}
+
+.custom-modal-content::-webkit-scrollbar-thumb {
+    background: #8b5cf6;
+    border-radius: 10px;
+}
+
+.custom-modal-content::-webkit-scrollbar-thumb:hover {
+    background: #ec4899;
+}
+
+.custom-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2.5rem;
+    color: #8b5cf6;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+.custom-modal-close:hover {
+    color: #ec4899;
+    transform: rotate(90deg);
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.custom-modal-title {
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+    text-align: center;
+    width: 100%;
+    padding: 0 40px;
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.custom-modal-image {
+    max-width: 280px;
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: contain;
+    border-radius: 15px;
+    margin: 0 auto 25px;
+    box-shadow: 0 15px 35px rgba(139, 92, 246, 0.4);
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.custom-modal-image:hover {
+    transform: scale(1.02);
+}
+
+.custom-modal-description {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    margin: 0 auto 25px;
+    max-width: 600px;
+    width: 100%;
+    text-align: center;
+    color: #f4f4f4;
+    padding: 0 15px;
+    font-family: 'Georgia', serif;
+    letter-spacing: 0.3px;
+}
+
+.custom-modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+    padding-top: 25px;
+    border-top: 2px solid rgba(139, 92, 246, 0.3);
+    width: 100%;
+}
+
+.modal-btn {
+    padding: 12px 30px;
+    background: transparent;
+    border: 2px solid #8b5cf6;
+    border-radius: 30px;
+    color: #f4f4f4;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    min-width: 160px;
+}
+
+.modal-btn:hover {
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    border-color: transparent;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);
+}
+
+.modal-btn i {
+    margin-right: 8px;
+    font-size: 1.2rem;
+}
+
+/* Стили для кнопок в модалке при перевернутой карте */
+.modal-btn#showUpright i {
+    color: #ffd700;
+}
+
+.modal-btn#showReversed i {
+    color: #c0c0c0;
+}
+
+/* Адаптация для планшетов */
+@media (max-width: 992px) {
+    .custom-modal-content {
+        max-width: 600px;
+        padding: 25px 25px 35px;
+    }
+
+    .custom-modal-title {
+        font-size: 2rem;
+    }
+
+    .custom-modal-image {
+        max-width: 240px;
+        max-height: 320px;
+    }
+
+    .custom-modal-description {
+        font-size: 1.1rem;
+    }
+
+    .modal-btn {
+        padding: 10px 25px;
+        font-size: 1rem;
+        min-width: 140px;
+    }
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .celtic-cross {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .celtic-cross .card-wrapper {
+        margin-bottom: 30px;
+    }
+
+    .card {
+        width: 100px;
+        height: 150px;
+    }
+
+    .custom-modal-content {
+        padding: 20px 20px 30px;
+        width: 95%;
+        max-height: 80vh;
+    }
+
+    .custom-modal-title {
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        padding: 0 35px;
+    }
+
+    .custom-modal-close {
+        font-size: 2rem;
+        top: 10px;
+        right: 15px;
+    }
+
+    .custom-modal-image {
+        max-width: 200px;
+        max-height: 280px;
+        margin-bottom: 20px;
+    }
+
+    .custom-modal-description {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+        padding: 0 10px;
+    }
+
+    .custom-modal-footer {
+        flex-direction: column;
+        gap: 12px;
+        padding-top: 20px;
+    }
+
+    .modal-btn {
+        width: 100%;
+        min-width: auto;
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .custom-modal-title {
+        font-size: 1.4rem;
+        padding: 0 30px;
+    }
+
+    .custom-modal-image {
+        max-width: 160px;
+        max-height: 240px;
+    }
+
+    .custom-modal-description {
+        font-size: 0.95rem;
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+
+    /* Стилизация скролла для описания на мобильных */
+    .custom-modal-description::-webkit-scrollbar {
+        width: 4px;
+    }
+}
