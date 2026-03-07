@@ -9,6 +9,7 @@ from django.conf import settings
 from .forms import EmailAuthenticationForm, MysticUserCreationForm, ProfileUpdateForm
 from .models import User, SubscriptionPlan, UserSubscription, Payment
 import logging
+from datetime import timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ def create_mock_payment(amount, description, return_url):
 def register_view(request):
     """Регистрация пользователя"""
     if request.user.is_authenticated:
-        return redirect('profile')
+        return redirect('user_app:profile')
 
     if request.method == 'POST':
         form = MysticUserCreationForm(request.POST)
@@ -65,7 +66,7 @@ def register_view(request):
 def login_view(request):
     """Вход в систему"""
     if request.user.is_authenticated:
-        return redirect('profile')
+        return redirect('user_app:profile')
 
     if request.method == 'POST':
         form = EmailAuthenticationForm(request, data=request.POST)
@@ -76,7 +77,7 @@ def login_view(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f'Добро пожаловать, {user.get_full_name_or_email()}!')
-                next_url = request.GET.get('next', 'profile')
+                next_url = request.GET.get('next', 'user_app:profile')
                 return redirect(next_url)
             else:
                 messages.error(request, 'Неверный email или пароль.')
@@ -179,9 +180,9 @@ def subscription_checkout_view(request, plan_id):
             return redirect('user_app:profile')
 
             # ===== РЕАЛЬНЫЙ РЕЖИМ (раскомментировать для ЮKassa) =====
-            # # Создаем платеж в ЮKassa 
+            # # Создаем платеж в ЮKassa
             # idempotence_key = str(uuid.uuid4())
-            # 
+            #
             # yoo_payment = YooKassaPayment.create({
             #     "amount": {
             #         "value": f"{plan.price:.2f}",
@@ -201,12 +202,12 @@ def subscription_checkout_view(request, plan_id):
             #         "plan_id": plan.id
             #     }
             # }, idempotence_key)
-            # 
+            #
             # # Сохраняем данные платежа от ЮKassa
             # payment.yookassa_payment_id = yoo_payment.id
             # payment.yookassa_confirmation_url = yoo_payment.confirmation.confirmation_url
             # payment.save()
-            # 
+            #
             # # Перенаправляем пользователя на страницу оплаты ЮKassa
             # return redirect(yoo_payment.confirmation.confirmation_url)
 
@@ -251,19 +252,96 @@ def subscription_detail_view(request, subscription_id):
 
 @login_required
 def subscription_extend_view(request, subscription_id):
-    """Продление подписки"""
+    """
+    Представление для продления подписки с выбором количества месяцев
+    """
     subscription = get_object_or_404(UserSubscription, id=subscription_id, user=request.user)
 
     if not subscription.is_active:
         messages.error(request, 'Нельзя продлить неактивную подписку')
         return redirect('user_app:profile')
 
+    # Словарь с количеством дней для каждого варианта
+    duration_map = {
+        '30': {'months': 1, 'days': 30, 'discount': 0},
+        '90': {'months': 3, 'days': 90, 'discount': 5},
+        '180': {'months': 6, 'days': 180, 'discount': 10},
+        '365': {'months': 12, 'days': 365, 'discount': 15},
+    }
+
     if request.method == 'POST':
-        # Перенаправляем на оформление нового платежа
-        return redirect('user_app:subscription_checkout', plan_id=subscription.plan.id)
+        # Получаем выбранную длительность из формы
+        selected_duration = request.POST.get('duration', '30')
+
+        if selected_duration not in duration_map:
+            messages.error(request, 'Выбран некорректный срок продления')
+            return redirect('user_app:subscription_extend', subscription_id=subscription.id)
+
+        duration_data = duration_map[selected_duration]
+        months = duration_data['months']
+        days = duration_data['days']
+        discount = duration_data['discount']
+
+        # Рассчитываем цену со скидкой
+        base_price = float(subscription.plan.price)
+        total_price = base_price * months * (1 - discount / 100)
+
+        # Создаем запись о платеже
+        payment = Payment.objects.create(
+            user=request.user,
+            plan=subscription.plan,
+            amount=total_price,
+            status='succeeded',  # В тестовом режиме сразу успешно
+            yookassa_payment_id=f"test_payment_{uuid.uuid4()}"
+        )
+
+        # Продлеваем подписку
+        old_end_date = subscription.end_date
+
+        # Если подписка еще активна, добавляем дни к текущей дате окончания
+        if subscription.end_date > timezone.now():
+            new_end_date = subscription.end_date + timedelta(days=days)
+        else:
+            # Если подписка истекла, начинаем с текущей даты
+            new_end_date = timezone.now() + timedelta(days=days)
+            subscription.is_active = True
+
+        subscription.end_date = new_end_date
+        subscription.save()
+
+        # Формируем сообщение об успехе
+        discount_text = f" со скидкой {discount}%" if discount > 0 else ""
+        messages.success(
+            request,
+            f'✅ Подписка успешно продлена на {months} {"месяц" if months == 1 else "месяца"}{discount_text}! '
+            f'Новая дата окончания: {new_end_date.strftime("%d.%m.%Y")}'
+        )
+
+        return redirect('user_app:subscription_detail', subscription_id=subscription.id)
+
+    # Для GET запроса передаем данные в шаблон
+    base_price = float(subscription.plan.price)
+
+    # Рассчитываем цены для каждого варианта
+    price_options = {}
+    for key, data in duration_map.items():
+        months = data['months']
+        discount = data['discount']
+        original_price = base_price * months
+        final_price = original_price * (1 - discount / 100)
+        price_options[key] = {
+            'months': months,
+            'days': data['days'],
+            'discount': discount,
+            'original_price': round(original_price),
+            'final_price': round(final_price),
+            'monthly_price': round(base_price)
+        }
 
     context = {
         'subscription': subscription,
+        'price_options': price_options,
+        'base_price': round(base_price),
     }
     return render(request, 'subscription_extend.html', context)
 

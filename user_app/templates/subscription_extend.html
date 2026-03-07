@@ -1,0 +1,789 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Продление подписки - Мистический Портал{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/astral.css' %}">
+<style>
+    .extend-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    .extend-card {
+        background: rgba(12, 12, 26, 0.8);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 50px;
+        padding: 3rem;
+        max-width: 900px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        animation: cardAppear 0.8s ease-out;
+    }
+
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .extend-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        animation: rotate 20s linear infinite;
+        z-index: -1;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .extend-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .extend-header i {
+        font-size: 4rem;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        animation: floatIcon 3s ease-in-out infinite;
+    }
+
+    @keyframes floatIcon {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .extend-header h1 {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .extend-header p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+    }
+
+    /* Тестовый режим бейдж */
+    .test-mode-badge {
+        background: rgba(245, 158, 11, 0.2);
+        border: 1px solid #f59e0b;
+        color: #f59e0b;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        display: inline-block;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    .test-mode-badge i {
+        margin-right: 0.5rem;
+    }
+
+    /* Текущая подписка */
+    .current-subscription {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+        border: 2px solid #8b5cf6;
+        border-radius: 30px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .current-subscription h3 {
+        color: #8b5cf6;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .subscription-info {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .info-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 20px;
+    }
+
+    .info-label {
+        color: #8b5cf6;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .info-value.highlight {
+        color: #ec4899;
+        font-size: 1.5rem;
+    }
+
+    /* Прогресс-бар */
+    .progress-container {
+        margin: 1.5rem 0;
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    .progress-bar-bg {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+        border-radius: 5px;
+        transition: width 0.3s ease;
+    }
+
+    /* Варианты продления */
+    .extend-options {
+        margin: 2rem 0;
+    }
+
+    .extend-options h3 {
+        color: #8b5cf6;
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .options-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .option-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .option-card:hover {
+        transform: translateY(-5px);
+        border-color: #8b5cf6;
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+    }
+
+    .option-card.selected {
+        border-color: #ec4899;
+        background: rgba(236, 72, 153, 0.1);
+        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+    }
+
+    .option-card input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .option-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+        border: 2px solid #8b5cf6;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .option-icon i {
+        font-size: 2rem;
+        color: #8b5cf6;
+        transition: all 0.3s ease;
+    }
+
+    .option-card:hover .option-icon i {
+        color: #ec4899;
+        transform: scale(1.1);
+    }
+
+    .option-duration {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #8b5cf6;
+        margin-bottom: 0.5rem;
+    }
+
+    .option-price {
+        font-size: 1.2rem;
+        color: #ec4899;
+        margin-bottom: 1rem;
+    }
+
+    .option-price small {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.5);
+        display: block;
+        margin-top: 0.3rem;
+    }
+
+    .option-discount {
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        background: linear-gradient(90deg, #ec4899, #8b5cf6);
+        color: white;
+        padding: 0.3rem 2rem;
+        transform: rotate(45deg);
+        font-size: 0.7rem;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    /* Итого */
+    .total-section {
+        background: rgba(139, 92, 246, 0.1);
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin: 2rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .total-label {
+        color: #8b5cf6;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .total-amount {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #ec4899;
+        transition: all 0.3s ease;
+    }
+
+    .total-amount.updated {
+        animation: priceUpdate 0.5s ease;
+    }
+
+    @keyframes priceUpdate {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+            color: #8b5cf6;
+        }
+    }
+
+    .original-price {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: line-through;
+        margin-right: 1rem;
+    }
+
+    /* Кнопки действий */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        color: white;
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        color: white;
+    }
+
+    .action-btn-outline {
+        background: transparent;
+        border: 2px solid #8b5cf6;
+        color: #8b5cf6;
+    }
+
+    .action-btn-outline:hover {
+        background: rgba(139, 92, 246, 0.1);
+        transform: translateY(-3px);
+        color: #ec4899;
+        border-color: #ec4899;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .extend-card {
+            padding: 1.5rem;
+        }
+
+        .extend-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .options-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .subscription-info {
+            grid-template-columns: 1fr;
+        }
+
+        .total-section {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .options-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Предупреждение */
+    .warning-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        border-radius: 20px;
+        padding: 1rem;
+        margin: 1rem 0;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .warning-message i {
+        font-size: 1.5rem;
+    }
+
+    /* Дополнительная информация */
+    .info-footer {
+        margin-top: 2rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        border-top: 1px solid rgba(139, 92, 246, 0.2);
+        padding-top: 2rem;
+    }
+
+    .info-footer i {
+        color: #8b5cf6;
+        margin-right: 0.5rem;
+    }
+
+    /* Добавьте эти стили для улучшения кликабельности */
+    .option-card {
+        cursor: pointer;
+        position: relative;
+        z-index: 1;
+        user-select: none; /* Предотвращает выделение текста при клике */
+    }
+
+    .option-card input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .option-card.selected {
+        border-color: #ec4899;
+        background: rgba(236, 72, 153, 0.1);
+        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+    }
+
+
+    /* Но сделайте исключение для radio, чтобы он был доступен */
+    .option-card input[type="radio"] {
+        pointer-events: auto;
+        opacity: 0;
+        position: absolute;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="extend-container">
+    <div class="extend-card">
+        <!-- Тестовый режим -->
+        <div class="test-mode-badge">
+            <i class="fas fa-flask"></i> ТЕСТОВЫЙ РЕЖИМ (оплата не требуется)
+        </div>
+
+        <!-- Заголовок -->
+        <div class="extend-header">
+            <i class="fas fa-hourglass-half"></i>
+            <h1>Продление подписки</h1>
+            <p>Продлите магический контракт и сохраните доступ</p>
+        </div>
+
+        <!-- Информация о текущей подписке -->
+        <div class="current-subscription">
+            <h3>
+                <i class="fas fa-crown"></i>
+                Текущая подписка
+            </h3>
+
+            <div class="subscription-info">
+                <div class="info-item">
+                    <div class="info-label">Тариф</div>
+                    <div class="info-value">{{ subscription.plan.name }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Действует до</div>
+                    <div class="info-value">{{ subscription.end_date|date:"d.m.Y" }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Осталось</div>
+                    <div class="info-value highlight">{{ subscription.end_date|timeuntil }}</div>
+                </div>
+            </div>
+
+            <!-- Прогресс-бар -->
+            <div class="progress-container">
+                <div class="progress-header">
+                    <span><i class="fas fa-hourglass-half"></i> Прогресс</span>
+                    <span>{{ subscription.get_progress_percentage }}%</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: {{ subscription.get_progress_percentage }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Варианты продления -->
+        <div class="extend-options">
+            <h3>
+                <i class="fas fa-gem"></i>
+                Выберите срок продления
+            </h3>
+
+            <form method="post" id="extendForm">
+                {% csrf_token %}
+
+                <div class="options-grid">
+                    <!-- Вариант на 1 месяц -->
+                    <div class="option-card" data-months="1" data-discount="0"
+                         data-price="{{ subscription.plan.price }}" data-value="30">
+                        <input type="radio" name="duration" value="30" id="duration_30">
+                        <div class="option-icon">
+                            <i class="fas fa-moon"></i>
+                        </div>
+                        <div class="option-duration">1 месяц</div>
+                        <div class="option-price">
+                            <span class="option-total">{{ subscription.plan.price|floatformat:0 }}</span> ₽
+                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
+                        </div>
+                        <div class="option-discount">Без скидки</div>
+                    </div>
+
+                    <!-- Вариант на 3 месяца -->
+                    <div class="option-card" data-months="3" data-discount="5"
+                         data-price="{{ subscription.plan.price }}" data-value="90">
+                        <input type="radio" name="duration" value="90" id="duration_90">
+                        <div class="option-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div class="option-duration">3 месяца</div>
+                        <div class="option-price">
+                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
+                            ₽
+                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
+                        </div>
+                        <div class="option-discount">🔥 Скидка 5%</div>
+                    </div>
+
+                    <!-- Вариант на 6 месяцев -->
+                    <div class="option-card" data-months="6" data-discount="10"
+                         data-price="{{ subscription.plan.price }}" data-value="180">
+                        <input type="radio" name="duration" value="180" id="duration_180">
+                        <div class="option-icon">
+                            <i class="fas fa-infinity"></i>
+                        </div>
+                        <div class="option-duration">6 месяцев</div>
+                        <div class="option-price">
+                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
+                            ₽
+                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
+                        </div>
+                        <div class="option-discount">⚡ Скидка 10%</div>
+                    </div>
+
+                    <!-- Вариант на 12 месяцев -->
+                    <div class="option-card" data-months="12" data-discount="15"
+                         data-price="{{ subscription.plan.price }}" data-value="365">
+                        <input type="radio" name="duration" value="365" id="duration_365">
+                        <div class="option-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="option-duration">12 месяцев</div>
+                        <div class="option-price">
+                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
+                            ₽
+                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
+                        </div>
+                        <div class="option-discount">✨ Скидка 15%</div>
+                    </div>
+                </div>
+
+                <!-- Итого к оплате -->
+                <div class="total-section">
+                    <span class="total-label">Итого к оплате:</span>
+                    <div>
+                        <span class="original-price" id="originalPrice" style="display: none;">{{ subscription.plan.price|floatformat:0 }} ₽</span>
+                        <span class="total-amount" id="totalAmount">{{ subscription.plan.price|floatformat:0 }} ₽</span>
+                    </div>
+                </div>
+
+                <!-- Кнопки действий -->
+                <div class="action-buttons">
+                    <button type="submit" class="action-btn action-btn-primary">
+                        <i class="fas fa-check"></i> Продлить в тестовом режиме
+                    </button>
+                    <a href="{% url 'user_app:subscription_detail' subscription.id %}"
+                       class="action-btn action-btn-outline">
+                        <i class="fas fa-arrow-left"></i> Вернуться
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Дополнительная информация -->
+        <div class="info-footer">
+            <p><i class="fas fa-info-circle"></i> После продления новая дата окончания добавится к текущей</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        console.log('Document ready'); // Для отладки
+
+        // Базовая цена
+        const basePrice = parseFloat('{{ subscription.plan.price|floatformat:0 }}');
+        console.log('Base price:', basePrice);
+
+        // Функция форматирования цены
+        function formatPrice(price) {
+            return Math.round(price).toLocaleString('ru-RU') + ' ₽';
+        }
+
+        // Функция расчета цены с учетом скидки
+        function calculatePrice(months, discountPercent) {
+            const originalTotal = basePrice * months;
+            const discountAmount = originalTotal * (discountPercent / 100);
+            const finalTotal = originalTotal - discountAmount;
+            return {
+                original: originalTotal,
+                final: finalTotal,
+                discount: discountPercent
+            };
+        }
+
+        // Функция обновления отображения цены
+        function updatePrice() {
+            const selectedCard = $('.option-card.selected');
+            if (!selectedCard.length) {
+                console.log('No selected card found');
+                return;
+            }
+
+            const months = parseInt(selectedCard.data('months'));
+            const discount = parseInt(selectedCard.data('discount'));
+            const price = parseFloat(selectedCard.data('price'));
+
+            console.log('Updating price for:', months, 'months, discount:', discount);
+
+            const prices = calculatePrice(months, discount);
+
+            // Обновляем итоговую сумму
+            const originalPriceEl = $('#originalPrice');
+            const totalAmountEl = $('#totalAmount');
+
+            if (discount > 0) {
+                originalPriceEl.text(formatPrice(prices.original)).show();
+            } else {
+                originalPriceEl.hide();
+            }
+
+            totalAmountEl.addClass('updated');
+            totalAmountEl.text(formatPrice(prices.final));
+
+            setTimeout(() => totalAmountEl.removeClass('updated'), 500);
+        }
+
+        // Простой и надежный обработчик кликов
+        $('.option-card').on('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const clickedCard = $(this);
+            console.log('Card clicked:', clickedCard.data('months'), 'months');
+
+            // Убираем выделение со всех карточек
+            $('.option-card').removeClass('selected');
+
+            // Добавляем выделение текущей карточке
+            clickedCard.addClass('selected');
+
+            // Отмечаем radio внутри карточки
+            const radio = clickedCard.find('input[type="radio"]');
+            radio.prop('checked', true);
+
+            // Обновляем цену
+            updatePrice();
+        });
+
+        // Устанавливаем первую карточку как выбранную по умолчанию
+        function setDefaultSelection() {
+            console.log('Setting default selection');
+            const firstCard = $('.option-card').first();
+            firstCard.addClass('selected');
+            firstCard.find('input[type="radio"]').prop('checked', true);
+            updatePrice();
+        }
+
+        // Вызываем установку по умолчанию
+        setDefaultSelection();
+
+        // Обработка отправки формы
+        $('#extendForm').on('submit', function(e) {
+            e.preventDefault();
+
+            // Проверяем, выбран ли вариант
+            if (!$('input[name="duration"]:checked').length) {
+                alert('Пожалуйста, выберите срок продления');
+                return false;
+            }
+
+            const selectedDuration = $('input[name="duration"]:checked').val();
+            console.log('Submitting with duration:', selectedDuration);
+
+            const btn = $(this).find('button[type="submit"]');
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
+            btn.prop('disabled', true);
+
+            // В тестовом режиме просто показываем успех
+            setTimeout(() => {
+                window.location.href = "{% url 'user_app:subscription_success' payment_id='00000000-0000-0000-0000-000000000000' %}";
+            }, 1500);
+        });
+
+        // Анимация при наведении
+        $('.option-card').hover(
+            function() {
+                $(this).find('.option-icon i').css({
+                    'transform': 'scale(1.2) rotate(5deg)',
+                    'transition': 'all 0.3s ease'
+                });
+            },
+            function() {
+                $(this).find('.option-icon i').css({
+                    'transform': 'scale(1) rotate(0)',
+                    'transition': 'all 0.3s ease'
+                });
+            }
+        );
+    });
+</script>
+{% endblock %}
