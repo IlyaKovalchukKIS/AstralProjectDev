@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход - Мистический Портал{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+    }
+
+    .login-card {
+        background: rgba(12, 12, 26, 0.8);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 50px;
+        padding: 3rem;
+        width: 100%;
+        max-width: 450px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 100px rgba(139, 92, 246, 0.3);
+        animation: cardAppear 0.8s ease-out;
+    }
+
+    @keyframes cardAppear {
+        from {
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        animation: rotate 20s linear infinite;
+        z-index: -1;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .login-header i {
+        font-size: 4rem;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+        animation: floatIcon 3s ease-in-out infinite;
+    }
+
+    @keyframes floatIcon {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .login-header h2 {
+        font-size: 2.5rem;
+        background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 1rem;
+    }
+
+    .mystic-input-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .mystic-input-group label {
+        display: block;
+        color: #8b5cf6;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+    }
+
+    .mystic-input {
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.05) !important;
+        border: 2px solid rgba(139, 92, 246, 0.3) !important;
+        border-radius: 50px !important;
+        color: #fff !important;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .mystic-input:focus {
+        outline: none;
+        border-color: #ec4899 !important;
+        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3) !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        transform: translateY(-2px);
+    }
+
+    .mystic-input::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+        font-style: italic;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b5cf6;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        z-index: 2;
+    }
+
+    .mystic-input:focus + .input-icon {
+        color: #ec4899;
+        transform: translateY(-50%) scale(1.2);
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        border: none;
+        border-radius: 50px;
+        color: white;
+        font-size: 1.2rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        margin-top: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .login-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 40px rgba(139, 92, 246, 0.4);
+    }
+
+    .login-btn:hover::before {
+        left: 100%;
+    }
+
+    .login-btn:active {
+        transform: translateY(0);
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .login-footer p {
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.5rem;
+    }
+
+    .login-footer a {
+        color: #ec4899;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .login-footer a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .login-footer a:hover {
+        color: #8b5cf6;
+    }
+
+    .login-footer a:hover::after {
+        transform: scaleX(1);
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        color: #ec4899;
+        font-size: 0.9rem;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    .errorlist li {
+        margin-bottom: 0.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .errorlist li i {
+        font-size: 0.8rem;
+    }
+
+    .forgot-password {
+        text-align: right;
+        margin-top: -1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .forgot-password a {
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .forgot-password a:hover {
+        color: #8b5cf6;
+    }
+
+    .magic-particles {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(139, 92, 246, 0.3);
+        border-radius: 50%;
+        animation: floatParticle 3s ease-in-out infinite;
+    }
+
+    @keyframes floatParticle {
+        0%, 100% {
+            transform: translateY(0) translateX(0);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-20px) translateX(10px);
+            opacity: 0.8;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .login-card {
+            padding: 2rem;
+        }
+
+        .login-header h2 {
+            font-size: 2rem;
+        }
+
+        .login-header i {
+            font-size: 3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .login-container {
+            padding: 1rem;
+        }
+
+        .login-card {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <!-- Магические частицы -->
+    <div class="magic-particles">
+        {% for i in "123456"|make_list %}
+        <div class="particle" style="top: {{ forloop.counter|add:"10" }}%; left: {{ forloop.counter|add:"20" }}%; animation-delay: {{ forloop.counter|add:"0.2" }}s;"></div>
+        {% endfor %}
+    </div>
+
+    <div class="login-card">
+        <div class="login-header">
+            <i class="fas fa-key"></i>
+            <h2>Вход в портал</h2>
+            <p>Откройте врата в мир мистики</p>
+        </div>
+
+        <form method="post" novalidate id="loginForm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="errorlist">
+                    {% for error in form.non_field_errors %}
+                        <li><i class="fas fa-exclamation-circle"></i> {{ error }}</li>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Email поле (без autofocus) -->
+            <div class="mystic-input-group">
+                <label for="{{ form.username.id_for_label }}">
+                    <i class="fas fa-envelope"></i> {{ form.username.label }}
+                </label>
+                {{ form.username }}
+                <i class="fas fa-envelope input-icon"></i>
+                {% if form.username.errors %}
+                    <div class="errorlist">
+                        {% for error in form.username.errors %}
+                            <li><i class="fas fa-exclamation-circle"></i> {{ error }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Пароль поле -->
+            <div class="mystic-input-group">
+                <label for="{{ form.password.id_for_label }}">
+                    <i class="fas fa-lock"></i> {{ form.password.label }}
+                </label>
+                {{ form.password }}
+                <i class="fas fa-lock input-icon"></i>
+                {% if form.password.errors %}
+                    <div class="errorlist">
+                        {% for error in form.password.errors %}
+                            <li><i class="fas fa-exclamation-circle"></i> {{ error }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Забыли пароль? -->
+            <div class="forgot-password">
+                <a href="#">
+                    <i class="fas fa-question-circle"></i> Забыли пароль?
+                </a>
+            </div>
+
+            <!-- Кнопка входа -->
+            <button type="submit" class="login-btn" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Войти
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>Еще нет аккаунта?</p>
+            <a href="{% url 'user_app:register' %}">
+                <i class="fas fa-user-plus"></i> Создать аккаунт
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Убираем autofocus если он все еще есть
+        $('#id_username').attr('autofocus', false);
+
+        // Сбрасываем фокус при клике на пустую область
+        $(document).on('click', function(e) {
+            // Если кликнули не на поле ввода и не на label
+            if (!$(e.target).is('input') && !$(e.target).is('label') && !$(e.target).is('i')) {
+                $('input').blur(); // Убираем фокус со всех полей
+            }
+        });
+
+        // Предотвращаем всплытие при клике на поля ввода
+        $('input').on('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // Анимация кнопки при отправке
+        $('#loginForm').on('submit', function() {
+            const btn = $('#loginBtn');
+            btn.html('<i class="fas fa-spinner fa-spin"></i> Вход...');
+            btn.prop('disabled', true);
+        });
+
+        // Магические эффекты при фокусе на полях
+        $('.mystic-input').focus(function() {
+            $(this).closest('.mystic-input-group').find('.input-icon').css({
+                'color': '#ec4899',
+                'transform': 'translateY(-50%) scale(1.2)'
+            });
+        }).blur(function() {
+            $(this).closest('.mystic-input-group').find('.input-icon').css({
+                'color': '#8b5cf6',
+                'transform': 'translateY(-50%) scale(1)'
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,803 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет - Мистический Портал{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: rgba(139, 92, 246, 0.1);
+        border-radius: 30px;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        backdrop-filter: blur(10px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '★';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        font-size: 300px;
+        color: rgba(139, 92, 246, 0.1);
+        transform: rotate(15deg);
+        font-family: serif;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 0 50px rgba(139, 92, 246, 0.5);
+    }
+
+    .profile-avatar i {
+        font-size: 5rem;
+        color: white;
+    }
+
+    .profile-name {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(45deg, #fff, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .profile-email {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: rgba(139, 92, 246, 0.2);
+        border: 1px solid #8b5cf6;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 1rem;
+        margin: 0.5rem;
+    }
+
+    .profile-badge i {
+        margin-right: 0.5rem;
+        color: #ec4899;
+    }
+
+    .stat-card {
+        background: rgba(12, 12, 26, 0.6);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        border-color: #ec4899;
+        box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .stat-icon i {
+        font-size: 1.8rem;
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #8b5cf6;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .info-section {
+        background: rgba(12, 12, 26, 0.4);
+        border-radius: 20px;
+        padding: 2rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .info-item {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        display: flex;
+        align-items: center;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        min-width: 150px;
+        color: #8b5cf6;
+        font-weight: 600;
+    }
+
+    .info-value {
+        color: #fff;
+        flex: 1;
+    }
+
+    .info-icon {
+        width: 40px;
+        color: #ec4899;
+        margin-right: 1rem;
+    }
+
+    .subscription-card {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+        border: 2px solid #8b5cf6;
+        border-radius: 20px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subscription-card.active {
+        border-color: #10b981;
+        box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+    }
+
+    .subscription-card.active::before {
+        content: '✓ АКТИВНО';
+        position: absolute;
+        top: 20px;
+        right: -30px;
+        background: #10b981;
+        color: white;
+        padding: 0.5rem 3rem;
+        transform: rotate(45deg);
+        font-size: 0.8rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .subscription-name {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        color: #8b5cf6;
+    }
+
+    .subscription-price {
+        font-size: 2.5rem;
+        color: #ec4899;
+        margin-bottom: 1rem;
+    }
+
+    .subscription-price small {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .subscription-date {
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 0.5rem;
+    }
+
+    .subscription-date i {
+        margin-right: 0.5rem;
+        color: #8b5cf6;
+    }
+
+    .progress {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        margin: 1rem 0;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+        border-radius: 10px;
+    }
+
+    /* ИСПРАВЛЕННЫЕ СТИЛИ ДЛЯ КНОПОК */
+    .action-btn {
+        display: inline-block;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin: 0.5rem;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 1rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(45deg, #8b5cf6, #ec4899);
+        color: white;
+        border: none;
+    }
+
+    .action-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .action-btn-primary:active {
+        transform: translateY(0);
+        opacity: 0.9;
+    }
+
+    .action-btn-outline {
+        background: transparent;
+        border: 2px solid #8b5cf6;
+        color: #8b5cf6;
+        text-decoration: none;
+    }
+
+    .action-btn-outline:hover {
+        background: rgba(139, 92, 246, 0.1);
+        transform: translateY(-2px);
+        color: #ec4899;
+        border-color: #ec4899;
+        text-decoration: none;
+    }
+
+    /* СТИЛИ ДЛЯ КЛИКАБЕЛЬНЫХ КАРТОЧЕК */
+    .card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .card-link:hover {
+        text-decoration: none;
+    }
+
+    .card-link:hover .stat-card {
+        transform: translateY(-5px);
+        border-color: #ec4899;
+        box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+    }
+
+    .profile-header a {
+        text-decoration: none;
+    }
+
+    .profile-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        background: rgba(12, 12, 26, 0.4);
+        border-radius: 20px;
+    }
+
+    .empty-state i {
+        font-size: 5rem;
+        color: #8b5cf6;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .crystal-ball {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 2rem;
+    }
+
+    .crystal-ball i {
+        font-size: 5rem;
+        color: #8b5cf6;
+        animation: crystalGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes crystalGlow {
+        0%, 100% {
+            filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+            transform: scale(1);
+        }
+        50% {
+            filter: drop-shadow(0 0 40px rgba(236, 72, 153, 0.8));
+            transform: scale(1.05);
+        }
+    }
+
+    .tarot-card-effect {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .tarot-card-effect:hover {
+        transform: perspective(1000px) rotateX(5deg) translateY(-5px);
+    }
+
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 1.5rem;
+        }
+
+        .profile-name {
+            font-size: 1.8rem;
+        }
+
+        .info-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-label {
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Профиль пользователя -->
+    <div class="profile-header fade-in">
+        <div class="row align-items-center">
+            <div class="col-lg-3 text-center">
+                <div class="profile-avatar">
+                    {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name_or_email }}"
+                         class="w-100 h-100 rounded-circle">
+                    {% else %}
+                    <i class="fas fa-user-astronaut"></i>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center text-lg-start">
+                <h1 class="profile-name">{{ user.get_full_name|default:user.email }}</h1>
+                <div class="profile-email">
+                    <i class="fas fa-envelope"></i> {{ user.email }}
+                </div>
+                <div>
+                    {% if user.first_name %}
+                    <span class="profile-badge">
+                            <i class="fas fa-star"></i> {{ user.first_name }}
+                        </span>
+                    {% endif %}
+                    {% if user.birth_date %}
+                    <span class="profile-badge">
+                            <i class="fas fa-calendar-alt"></i> {{ user.birth_date|date:"d.m.Y" }}
+                        </span>
+                    {% endif %}
+                    {% if user.birth_time %}
+                    <span class="profile-badge">
+                            <i class="fas fa-clock"></i> {{ user.birth_time|time:"H:i" }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-3 text-center text-lg-end">
+                <!-- ИСПРАВЛЕННАЯ КНОПКА РЕДАКТИРОВАНИЯ -->
+                <a href="{% url 'user_app:profile_update' %}" class="action-btn action-btn-primary"
+                   onclick="event.stopPropagation();">
+                    <i class="fas fa-edit"></i> Редактировать
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика (СДЕЛАНА КЛИКАБЕЛЬНОЙ) -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'user_app:subscription_history' %}" class="card-link">
+                <div class="stat-card tarot-card-effect">
+                    <div class="stat-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="stat-value">{{ subscriptions_count|default:"0" }}</div>
+                    <div class="stat-label">Всего подписок</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-4">
+            <a href="{% if active_subscription %}{% url 'user_app:subscription_detail' active_subscription.id %}{% else %}{% url 'user_app:subscription_plans' %}{% endif %}"
+               class="card-link">
+                <div class="stat-card tarot-card-effect">
+                    <div class="stat-icon">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="stat-value">{% if active_subscription %}1{% else %}0{% endif %}</div>
+                    <div class="stat-label">Активных подписок</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4 mb-4">
+            <a href="{% url 'user_app:profile' %}" class="card-link">
+                <div class="stat-card tarot-card-effect">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value">{{ user.date_joined|date:"Y" }}</div>
+                    <div class="stat-label">На сайте с</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Детальная информация -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="info-section">
+                <h3 class="mb-4">
+                    <i class="fas fa-user-circle" style="color: #8b5cf6; margin-right: 10px;"></i>
+                    Личная информация
+                </h3>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="info-label">Имя</div>
+                    <div class="info-value text-center">{{ user.first_name|default:"Не указано" }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-user-tag"></i>
+                    </div>
+                    <div class="info-label">Фамилия</div>
+                    <div class="info-value text-center">{{ user.last_name|default:"Не указано" }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="info-label">Email</div>
+                    <div class="info-value text-center">{{ user.email }}</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="info-label">Телефон</div>
+                    <div class="info-value text-center">{{ user.phone|default:"Не указано" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ИСПРАВЛЕННЫЙ БЛОК АСТРОЛОГИЧЕСКИЕ ДАННЫЕ -->
+        <div class="col-lg-6 mb-4">
+            <div class="info-section">
+                <h3 class="mb-4">
+                    <i class="fas fa-moon" style="color: #8b5cf6; margin-right: 10px;"></i>
+                    Астрологические данные
+                </h3>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-calendar"></i>
+                    </div>
+                    <div class="info-label">Дата рождения</div>
+                    <div class="info-value text-center">
+                        {% if user.birth_date %}
+                        {{ user.birth_date|date:"d E Y" }}
+                        {% else %}
+                        <span class="text-muted">Не указано</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="info-label">Время рождения</div>
+                    <div class="info-value text-center">
+                        {% if user.birth_time %}
+                        {{ user.birth_time|time:"H:i" }}
+                        {% else %}
+                        <span class="text-muted">Не указано</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="info-label">Знак зодиака</div>
+                    <div class="info-value text-center">
+                        {% if user.birth_date %}
+                        {% with day=user.birth_date.day month=user.birth_date.month %}
+                        {% if month == 3 and day >= 21 or month == 4 and day <= 19 %}Овен
+                        {% elif month == 4 and day >= 20 or month == 5 and day <= 20 %}Телец
+                        {% elif month == 5 and day >= 21 or month == 6 and day <= 20 %}Близнецы
+                        {% elif month == 6 and day >= 21 or month == 7 and day <= 22 %}Рак
+                        {% elif month == 7 and day >= 23 or month == 8 and day <= 22 %}Лев
+                        {% elif month == 8 and day >= 23 or month == 9 and day <= 22 %}Дева
+                        {% elif month == 9 and day >= 23 or month == 10 and day <= 22 %}Весы
+                        {% elif month == 10 and day >= 23 or month == 11 and day <= 21 %}Скорпион
+                        {% elif month == 11 and day >= 22 or month == 12 and day <= 21 %}Стрелец
+                        {% elif month == 12 and day >= 22 or month == 1 and day <= 19 %}Козерог
+                        {% elif month == 1 and day >= 20 or month == 2 and day <= 18 %}Водолей
+                        {% elif month == 2 and day >= 19 or month == 3 and day <= 20 %}Рыбы
+                        {% else %}Не определен{% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <span class="text-muted">Укажите дату рождения</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon">
+                        <i class="fas fa-dragon"></i>
+                    </div>
+                    <div class="info-label">Китайский гороскоп</div>
+                    <div class="info-value text-center">
+                        {% if user.birth_date %}
+                        {% with year=user.birth_date.year %}
+                        {% if year == 2020 or year == 2008 %}Крыса
+                        {% elif year == 2021 or year == 2009 %}Бык
+                        {% elif year == 2022 or year == 2010 %}Тигр
+                        {% elif year == 2023 or year == 2011 %}Кролик
+                        {% elif year == 2024 or year == 2012 %}Дракон
+                        {% elif year == 2025 or year == 2013 %}Змея
+                        {% elif year == 2026 or year == 2014 %}Лошадь
+                        {% elif year == 2027 or year == 2015 %}Коза
+                        {% elif year == 2028 or year == 2016 %}Обезьяна
+                        {% elif year == 2029 or year == 2017 %}Петух
+                        {% elif year == 2030 or year == 2018 %}Собака
+                        {% elif year == 2031 or year == 2019 %}Свинья
+                        {% else %}
+                        {% with remainder=year|add:"-4"|stringformat:"s"|slice:"-1:"|add:"0" %}
+                        {% if remainder == "0" or remainder == "00" %}Крыса
+                        {% elif remainder == "1" or remainder == "01" %}Бык
+                        {% elif remainder == "2" or remainder == "02" %}Тигр
+                        {% elif remainder == "3" or remainder == "03" %}Кролик
+                        {% elif remainder == "4" or remainder == "04" %}Дракон
+                        {% elif remainder == "5" or remainder == "05" %}Змея
+                        {% elif remainder == "6" or remainder == "06" %}Лошадь
+                        {% elif remainder == "7" or remainder == "07" %}Коза
+                        {% elif remainder == "8" or remainder == "08" %}Обезьяна
+                        {% elif remainder == "9" or remainder == "09" %}Петух
+                        {% elif remainder == "10" %}Собака
+                        {% elif remainder == "11" %}Свинья
+                        {% else %}Не определен{% endif %}
+                        {% endwith %}
+                        {% endif %}
+                        {% endwith %}
+                        {% else %}
+                        <span class="text-muted">Укажите дату рождения</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Текущая подписка -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-gem" style="color: #8b5cf6; margin-right: 10px;"></i>
+                Моя подписка
+            </h2>
+
+            {% if active_subscription %}
+            <div class="subscription-card active tarot-card-effect">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 text-center text-lg-start">
+                        <div class="crystal-ball">
+                            <i class="fas fa-crystal-ball"></i>
+                        </div>
+                        <h3 class="subscription-name">{{ active_subscription.plan.name|default:"Не указано" }}</h3>
+                        <div class="subscription-price">
+                            {{ active_subscription.plan.price|default:"0" }} ₽
+                            <small>/ {{ active_subscription.plan.duration_days|default:"30" }} дней</small>
+                        </div>
+                    </div>
+                    <div class="col-lg-5">
+                        <div class="subscription-date">
+                            <i class="fas fa-calendar-plus"></i> Начало:
+                            {% if active_subscription.start_date %}
+                            {{ active_subscription.start_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                            <span class="text-muted">Не указано</span>
+                            {% endif %}
+                        </div>
+                        <div class="subscription-date">
+                            <i class="fas fa-calendar-times"></i> Окончание:
+                            {% if active_subscription.end_date %}
+                            {{ active_subscription.end_date|date:"d.m.Y H:i" }}
+                            {% else %}
+                            <span class="text-muted">Не указано</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Прогресс-бар -->
+                        {% if active_subscription.end_date and active_subscription.start_date %}
+                        {% with total_days=active_subscription.plan.duration_days %}
+                        {% with days_passed=active_subscription.end_date|timeuntil:active_subscription.start_date %}
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar"
+                                 style="width: 66%;"
+                                 aria-valuenow="66"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+                        </div>
+                        {% endwith %}
+                        {% endwith %}
+                        {% endif %}
+
+                        <p class="text-center mb-0">
+                            <i class="fas fa-hourglass-half"></i>
+                            Осталось:
+                            {% if active_subscription.end_date %}
+                            {{ active_subscription.end_date|timeuntil }}
+                            {% else %}
+                            <span class="text-muted">Не определено</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <!-- Временно, для отладки -->
+                    <div class="col-lg-3 text-center">
+                        {% if active_subscription.plan.description is None %}
+                        <p class="mb-2">Без описания</p>
+                        {% else %}
+                        <p class="mb-2">{{ active_subscription.plan.description }}</p>
+                        {% endif %}
+                        <a href="{% url 'user_app:subscription_detail' active_subscription.id %}"
+                           class="action-btn action-btn-outline">
+                            <i class="fas fa-arrow-right"></i> Подробнее
+                        </a>
+                        <a href="{% url 'user_app:subscription_extend' active_subscription.id %}"
+                           class="action-btn action-btn-primary mt-2">
+                            <i class="fas fa-plus"></i> Продлить
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-crystal-ball"></i>
+                <h3 class="mb-3">У вас пока нет активной подписки</h3>
+                <p class="mb-4">Откройте доступ к магическим знаниям и эксклюзивным предсказаниям</p>
+                <a href="{% url 'user_app:subscription_plans' %}" class="action-btn action-btn-primary">
+                    <i class="fas fa-gem"></i> Выбрать тариф
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- История подписок (ИСПРАВЛЕННАЯ) -->
+    {% if subscriptions_history %}
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-4">
+                <i class="fas fa-history" style="color: #8b5cf6; margin-right: 10px;"></i>
+                История подписок
+            </h3>
+
+            <div class="info-section">
+                {% for subscription in subscriptions_history %}
+                <a href="{% url 'user_app:subscription_detail' subscription.id %}" class="card-link">
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="fas {% if subscription.is_active %}fa-check-circle text-success{% else %}fa-times-circle text-muted{% endif %}"></i>
+                        </div>
+                        <div class="info-label">{{ subscription.plan.name }}</div>
+                        <div class="info-value">
+                            {{ subscription.start_date|date:"d.m.Y" }} -
+                            {% if subscription.end_date %}
+                            {{ subscription.end_date|date:"d.m.Y" }}
+                            {% else %}
+                            Бессрочно
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if subscription.is_active %}
+                            <span class="badge bg-success">Активна</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Завершена</span>
+                            {% endif %}
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-chevron-right" style="color: #8b5cf6;"></i>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'user_app:subscription_history' %}" class="action-btn action-btn-outline">
+                    <i class="fas fa-history"></i> Вся история
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // Магические эффекты при наведении
+        $('.stat-card, .subscription-card, .info-item').hover(
+            function () {
+                $(this).find('i').not('.fa-chevron-right, .action-btn i').css({
+                    'transform': 'scale(1.2) rotate(5deg)',
+                    'transition': 'all 0.3s ease'
+                });
+                $(this).find('.fa-chevron-right').css({
+                    'transform': 'translateX(5px)',
+                    'transition': 'all 0.3s ease'
+                });
+            },
+            function () {
+                $(this).find('i').not('.fa-chevron-right, .action-btn i').css({
+                    'transform': 'scale(1) rotate(0)'
+                });
+                $(this).find('.fa-chevron-right').css({
+                    'transform': 'translateX(0)'
+                });
+            }
+        );
+
+        // Анимация появления элементов
+        $('.fade-in').each(function (index) {
+            $(this).css('animation-delay', index * 0.1 + 's');
+        });
+
+        // Предотвращаем переход по ссылке при нажатии на кнопки внутри карточки
+        $('.action-btn').click(function (e) {
+            e.stopPropagation();
+            return true;
+        });
+    });
+
+    // Дополнительный обработчик для кнопки редактирования
+    document.addEventListener('DOMContentLoaded', function () {
+        var editBtn = document.querySelector('.action-btn-primary[href*="profile_update"]');
+        if (editBtn) {
+            editBtn.addEventListener('click', function (e) {
+                console.log('Edit button clicked');
+            });
+        }
+    });
+</script>
+{% endblock %}

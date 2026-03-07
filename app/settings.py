@@ -38,11 +38,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["quarterly-expensive-toadfish.cloudpub.ru", "127.0.0.1"]
 
-# CSRF_TRUSTED_ORIGINS (это важно!)
+# Настройки CSRF
 CSRF_TRUSTED_ORIGINS = [
     'https://quarterly-expensive-toadfish.cloudpub.ru',
-    'http://quarterly-expensive-toadfish.cloudpub.ru',  # если используете http
+    'http://quarterly-expensive-toadfish.cloudpub.ru',
 ]
+
+# Если сайт работает через HTTPS
+CSRF_COOKIE_SECURE = False  # True только если используется HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Важно для JavaScript
+CSRF_COOKIE_SAMESITE = 'Lax'  # Или 'Strict' в зависимости от требований
+CSRF_USE_SESSIONS = False  # Хранить CSRF токен в куках, а не в сессии
 
 if not DEBUG:
     CSRF_COOKIE_SECURE = True
@@ -53,7 +59,6 @@ if not DEBUG:
 # Telegram Bot
 TELEGRAM_BOT_TOKEN = config('BOT_TOKEN')
 
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -62,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_select2',
     'tarot_app',
     'tg_bot',
     'user_app'
@@ -145,5 +151,25 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Настройки аутентификации
+AUTH_USER_MODEL = 'user_app.User'
+LOGIN_URL = 'user_app:login'
+LOGIN_REDIRECT_URL = 'user_app:profile'
+LOGOUT_REDIRECT_URL = 'home'
 
-# AUTH_USER_MODEL = 'tg_bot.User'
+# Настройки сообщений
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger',
+    messages.SUCCESS: 'success',
+    messages.INFO: 'info',
+    messages.WARNING: 'warning',
+}  # замените myapp на имя вашего приложения
+AUTHENTICATION_BACKENDS = [
+    'user_app.backends.EmailBackend',
+    'django.contrib.auth.backends.ModelBackend',  # сохраняем стандартный бэкенд
+]
+
+SELECT2_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
+SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
