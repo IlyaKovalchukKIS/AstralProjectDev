@@ -5,61 +5,75 @@
 
 {% block extra_css %}
 <style>
-    .detail-container {
-        padding: 2rem;
-        max-width: 1200px;
-        margin: 0 auto;
+    /* ===== БАЗОВЫЕ СТИЛИ С МОБИЛЬНОЙ АДАПТАЦИЕЙ ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
     }
 
+    .detail-container {
+        padding: 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    /* Заголовок */
     .detail-header {
         text-align: center;
-        margin-bottom: 3rem;
+        margin-bottom: 1.5rem;
         position: relative;
     }
 
     .detail-header i {
-        font-size: 4rem;
+        font-size: clamp(2rem, 8vw, 3rem);
         background: linear-gradient(135deg, #8b5cf6, #ec4899);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
         animation: floatIcon 3s ease-in-out infinite;
     }
 
     @keyframes floatIcon {
         0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
+        50% { transform: translateY(-8px); }
     }
 
     .detail-header h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.5rem, 6vw, 2rem);
         background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.5rem;
+        line-height: 1.2;
+        word-wrap: break-word;
     }
 
     .detail-header p {
         color: rgba(255, 255, 255, 0.7);
-        font-size: 1.1rem;
+        font-size: clamp(0.85rem, 3vw, 1rem);
+        padding: 0 0.5rem;
     }
 
+    /* Основная карточка подписки */
     .subscription-card {
         background: rgba(12, 12, 26, 0.8);
         backdrop-filter: blur(20px);
         border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 50px;
-        padding: 3rem;
-        margin-bottom: 2rem;
+        border-radius: 30px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
         position: relative;
         overflow: hidden;
         animation: cardAppear 0.8s ease-out;
+        width: 100%;
     }
 
     @keyframes cardAppear {
         from {
             opacity: 0;
-            transform: translateY(30px) scale(0.95);
+            transform: translateY(20px) scale(0.95);
         }
         to {
             opacity: 1;
@@ -84,47 +98,45 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Статус подписки */
+    /* Статус подписки - адаптирован для мобильных */
     .subscription-status {
         position: absolute;
-        top: 30px;
-        {% if subscription.is_active %}
-        left: -30px;
-        background: #10b981;
-        transform: rotate(-45deg);
-        {% else %}
-        left: -30px;
-        background: #6b7280;
-        transform: rotate(-45deg);
-        {% endif %}
+        top: 20px;
+        left: -20px;
+        background: {% if subscription.is_active %}#10b981{% else %}#6b7280{% endif %};
         color: white;
-        padding: 0.5rem 3rem;
-        font-size: 0.9rem;
+        padding: 0.3rem 2rem;
+        font-size: 0.8rem;
         font-weight: bold;
         letter-spacing: 1px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
         z-index: 10;
+        transform: rotate(-45deg);
+        white-space: nowrap;
+        width: 120px;
+        text-align: center;
     }
 
     .subscription-status i {
-        margin-right: 0.5rem;
+        margin-right: 0.3rem;
+        font-size: 0.7rem;
     }
 
-    /* Основная информация */
+    /* Иконка подписки */
     .subscription-icon {
-        width: 120px;
-        height: 120px;
+        width: clamp(60px, 15vw, 80px);
+        height: clamp(60px, 15vw, 80px);
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         border: 3px solid #8b5cf6;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 2rem;
+        margin: 0 auto 1.5rem;
     }
 
     .subscription-icon i {
-        font-size: 4rem;
+        font-size: clamp(1.5rem, 6vw, 2.5rem);
         color: #8b5cf6;
         animation: pulse 3s ease-in-out infinite;
     }
@@ -135,87 +147,35 @@
     }
 
     .plan-name {
-        font-size: 3rem;
+        font-size: clamp(1.5rem, 6vw, 2rem);
         text-align: center;
-        margin-bottom: 1rem;
+        margin-bottom: 0.75rem;
         background: linear-gradient(45deg, #8b5cf6, #ec4899);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        line-height: 1.2;
+        word-break: break-word;
     }
 
     .plan-price {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
 
     .price-number {
-        font-size: 4rem;
+        font-size: clamp(2rem, 8vw, 3rem);
         font-weight: bold;
         color: #ec4899;
     }
 
     .price-period {
         color: rgba(255, 255, 255, 0.5);
-        font-size: 1.2rem;
-    }
-
-    /* Детальная информация */
-    .details-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
-    }
-
-    .detail-section {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 30px;
-        padding: 2rem;
-        border: 1px solid rgba(139, 92, 246, 0.2);
-    }
-
-    .section-title {
-        color: #8b5cf6;
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .section-title i {
-        font-size: 1.5rem;
-    }
-
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 1rem;
-        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-    }
-
-    .info-row:last-child {
-        border-bottom: none;
-    }
-
-    .info-label {
-        color: #8b5cf6;
-        font-weight: 600;
-    }
-
-    .info-value {
-        color: #fff;
-        font-weight: 500;
-    }
-
-    .info-value.highlight {
-        color: #ec4899;
-        font-weight: bold;
+        font-size: clamp(0.85rem, 3vw, 1rem);
     }
 
     /* Прогресс-бар */
     .progress-container {
-        margin: 2rem 0;
+        margin: 1.5rem 0;
     }
 
     .progress-header {
@@ -223,12 +183,14 @@
         justify-content: space-between;
         margin-bottom: 0.5rem;
         color: rgba(255, 255, 255, 0.7);
+        font-size: clamp(0.8rem, 3vw, 0.9rem);
+        gap: 0.5rem;
     }
 
     .progress-bar-bg {
-        height: 20px;
+        height: clamp(8px, 2vw, 12px);
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
+        border-radius: 6px;
         overflow: hidden;
         position: relative;
     }
@@ -236,7 +198,7 @@
     .progress-bar-fill {
         height: 100%;
         background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        border-radius: 10px;
+        border-radius: 6px;
         transition: width 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -258,57 +220,127 @@
         100% { transform: translateX(100%); }
     }
 
-    /* Статистика */
+    /* Детальная информация - адаптирована для мобильных */
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin: 1.5rem 0;
+        width: 100%;
+    }
+
+    .detail-section {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 1rem;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .section-title {
+        color: #8b5cf6;
+        font-size: clamp(1.1rem, 4vw, 1.3rem);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: clamp(1.1rem, 4vw, 1.3rem);
+    }
+
+    .info-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        padding: 0.8rem;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        color: #8b5cf6;
+        font-weight: 600;
+        font-size: clamp(0.85rem, 3vw, 0.9rem);
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .info-value {
+        color: #fff;
+        font-weight: 500;
+        font-size: clamp(0.9rem, 3.5vw, 1rem);
+        word-break: break-word;
+        transition: all 0.3s ease;
+    }
+
+    .info-value.highlight {
+        color: #ec4899;
+        font-weight: bold;
+    }
+
+    /* Статистика - адаптирована для мобильных */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1fr;
         gap: 1rem;
-        margin: 2rem 0;
+        margin: 1.5rem 0;
     }
 
     .stat-item {
         text-align: center;
-        padding: 1.5rem;
+        padding: 1rem;
         background: rgba(139, 92, 246, 0.1);
-        border-radius: 20px;
+        border-radius: 15px;
         border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
     .stat-value {
-        font-size: 2rem;
+        font-size: clamp(1.5rem, 6vw, 1.8rem);
         font-weight: bold;
         color: #8b5cf6;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .stat-label {
         color: rgba(255, 255, 255, 0.7);
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 3vw, 0.85rem);
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
     }
 
-    /* Кнопки действий */
+    /* Кнопки действий - адаптированы для мобильных */
     .action-buttons {
         display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 3rem;
-        flex-wrap: wrap;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 2rem;
+        width: 100%;
     }
 
     .action-btn {
-        padding: 1rem 2rem;
+        padding: 0.9rem 1rem;
         border-radius: 50px;
         font-weight: 600;
         text-decoration: none;
         transition: all 0.3s ease;
         border: none;
         cursor: pointer;
-        font-size: 1rem;
+        font-size: clamp(0.9rem, 3.5vw, 1rem);
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 0.5rem;
+        width: 100%;
+        text-align: center;
+        -webkit-tap-highlight-color: transparent;
     }
 
     .action-btn-primary {
@@ -316,10 +348,9 @@
         color: white;
     }
 
-    .action-btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
-        color: white;
+    .action-btn-primary:active {
+        transform: scale(0.98);
+        box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
     }
 
     .action-btn-outline {
@@ -328,11 +359,9 @@
         color: #8b5cf6;
     }
 
-    .action-btn-outline:hover {
+    .action-btn-outline:active {
         background: rgba(139, 92, 246, 0.1);
-        transform: translateY(-3px);
-        color: #ec4899;
-        border-color: #ec4899;
+        transform: scale(0.98);
     }
 
     .action-btn-danger {
@@ -341,11 +370,9 @@
         color: #ef4444;
     }
 
-    .action-btn-danger:hover {
+    .action-btn-danger:active {
         background: rgba(239, 68, 68, 0.1);
-        transform: translateY(-3px);
-        color: #ef4444;
-        border-color: #ef4444;
+        transform: scale(0.98);
     }
 
     .action-btn:disabled {
@@ -354,41 +381,62 @@
         pointer-events: none;
     }
 
-    /* История платежей */
+    /* История платежей - адаптирована для мобильных */
     .payment-history {
-        margin-top: 3rem;
+        margin-top: 2rem;
+        width: 100%;
+    }
+
+    .payment-table-container {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-top: 1rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(139, 92, 246, 0.2);
     }
 
     .payment-table {
         width: 100%;
+        min-width: 500px;
         border-collapse: collapse;
-        margin-top: 1rem;
+        font-size: 0.9rem;
     }
 
     .payment-table th {
         text-align: left;
-        padding: 1rem;
+        padding: 0.8rem;
         color: #8b5cf6;
         font-weight: 600;
         border-bottom: 2px solid rgba(139, 92, 246, 0.3);
+        white-space: nowrap;
+        background: rgba(139, 92, 246, 0.1);
     }
 
     .payment-table td {
-        padding: 1rem;
+        padding: 0.8rem;
         border-bottom: 1px solid rgba(139, 92, 246, 0.2);
         color: rgba(255, 255, 255, 0.9);
+        word-break: break-word;
+    }
+
+    .payment-table tr:last-child td {
+        border-bottom: none;
     }
 
     .payment-table tr:hover td {
         background: rgba(139, 92, 246, 0.1);
     }
 
+    /* Статус бейджи */
     .status-badge {
-        padding: 0.25rem 1rem;
+        padding: 0.2rem 0.8rem;
         border-radius: 50px;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         font-weight: 600;
         display: inline-block;
+        white-space: nowrap;
     }
 
     .status-active {
@@ -409,65 +457,253 @@
         border: 1px solid #f59e0b;
     }
 
-    /* Адаптивность */
-    @media (max-width: 768px) {
-        .detail-container {
-            padding: 1rem;
-        }
+    /* Дополнительная информация */
+    .terms-section {
+        margin-top: 1.5rem;
+        padding: 1rem;
+        background: rgba(139, 92, 246, 0.05);
+        border-radius: 20px;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        width: 100%;
+    }
 
-        .detail-header h1 {
-            font-size: 2rem;
-        }
+    .terms-section h3 {
+        color: #8b5cf6;
+        font-size: clamp(1.1rem, 4vw, 1.2rem);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
 
-        .subscription-card {
-            padding: 2rem;
-        }
+    .terms-section p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: clamp(0.85rem, 3vw, 0.9rem);
+        line-height: 1.6;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 
-        .plan-name {
-            font-size: 2rem;
-        }
+    .terms-section p i {
+        color: #10b981;
+        font-size: 0.9rem;
+        margin-top: 0.2rem;
+        flex-shrink: 0;
+    }
 
-        .price-number {
-            font-size: 3rem;
-        }
+    /* Анимации */
+    .fade-in {
+        animation: fadeIn 0.8s ease forwards;
+    }
 
-        .details-grid {
-            grid-template-columns: 1fr;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
-
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .action-btn {
-            width: 100%;
-            justify-content: center;
-        }
-
-        .subscription-status {
-            left: -20px;
-            padding: 0.3rem 2rem;
-            font-size: 0.8rem;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
-    @media (max-width: 576px) {
+    /* Адаптация для очень маленьких экранов (до 375px) */
+    @media (max-width: 375px) {
+        .detail-container {
+            padding: 0.75rem;
+        }
+
         .subscription-card {
-            padding: 1.5rem;
+            padding: 1rem;
+        }
+
+        .subscription-status {
+            font-size: 0.7rem;
+            padding: 0.2rem 1.5rem;
+            width: 100px;
         }
 
         .info-row {
-            flex-direction: column;
-            gap: 0.5rem;
+            padding: 0.6rem;
         }
 
-        .payment-table {
-            display: block;
-            overflow-x: auto;
+        .detail-section {
+            padding: 0.8rem;
+        }
+
+        .action-btn {
+            padding: 0.8rem;
+        }
+    }
+
+    /* Планшеты (вертикальная ориентация) */
+    @media (min-width: 600px) and (max-width: 767px) {
+        .details-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            width: auto;
+            flex: 1 1 auto;
+            min-width: 150px;
+        }
+
+        .info-row {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            margin-bottom: 0;
+        }
+    }
+
+    /* Планшеты (горизонтальная ориентация и малые ноутбуки) */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        .details-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            width: auto;
+            flex: 0 1 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .info-row {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .subscription-status {
+            top: 25px;
+            left: -25px;
+            padding: 0.4rem 2.5rem;
+            font-size: 0.85rem;
+            width: 130px;
+        }
+    }
+
+    /* Десктоп */
+    @media (min-width: 1025px) {
+        .detail-container {
+            padding: 2rem;
+        }
+
+        .details-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: row;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .action-btn {
+            width: auto;
+            padding: 1rem 2rem;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .action-btn-outline:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .action-btn-danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .info-row {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-row:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+            transform: translateX(5px);
+        }
+
+        .info-row:hover .info-value {
+            transform: translateX(5px);
+            color: #8b5cf6;
+        }
+
+        .subscription-status {
+            top: 30px;
+            left: -30px;
+            padding: 0.5rem 3rem;
+            font-size: 0.9rem;
+            width: 150px;
+        }
+    }
+
+    /* Улучшения для сенсорных экранов */
+    @media (hover: none) and (pointer: coarse) {
+        .action-btn:hover {
+            transform: none;
+        }
+
+        .info-row:hover {
+            background: none;
+            transform: none;
+        }
+
+        .info-row:active {
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+        }
+
+        .payment-table tr:hover td {
+            background: none;
+        }
+
+        .payment-table tr:active td {
+            background: rgba(139, 92, 246, 0.1);
+        }
+    }
+
+    /* Улучшения для устройств с большими экранами */
+    @media (min-width: 1440px) {
+        .detail-container {
+            max-width: 1400px;
         }
     }
 </style>
@@ -494,9 +730,9 @@
         <div class="subscription-icon">
             <i class="fas fa-crown"></i>
         </div>
-        
+
         <h2 class="plan-name">{{ subscription.plan.name }}</h2>
-        
+
         <div class="plan-price">
             <span class="price-number">{{ subscription.plan.price|floatformat:0 }}</span>
             <span class="price-period">₽</span>
@@ -523,24 +759,24 @@
                     <i class="fas fa-info-circle"></i>
                     Основная информация
                 </h3>
-                
+
                 <div class="info-row">
-                    <span class="info-label">ID подписки</span>
+                    <span class="info-label"><i class="fas fa-hashtag"></i> ID подписки</span>
                     <span class="info-value">#{{ subscription.id }}</span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Тарифный план</span>
+                    <span class="info-label"><i class="fas fa-tag"></i> Тарифный план</span>
                     <span class="info-value">{{ subscription.plan.name }}</span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Стоимость</span>
+                    <span class="info-label"><i class="fas fa-ruble-sign"></i> Стоимость</span>
                     <span class="info-value highlight">{{ subscription.plan.price }} ₽</span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Длительность</span>
+                    <span class="info-label"><i class="fas fa-clock"></i> Длительность</span>
                     <span class="info-value">{{ subscription.plan.duration_days }} дней</span>
                 </div>
             </div>
@@ -551,26 +787,26 @@
                     <i class="fas fa-calendar-alt"></i>
                     Даты
                 </h3>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Дата начала</span>
+                    <span class="info-label"><i class="fas fa-play"></i> Дата начала</span>
                     <span class="info-value">{{ subscription.start_date|date:"d.m.Y H:i" }}</span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Дата окончания</span>
+                    <span class="info-label"><i class="fas fa-stop"></i> Дата окончания</span>
                     <span class="info-value">{{ subscription.end_date|date:"d.m.Y H:i" }}</span>
                 </div>
-                
+
                 {% if subscription.is_active %}
                 <div class="info-row">
-                    <span class="info-label">Осталось времени</span>
+                    <span class="info-label"><i class="fas fa-hourglass-end"></i> Осталось времени</span>
                     <span class="info-value highlight">{{ subscription.end_date|timeuntil }}</span>
                 </div>
                 {% endif %}
-                
+
                 <div class="info-row">
-                    <span class="info-label">Создана</span>
+                    <span class="info-label"><i class="fas fa-plus-circle"></i> Создана</span>
                     <span class="info-value">{{ subscription.start_date|date:"d.m.Y" }}</span>
                 </div>
             </div>
@@ -581,9 +817,9 @@
                     <i class="fas fa-chart-line"></i>
                     Статистика
                 </h3>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Статус</span>
+                    <span class="info-label"><i class="fas fa-circle"></i> Статус</span>
                     <span class="info-value">
                         {% if subscription.is_active %}
                             <span class="status-badge status-active">Активна</span>
@@ -592,17 +828,17 @@
                         {% endif %}
                     </span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Использовано</span>
+                    <span class="info-label"><i class="fas fa-percent"></i> Использовано</span>
                     <span class="info-value">{{ subscription.get_progress_percentage }}%</span>
                 </div>
-                
+
                 <div class="info-row">
-                    <span class="info-label">Осталось дней</span>
+                    <span class="info-label"><i class="fas fa-calendar-day"></i> Осталось дней</span>
                     <span class="info-value">
                         {% if subscription.is_active %}
-                            {{ subscription.end_date|timeuntil }}
+                            {{ subscription.get_days_left }} дней
                         {% else %}
                             0 дней
                         {% endif %}
@@ -614,19 +850,20 @@
         <!-- Кнопки действий -->
         <div class="action-buttons">
             {% if subscription.is_active %}
-                <a href="{% url 'user_app:subscription_extend' subscription.id %}" class="action-btn action-btn-primary">
-                    <i class="fas fa-plus-circle"></i> Продлить подписку
-                </a>
-            {% else %}
-                <a href="{% url 'user_app:subscription_checkout' subscription.plan.id %}" class="action-btn action-btn-primary">
-                    <i class="fas fa-sync-alt"></i> Активировать снова
-                </a>
-            {% endif %}
-            
-            <a href="{% url 'user_app:subscription_plans' %}" class="action-btn action-btn-outline">
-                <i class="fas fa-gem"></i> Выбрать другой тариф
+            <a href="{% url 'user_app:subscription_extend' subscription.id %}" class="action-btn action-btn-primary">
+                <i class="fas fa-plus-circle"></i> Продлить подписку
             </a>
-            
+            {% else %}
+            <a href="{% url 'user_app:subscription_checkout' subscription.plan.id %}"
+               class="action-btn action-btn-primary">
+                <i class="fas fa-sync-alt"></i> Активировать снова
+            </a>
+            {% endif %}
+
+            <a href="{% url 'user_app:subscription_plans' %}" class="action-btn action-btn-outline">
+                <i class="fas fa-gem"></i> Другие тарифы
+            </a>
+
             <a href="{% url 'user_app:profile' %}" class="action-btn action-btn-outline">
                 <i class="fas fa-user"></i> В профиль
             </a>
@@ -636,83 +873,175 @@
     <!-- История платежей (если есть) -->
     {% if subscription.payments.exists %}
     <div class="payment-history fade-in">
-        <h2 class="section-title" style="justify-content: center; margin-bottom: 2rem;">
+        <h2 class="section-title" style="justify-content: center; margin-bottom: 1.5rem;">
             <i class="fas fa-history"></i>
             История платежей
         </h2>
-        
-        <div class="detail-section">
+
+        <div class="payment-table-container">
             <table class="payment-table">
                 <thead>
-                    <tr>
-                        <th>ID платежа</th>
-                        <th>Дата</th>
-                        <th>Сумма</th>
-                        <th>Статус</th>
-                    </tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Дата</th>
+                    <th>Сумма</th>
+                    <th>Статус</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for payment in subscription.payments.all %}
-                    <tr>
-                        <td>#{{ payment.id|slice:":8" }}</td>
-                        <td>{{ payment.created_at|date:"d.m.Y H:i" }}</td>
-                        <td>{{ payment.amount }} ₽</td>
-                        <td>
-                            {% if payment.status == 'succeeded' %}
-                                <span class="status-badge status-active">Оплачено</span>
-                            {% elif payment.status == 'pending' %}
-                                <span class="status-badge status-pending">Ожидает</span>
-                            {% else %}
-                                <span class="status-badge status-expired">{{ payment.get_status_display }}</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for payment in subscription.payments.all %}
+                <tr>
+                    <td>#{{ payment.id|slice:":6" }}</td>
+                    <td>{{ payment.created_at|date:"d.m.Y" }}</td>
+                    <td>{{ payment.amount }} ₽</td>
+                    <td>
+                        {% if payment.status == 'succeeded' %}
+                        <span class="status-badge status-active">Оплачено</span>
+                        {% elif payment.status == 'pending' %}
+                        <span class="status-badge status-pending">Ожидает</span>
+                        {% else %}
+                        <span class="status-badge status-expired">{{ payment.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
     {% endif %}
 
-    <!-- Дополнительная информация -->
-    <div class="detail-section" style="margin-top: 2rem;">
-        <h3 class="section-title">
+    <!-- Условия подписки -->
+    <div class="terms-section fade-in">
+        <h3>
             <i class="fas fa-shield-alt"></i>
             Условия подписки
         </h3>
-        
-        <div style="color: rgba(255, 255, 255, 0.7); line-height: 1.8; padding: 1rem;">
-            <p><i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i> Подписка автоматически не продлевается</p>
-            <p><i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i> Вы можете продлить подписку в любой момент до её окончания</p>
-            <p><i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i> После окончания подписки доступ к материалам закрывается</p>
-            <p><i class="fas fa-check-circle" style="color: #10b981; margin-right: 0.5rem;"></i> Все платежи защищены и безопасны</p>
-        </div>
+
+        <p>
+            <i class="fas fa-check-circle"></i>
+            <span>Подписка автоматически не продлевается</span>
+        </p>
+        <p>
+            <i class="fas fa-check-circle"></i>
+            <span>Вы можете продлить подписку в любой момент до её окончания</span>
+        </p>
+        <p>
+            <i class="fas fa-check-circle"></i>
+            <span>После окончания подписки доступ к материалам закрывается</span>
+        </p>
+        <p>
+            <i class="fas fa-check-circle"></i>
+            <span>Все платежи защищены и безопасны</span>
+        </p>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Анимация появления элементов
-        $('.fade-in').each(function(index) {
+        $('.fade-in').each(function (index) {
             $(this).css('animation-delay', index * 0.1 + 's');
         });
-        
-        // Добавляем класс для анимации при наведении
-        $('.info-row').hover(
-            function() {
-                $(this).find('.info-value').css({
-                    'transform': 'translateX(5px)',
-                    'transition': 'all 0.3s ease'
+
+        // Функция для применения адаптивного поведения
+        function applyResponsiveBehavior() {
+            const isMobile = window.innerWidth <= 768;
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+            if (isMobile || isTouchDevice) {
+                // Для мобильных и сенсорных устройств
+                $('.info-row').off('mouseenter mouseleave hover');
+                $('.payment-table tr').off('mouseenter mouseleave hover');
+
+                // Убираем hover-эффекты
+                $('.info-row').css('cursor', 'default');
+                $('.payment-table tr').css('cursor', 'default');
+
+                // Добавляем активные состояния для touch
+                $('.info-row').on('touchstart', function() {
+                    $(this).css('background', 'rgba(139, 92, 246, 0.1)');
+                }).on('touchend', function() {
+                    setTimeout(() => {
+                        $(this).css('background', '');
+                    }, 200);
                 });
-            },
-            function() {
-                $(this).find('.info-value').css({
-                    'transform': 'translateX(0)'
+
+                $('.action-btn').on('touchstart', function() {
+                    $(this).css('transform', 'scale(0.98)');
+                }).on('touchend', function() {
+                    $(this).css('transform', '');
                 });
+            } else {
+                // Для десктопа
+                $('.info-row').hover(
+                    function () {
+                        $(this).find('.info-value').css({
+                            'transform': 'translateX(5px)',
+                            'transition': 'all 0.3s ease',
+                            'color': '#8b5cf6'
+                        });
+                    },
+                    function () {
+                        $(this).find('.info-value').css({
+                            'transform': 'translateX(0)',
+                            'color': '#fff'
+                        });
+                    }
+                );
             }
-        );
+        }
+
+        // Применяем при загрузке
+        applyResponsiveBehavior();
+
+        // Отслеживание изменения размера окна с debounce
+        let resizeTimeout;
+        $(window).resize(function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function() {
+                applyResponsiveBehavior();
+            }, 150);
+        });
+
+        // Адаптация таблицы для мобильных
+        function adaptPaymentTable() {
+            if (window.innerWidth <= 480) {
+                $('.payment-table-container').css('border-radius', '15px');
+            } else {
+                $('.payment-table-container').css('border-radius', '20px');
+            }
+        }
+
+        adaptPaymentTable();
+        $(window).resize(adaptPaymentTable);
+
+        // Плавная прокрутка для мобильных
+        $('a[href^="#"]').on('click', function(e) {
+            e.preventDefault();
+            const target = $(this.hash);
+            if (target.length) {
+                $('html, body').animate({
+                    scrollTop: target.offset().top - 20
+                }, 500);
+            }
+        });
+
+        // Улучшение производительности на мобильных
+        if (window.innerWidth <= 768) {
+            // Отключаем сложные анимации на мобильных
+            $('.subscription-card').css('animation', 'none');
+            $('.progress-bar-fill::after').css('animation', 'none');
+
+            // Включаем аппаратное ускорение
+            $('.subscription-card, .detail-section, .action-btn').css({
+                'transform': 'translateZ(0)',
+                'backface-visibility': 'hidden',
+                'perspective': '1000'
+            });
+        }
     });
 </script>
 {% endblock %}
