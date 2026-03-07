@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load dict_extras %}
 {% block title %}Продление подписки - Мистический Портал{% endblock %}
 
 {% block extra_css %}
@@ -239,6 +239,21 @@
         box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
     }
 
+    .option-card.popular::before {
+        content: '★ ПОПУЛЯРНОЕ ★';
+        position: absolute;
+        top: 15px;
+        right: -30px;
+        background: linear-gradient(90deg, #8b5cf6, #ec4899);
+        color: white;
+        padding: 0.3rem 2rem;
+        transform: rotate(45deg);
+        font-size: 0.7rem;
+        font-weight: bold;
+        white-space: nowrap;
+        z-index: 2;
+    }
+
     .option-card input[type="radio"] {
         position: absolute;
         opacity: 0;
@@ -276,20 +291,37 @@
         margin-bottom: 0.5rem;
     }
 
-    .option-price {
-        font-size: 1.2rem;
-        color: #ec4899;
-        margin-bottom: 1rem;
+    .option-description {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-bottom: 0.5rem;
     }
 
-    .option-price small {
+    .price-container {
+        margin: 0.5rem 0;
+    }
+
+    .original-price {
+        font-size: 1rem;
+        color: rgba(255, 255, 255, 0.4);
+        text-decoration: line-through;
+        display: block;
+    }
+
+    .final-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ec4899;
+    }
+
+    .price-per-month {
         font-size: 0.8rem;
         color: rgba(255, 255, 255, 0.5);
         display: block;
         margin-top: 0.3rem;
     }
 
-    .option-discount {
+    .discount-badge {
         position: absolute;
         top: 10px;
         right: -30px;
@@ -342,7 +374,7 @@
         }
     }
 
-    .original-price {
+    .total-original-price {
         font-size: 1.2rem;
         color: rgba(255, 255, 255, 0.5);
         text-decoration: line-through;
@@ -472,7 +504,7 @@
         cursor: pointer;
         position: relative;
         z-index: 1;
-        user-select: none; /* Предотвращает выделение текста при клике */
+        user-select: none;
     }
 
     .option-card input[type="radio"] {
@@ -480,20 +512,13 @@
         opacity: 0;
         width: 0;
         height: 0;
+        pointer-events: none;
     }
 
     .option-card.selected {
         border-color: #ec4899;
         background: rgba(236, 72, 153, 0.1);
         box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
-    }
-
-
-    /* Но сделайте исключение для radio, чтобы он был доступен */
-    .option-card input[type="radio"] {
-        pointer-events: auto;
-        opacity: 0;
-        position: absolute;
     }
 </style>
 {% endblock %}
@@ -547,6 +572,14 @@
                     <div class="progress-bar-fill" style="width: {{ subscription.get_progress_percentage }}%;"></div>
                 </div>
             </div>
+
+            <!-- Предупреждение если осталось мало времени -->
+            {% if subscription.get_days_left < 7 %}
+            <div class="warning-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Внимание! До окончания подписки осталось {{ subscription.get_days_left }} дней. Рекомендуем продлить её сейчас.</span>
+            </div>
+            {% endif %}
         </div>
 
         <!-- Варианты продления -->
@@ -560,76 +593,69 @@
                 {% csrf_token %}
 
                 <div class="options-grid">
-                    <!-- Вариант на 1 месяц -->
-                    <div class="option-card" data-months="1" data-discount="0"
-                         data-price="{{ subscription.plan.price }}" data-value="30">
-                        <input type="radio" name="duration" value="30" id="duration_30">
+                    {% for option in extension_options %}
+                    <div class="option-card {% if option.is_popular %}popular{% endif %}" 
+                         data-option-id="{{ option.id }}"
+                         data-months="{{ option.months }}"
+                         data-discount="{{ option.discount_percent }}"
+                         data-price="{{ price_data|get_item:option.id|get_item:'final' }}">
+                        
+                        <input type="radio" name="extension_option" value="{{ option.id }}" 
+                               id="option_{{ option.id }}" {% if forloop.first %}checked{% endif %}>
+                        
                         <div class="option-icon">
-                            <i class="fas fa-moon"></i>
+                            <i class="{{ option.icon|default:'fas fa-moon' }}"></i>
                         </div>
-                        <div class="option-duration">1 месяц</div>
-                        <div class="option-price">
-                            <span class="option-total">{{ subscription.plan.price|floatformat:0 }}</span> ₽
-                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
+                        
+                        <div class="option-duration">{{ option.name }}</div>
+                        
+                        {% if option.description %}
+                        <div class="option-description">{{ option.description }}</div>
+                        {% endif %}
+                        
+                        <div class="price-container">
+                            {% if option.discount_percent > 0 %}
+                            <span class="original-price">
+                                {{ price_data|get_item:option.id|get_item:'original' }} ₽
+                            </span>
+                            {% endif %}
+                            <span class="final-price">
+                                {{ price_data|get_item:option.id|get_item:'final' }} ₽
+                            </span>
+                            <span class="price-per-month">
+                                {{ price_data|get_item:option.id|get_item:'monthly' }} ₽/мес
+                            </span>
                         </div>
-                        <div class="option-discount">Без скидки</div>
+                        
+                        {% if option.discount_percent > 0 %}
+                        <div class="discount-badge">-{{ option.discount_percent }}%</div>
+                        {% endif %}
                     </div>
-
-                    <!-- Вариант на 3 месяца -->
-                    <div class="option-card" data-months="3" data-discount="5"
-                         data-price="{{ subscription.plan.price }}" data-value="90">
-                        <input type="radio" name="duration" value="90" id="duration_90">
-                        <div class="option-icon">
-                            <i class="fas fa-crown"></i>
-                        </div>
-                        <div class="option-duration">3 месяца</div>
-                        <div class="option-price">
-                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
-                            ₽
-                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
-                        </div>
-                        <div class="option-discount">🔥 Скидка 5%</div>
+                    {% empty %}
+                    <div class="col-12 text-center">
+                        <p>Варианты продления временно недоступны</p>
                     </div>
-
-                    <!-- Вариант на 6 месяцев -->
-                    <div class="option-card" data-months="6" data-discount="10"
-                         data-price="{{ subscription.plan.price }}" data-value="180">
-                        <input type="radio" name="duration" value="180" id="duration_180">
-                        <div class="option-icon">
-                            <i class="fas fa-infinity"></i>
-                        </div>
-                        <div class="option-duration">6 месяцев</div>
-                        <div class="option-price">
-                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
-                            ₽
-                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
-                        </div>
-                        <div class="option-discount">⚡ Скидка 10%</div>
-                    </div>
-
-                    <!-- Вариант на 12 месяцев -->
-                    <div class="option-card" data-months="12" data-discount="15"
-                         data-price="{{ subscription.plan.price }}" data-value="365">
-                        <input type="radio" name="duration" value="365" id="duration_365">
-                        <div class="option-icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <div class="option-duration">12 месяцев</div>
-                        <div class="option-price">
-                            <span class="option-total">{{ subscription.plan.price|floatformat:0|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|add:subscription.plan.price|floatformat:0 }}</span>
-                            ₽
-                            <small>{{ subscription.plan.price|floatformat:0 }} ₽/мес</small>
-                        </div>
-                        <div class="option-discount">✨ Скидка 15%</div>
-                    </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Итого к оплате -->
                 <div class="total-section">
                     <span class="total-label">Итого к оплате:</span>
                     <div>
-                        <span class="original-price" id="originalPrice" style="display: none;">{{ subscription.plan.price|floatformat:0 }} ₽</span>
-                        <span class="total-amount" id="totalAmount">{{ subscription.plan.price|floatformat:0 }} ₽</span>
+                        {% with first_option=extension_options.first %}
+                            {% if first_option and first_option.discount_percent > 0 %}
+                            <span class="total-original-price" id="totalOriginalPrice">
+                                {{ price_data|get_item:first_option.id|get_item:'original' }} ₽
+                            </span>
+                            {% endif %}
+                            <span class="total-amount" id="totalAmount">
+                                {% if first_option %}
+                                    {{ price_data|get_item:first_option.id|get_item:'final' }} ₽
+                                {% else %}
+                                    {{ subscription.plan.price|floatformat:0 }} ₽
+                                {% endif %}
+                            </span>
+                        {% endwith %}
                     </div>
                 </div>
 
@@ -657,27 +683,27 @@
 {% block extra_js %}
 <script>
     $(document).ready(function() {
-        console.log('Document ready'); // Для отладки
+        console.log('Document ready');
 
         // Базовая цена
         const basePrice = parseFloat('{{ subscription.plan.price|floatformat:0 }}');
         console.log('Base price:', basePrice);
 
+        // Словарь с ценами для каждого варианта
+        const priceData = {
+            {% for option in extension_options %}
+            '{{ option.id }}': {
+                original: {{ price_data|get_item:option.id|get_item:'original' }},
+                final: {{ price_data|get_item:option.id|get_item:'final' }},
+                monthly: {{ price_data|get_item:option.id|get_item:'monthly' }},
+                discount: {{ option.discount_percent }}
+            },
+            {% endfor %}
+        };
+
         // Функция форматирования цены
         function formatPrice(price) {
             return Math.round(price).toLocaleString('ru-RU') + ' ₽';
-        }
-
-        // Функция расчета цены с учетом скидки
-        function calculatePrice(months, discountPercent) {
-            const originalTotal = basePrice * months;
-            const discountAmount = originalTotal * (discountPercent / 100);
-            const finalTotal = originalTotal - discountAmount;
-            return {
-                original: originalTotal,
-                final: finalTotal,
-                discount: discountPercent
-            };
         }
 
         // Функция обновления отображения цены
@@ -688,37 +714,45 @@
                 return;
             }
 
-            const months = parseInt(selectedCard.data('months'));
-            const discount = parseInt(selectedCard.data('discount'));
-            const price = parseFloat(selectedCard.data('price'));
+            const optionId = selectedCard.data('option-id');
+            const priceInfo = priceData[optionId];
 
-            console.log('Updating price for:', months, 'months, discount:', discount);
+            if (!priceInfo) {
+                console.log('No price info for option:', optionId);
+                return;
+            }
 
-            const prices = calculatePrice(months, discount);
+            console.log('Updating price for option:', optionId, priceInfo);
 
             // Обновляем итоговую сумму
-            const originalPriceEl = $('#originalPrice');
+            const totalOriginalPriceEl = $('#totalOriginalPrice');
             const totalAmountEl = $('#totalAmount');
 
-            if (discount > 0) {
-                originalPriceEl.text(formatPrice(prices.original)).show();
+            if (priceInfo.discount > 0) {
+                if (totalOriginalPriceEl.length) {
+                    totalOriginalPriceEl.text(formatPrice(priceInfo.original)).show();
+                } else {
+                    $('<span class="total-original-price" id="totalOriginalPrice"></span>')
+                        .text(formatPrice(priceInfo.original))
+                        .insertBefore(totalAmountEl);
+                }
             } else {
-                originalPriceEl.hide();
+                $('#totalOriginalPrice').hide();
             }
 
             totalAmountEl.addClass('updated');
-            totalAmountEl.text(formatPrice(prices.final));
+            totalAmountEl.text(formatPrice(priceInfo.final));
 
             setTimeout(() => totalAmountEl.removeClass('updated'), 500);
         }
 
-        // Простой и надежный обработчик кликов
+        // Обработчик кликов на карточки
         $('.option-card').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
 
             const clickedCard = $(this);
-            console.log('Card clicked:', clickedCard.data('months'), 'months');
+            console.log('Card clicked:', clickedCard.data('option-id'));
 
             // Убираем выделение со всех карточек
             $('.option-card').removeClass('selected');
@@ -738,9 +772,11 @@
         function setDefaultSelection() {
             console.log('Setting default selection');
             const firstCard = $('.option-card').first();
-            firstCard.addClass('selected');
-            firstCard.find('input[type="radio"]').prop('checked', true);
-            updatePrice();
+            if (firstCard.length) {
+                firstCard.addClass('selected');
+                firstCard.find('input[type="radio"]').prop('checked', true);
+                updatePrice();
+            }
         }
 
         // Вызываем установку по умолчанию
@@ -751,22 +787,20 @@
             e.preventDefault();
 
             // Проверяем, выбран ли вариант
-            if (!$('input[name="duration"]:checked').length) {
+            if (!$('input[name="extension_option"]:checked').length) {
                 alert('Пожалуйста, выберите срок продления');
                 return false;
             }
 
-            const selectedDuration = $('input[name="duration"]:checked').val();
-            console.log('Submitting with duration:', selectedDuration);
+            const selectedOptionId = $('input[name="extension_option"]:checked').val();
+            console.log('Submitting with option ID:', selectedOptionId);
 
             const btn = $(this).find('button[type="submit"]');
             btn.html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
             btn.prop('disabled', true);
 
-            // В тестовом режиме просто показываем успех
-            setTimeout(() => {
-                window.location.href = "{% url 'user_app:subscription_success' payment_id='00000000-0000-0000-0000-000000000000' %}";
-            }, 1500);
+            // Реальная отправка формы
+            this.submit();
         });
 
         // Анимация при наведении

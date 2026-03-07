@@ -1,54 +1,65 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, SubscriptionPlan, UserSubscription
-
-
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django.utils.translation import gettext_lazy as _
-from .models import User, SubscriptionPlan, UserSubscription
+from .models import (
+    User, SubscriptionPlan, ExtensionOption,
+    UserSubscription, ExtensionHistory, Payment
+)
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    """
-    Админка для кастомной модели пользователя с аутентификацией по email.
-    """
-    fieldsets = (
-        (None, {'fields': ('email', 'password')}),
-        (_('Personal info'), {
-            'fields': ('username', 'phone', 'birth_date', 'birth_time')
-        }),
-        (_('Permissions'), {
-            'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions'),
-        }),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2'),
-        }),
-    )
-    list_display = ('email', 'username', 'phone', 'is_staff')
-    ordering = ('email',)
-    search_fields = ('email', 'username')
-
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('email', 'first_name', 'last_name', 'is_active', 'date_joined')
+    search_fields = ('email', 'first_name', 'last_name')
+    list_filter = ('is_active', 'is_staff')
+    ordering = ('-date_joined',)
 
 
 @admin.register(SubscriptionPlan)
 class SubscriptionPlanAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'duration_days')
+    list_display = ('name', 'price', 'duration_days', 'is_popular', 'order')
+    list_editable = ('price', 'duration_days', 'is_popular', 'order')
     search_fields = ('name',)
+    list_filter = ('is_popular',)
+
+
+@admin.register(ExtensionOption)
+class ExtensionOptionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'months', 'days', 'discount_percent', 'is_active', 'is_popular', 'order')
+    list_editable = ('days', 'discount_percent', 'is_active', 'is_popular', 'order')
+    search_fields = ('name', 'description')
+    list_filter = ('is_active', 'is_popular')
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('name', 'description', 'icon')
+        }),
+        ('Параметры', {
+            'fields': ('months', 'days', 'discount_percent')
+        }),
+        ('Настройки отображения', {
+            'fields': ('is_active', 'is_popular', 'order')
+        }),
+    )
 
 
 @admin.register(UserSubscription)
 class UserSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('user', 'plan', 'start_date', 'end_date', 'is_active')
+    list_display = ('user', 'plan', 'start_date', 'end_date', 'is_active', 'extended_count')
     list_filter = ('is_active', 'plan')
-    search_fields = ('user__username', 'user__email')
-    actions = ['deactivate_selected']
+    search_fields = ('user__email', 'user__first_name')
+    date_hierarchy = 'start_date'
+    readonly_fields = ('extended_count', 'last_extended_date')
 
-    def deactivate_selected(self, request, queryset):
-        queryset.update(is_active=False)
-    deactivate_selected.short_description = "Деактивировать выбранные подписки"
+
+@admin.register(ExtensionHistory)
+class ExtensionHistoryAdmin(admin.ModelAdmin):
+    list_display = ('subscription', 'months_added', 'amount_paid', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('subscription__user__email',)
+    readonly_fields = ('created_at',)
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'amount', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__email', 'yookassa_payment_id')
+    readonly_fields = ('created_at', 'updated_at')

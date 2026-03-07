@@ -3,6 +3,7 @@ from django.db import models
 from django.utils import timezone
 from django.conf import settings
 import uuid
+from datetime import timedelta
 
 
 class UserManager(BaseUserManager):
@@ -69,11 +70,8 @@ class User(AbstractUser):
         verbose_name='Время рождения'
     )
 
-    # Указываем поле для аутентификации как email
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []  # username больше не требуется
-
-    # Используем кастомный менеджер
+    REQUIRED_FIELDS = []
     objects = UserManager()
 
     class Meta:
@@ -95,17 +93,14 @@ class User(AbstractUser):
     def get_active_subscription(self):
         """Возвращает активную подписку пользователя"""
         now = timezone.now()
-        # Ищем подписку, которая активна и дата окончания еще не прошла
         active_sub = self.subscriptions.filter(
             is_active=True,
             start_date__lte=now,
             end_date__gte=now
         ).first()
 
-        # Если не нашли по датам, проверяем просто активные
         if not active_sub:
             active_sub = self.subscriptions.filter(is_active=True).first()
-            # Если есть активная, но дата окончания прошла - деактивируем
             if active_sub and active_sub.end_date and active_sub.end_date < now:
                 active_sub.is_active = False
                 active_sub.save()
@@ -150,13 +145,95 @@ class SubscriptionPlan(models.Model):
         ordering = ['order', 'price']
 
     def __str__(self):
-        return self.name
+        return f"{self.name} - {self.price}₽/{self.duration_days}дн"
+
+
+class ExtensionOption(models.Model):
+    """
+    Модель варианта продления подписки.
+    Создается и редактируется через админку.
+    """
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название варианта'
+    )
+    months = models.PositiveIntegerField(
+        verbose_name='Количество месяцев'
+    )
+    days = models.PositiveIntegerField(
+        verbose_name='Количество дней',
+        help_text='Автоматически рассчитывается на основе месяцев, но можно указать вручную'
+    )
+    discount_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        verbose_name='Скидка (%)'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активно'
+    )
+    is_popular = models.BooleanField(
+        default=False,
+        verbose_name='Популярный вариант'
+    )
+    icon = models.CharField(
+        max_length=50,
+        default='fa-solid fa-moon',
+        verbose_name='Иконка FontAwesome',
+        help_text='Класс иконки, например: fa-solid fa-moon'
+    )
+    description = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='Краткое описание'
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Порядок сортировки'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+
+    class Meta:
+        verbose_name = 'Вариант продления'
+        verbose_name_plural = 'Варианты продления'
+        ordering = ['order', 'months']
+
+    def __str__(self):
+        discount_text = f" со скидкой {self.discount_percent}%" if self.discount_percent > 0 else ""
+        return f"{self.name} ({self.months} мес{discount_text})"
+
+    def save(self, *args, **kwargs):
+        # Если дни не указаны, рассчитываем из месяцев (30 дней = 1 месяц)
+        if not self.days:
+            self.days = self.months * 30
+        super().save(*args, **kwargs)
+
+    def calculate_price(self, base_price):
+        """
+        Рассчитывает цену со скидкой на основе базовой цены тарифа
+        """
+        original_price = float(base_price) * self.months
+        discount_multiplier = 1 - (float(self.discount_percent) / 100)
+        final_price = original_price * discount_multiplier
+        return {
+            'original': round(original_price),
+            'final': round(final_price),
+            'monthly': round(float(base_price))
+        }
 
 
 class UserSubscription(models.Model):
     """
-    Модель подписки пользователя.
-    Связывает пользователя с тарифным планом на определённый период.
+    Модель подписки пользователя с поддержкой продлений.
     """
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -182,7 +259,19 @@ class UserSubscription(models.Model):
         default=True,
         verbose_name='Активна'
     )
-    # Поле для хранения ID платежа из ЮKassa (на будущее)
+
+    # Поля для отслеживания продлений
+    extended_count = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Количество продлений'
+    )
+    last_extended_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name='Дата последнего продления'
+    )
+
+    # Поле для хранения ID платежа из ЮKassa
     yookassa_payment_id = models.CharField(
         max_length=255,
         blank=True,
@@ -195,29 +284,20 @@ class UserSubscription(models.Model):
         ordering = ['-start_date']
 
     def __str__(self):
-        return f'{self.user.email} – {self.plan.name}'
+        status = "Активна" if self.is_active else "Завершена"
+        return f'{self.user.email} – {self.plan.name} ({status})'
+
+    def save(self, *args, **kwargs):
+        if not self.end_date and self.plan:
+            self.end_date = self.start_date + timedelta(days=self.plan.duration_days)
+        super().save(*args, **kwargs)
 
     def deactivate_if_expired(self):
-        """
-        Деактивирует подписку, если её срок истёк.
-        """
         if self.end_date and self.end_date < timezone.now():
             self.is_active = False
             self.save(update_fields=['is_active'])
 
-    def save(self, *args, **kwargs):
-        """
-        Автоматически устанавливает дату окончания, если она не указана,
-        исходя из длительности тарифа.
-        """
-        if not self.end_date and self.plan and self.plan.duration_days:
-            self.end_date = self.start_date + timezone.timedelta(days=self.plan.duration_days)
-        super().save(*args, **kwargs)
-
     def get_progress_percentage(self):
-        """
-        Возвращает процент использованного времени подписки
-        """
         if not self.end_date or not self.start_date:
             return 0
 
@@ -232,10 +312,107 @@ class UserSubscription(models.Model):
 
         return int((passed_seconds / total_seconds) * 100)
 
+    def get_days_left(self):
+        if not self.end_date:
+            return 0
+        now = timezone.now()
+        if now > self.end_date:
+            return 0
+        delta = self.end_date - now
+        return delta.days
+
+    def extend(self, extension_option, payment_id=None):
+        """
+        Продлевает подписку на основе выбранного варианта продления
+        """
+        days = extension_option.days
+
+        if self.end_date > timezone.now():
+            # Если подписка активна, добавляем дни к текущей дате окончания
+            self.end_date = self.end_date + timedelta(days=days)
+        else:
+            # Если подписка истекла, начинаем с текущей даты
+            self.end_date = timezone.now() + timedelta(days=days)
+            self.is_active = True
+
+        self.extended_count += 1
+        self.last_extended_date = timezone.now()
+
+        if payment_id:
+            self.yookassa_payment_id = payment_id
+
+        self.save()
+
+        # Создаем запись в истории продлений
+        ExtensionHistory.objects.create(
+            subscription=self,
+            extension_option=extension_option,
+            old_end_date=self.end_date - timedelta(days=days),
+            new_end_date=self.end_date,
+            payment_id=payment_id
+        )
+
+        return self
+
+
+class ExtensionHistory(models.Model):
+    """
+    Модель для хранения истории продлений подписок
+    """
+    subscription = models.ForeignKey(
+        UserSubscription,
+        on_delete=models.CASCADE,
+        related_name='extension_history',
+        verbose_name='Подписка'
+    )
+    extension_option = models.ForeignKey(
+        'ExtensionOption',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Вариант продления'
+    )
+    months_added = models.PositiveIntegerField(
+        verbose_name='Добавлено месяцев'
+    )
+    discount_percent = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        verbose_name='Скидка (%)'
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name='Сумма оплаты'
+    )
+    old_end_date = models.DateTimeField(
+        verbose_name='Старая дата окончания'
+    )
+    new_end_date = models.DateTimeField(
+        verbose_name='Новая дата окончания'
+    )
+    payment_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='ID платежа'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата продления'
+    )
+
+    class Meta:
+        verbose_name = 'История продления'
+        verbose_name_plural = 'История продлений'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Продление #{self.id} - {self.subscription} +{self.months_added}мес'
+
 
 class Payment(models.Model):
     """
-    Модель для отслеживания платежей (для будущей интеграции с ЮKassa)
+    Модель для отслеживания платежей
     """
     PAYMENT_STATUS = [
         ('pending', 'Ожидает оплаты'),
@@ -255,10 +432,20 @@ class Payment(models.Model):
         related_name='payments',
         verbose_name='Пользователь'
     )
-    plan = models.ForeignKey(
-        SubscriptionPlan,
-        on_delete=models.PROTECT,
-        verbose_name='Тарифный план'
+    subscription = models.ForeignKey(
+        UserSubscription,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='payments',
+        verbose_name='Подписка'
+    )
+    extension_option = models.ForeignKey(
+        ExtensionOption,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Вариант продления'
     )
     amount = models.DecimalField(
         max_digits=10,
@@ -271,15 +458,10 @@ class Payment(models.Model):
         default='pending',
         verbose_name='Статус'
     )
-    # Поля для ЮKassa (на будущее)
     yookassa_payment_id = models.CharField(
         max_length=255,
         blank=True,
         verbose_name='ID платежа в ЮKassa'
-    )
-    yookassa_confirmation_url = models.URLField(
-        blank=True,
-        verbose_name='Ссылка на оплату'
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -297,16 +479,3 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'Платеж {self.id} - {self.amount}₽ - {self.get_status_display()}'
-
-    def create_subscription(self):
-        """
-        Создает подписку после успешной оплаты
-        """
-        subscription = UserSubscription.objects.create(
-            user=self.user,
-            plan=self.plan,
-            start_date=timezone.now(),
-            is_active=True,
-            yookassa_payment_id=self.yookassa_payment_id
-        )
-        return subscription
