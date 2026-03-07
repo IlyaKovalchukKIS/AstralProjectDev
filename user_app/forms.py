@@ -4,15 +4,12 @@ from .models import User
 
 
 class EmailAuthenticationForm(AuthenticationForm):
-    """
-    Форма аутентификации с использованием email вместо username.
-    """
+    """Форма входа по email"""
     username = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={
             'class': 'form-control mystic-input',
             'placeholder': 'Введите ваш email',
-            # Убираем autofocus
         })
     )
     password = forms.CharField(
@@ -25,9 +22,7 @@ class EmailAuthenticationForm(AuthenticationForm):
 
 
 class MysticUserCreationForm(UserCreationForm):
-    """
-    Форма регистрации пользователя в стиле мистического портала.
-    """
+    """Форма регистрации"""
     email = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={
@@ -64,9 +59,7 @@ class MysticUserCreationForm(UserCreationForm):
 
 
 class ProfileUpdateForm(forms.ModelForm):
-    """
-    Форма обновления профиля пользователя.
-    """
+    """Форма редактирования профиля"""
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email', 'phone', 'birth_date', 'birth_time']

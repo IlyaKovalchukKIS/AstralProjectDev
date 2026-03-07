@@ -169,20 +169,24 @@
     .subscription-card.active {
         border-color: #10b981;
         box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+        position: relative;
     }
 
     .subscription-card.active::before {
         content: '✓ АКТИВНО';
         position: absolute;
-        top: 20px;
-        right: -30px;
+        top: 10px;
+        left: 10px;
         background: #10b981;
         color: white;
-        padding: 0.5rem 3rem;
-        transform: rotate(45deg);
+        padding: 0.3rem 1.5rem;
+        border-radius: 20px; /* Скругленные углы */
         font-size: 0.8rem;
         font-weight: bold;
         letter-spacing: 1px;
+        white-space: nowrap;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
 
     .subscription-name {
@@ -742,11 +746,11 @@
                 {% endfor %}
             </div>
 
-            <div class="text-center mt-4">
-                <a href="{% url 'user_app:subscription_history' %}" class="action-btn action-btn-outline">
-                    <i class="fas fa-history"></i> Вся история
-                </a>
-            </div>
+<!--            <div class="text-center mt-4">-->
+<!--                <a href="{% url 'user_app:subscription_history' %}" class="action-btn action-btn-outline">-->
+<!--                    <i class="fas fa-history"></i> Вся история-->
+<!--                </a>-->
+<!--            </div>-->
         </div>
     </div>
     {% endif %}

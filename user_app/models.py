@@ -85,38 +85,33 @@ class User(AbstractUser):
 
     def get_full_name_or_email(self):
         """Возвращает полное имя или email, если имя не указано"""
-        full_name = self.get_full_name()
-        return full_name if full_name else self.email
+        if self.first_name and self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        elif self.first_name:
+            return self.first_name
+        else:
+            return self.email
 
     def get_active_subscription(self):
-        """
-        Возвращает активную подписку пользователя
-        """
-        try:
-            # Получаем текущее время
-            now = timezone.now()
+        """Возвращает активную подписку пользователя"""
+        now = timezone.now()
+        # Ищем подписку, которая активна и дата окончания еще не прошла
+        active_sub = self.subscriptions.filter(
+            is_active=True,
+            start_date__lte=now,
+            end_date__gte=now
+        ).first()
 
-            # Ищем активную подписку
-            active_sub = self.subscriptions.filter(
-                is_active=True,
-                start_date__lte=now,
-                end_date__gte=now
-            ).first()
+        # Если не нашли по датам, проверяем просто активные
+        if not active_sub:
+            active_sub = self.subscriptions.filter(is_active=True).first()
+            # Если есть активная, но дата окончания прошла - деактивируем
+            if active_sub and active_sub.end_date and active_sub.end_date < now:
+                active_sub.is_active = False
+                active_sub.save()
+                active_sub = None
 
-            # Если не нашли по датам, пробуем просто активную
-            if not active_sub:
-                active_sub = self.subscriptions.filter(is_active=True).first()
-
-                # Проверяем, не истекла ли она
-                if active_sub and active_sub.end_date and active_sub.end_date < now:
-                    active_sub.is_active = False
-                    active_sub.save()
-                    active_sub = None
-
-            return active_sub
-        except Exception as e:
-            print(f"Error getting active subscription: {e}")
-            return None
+        return active_sub
 
 
 class SubscriptionPlan(models.Model):
@@ -140,10 +135,19 @@ class SubscriptionPlan(models.Model):
         blank=True,
         verbose_name='Описание'
     )
+    is_popular = models.BooleanField(
+        default=False,
+        verbose_name='Популярный тариф'
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Порядок сортировки'
+    )
 
     class Meta:
         verbose_name = 'Тарифный план'
         verbose_name_plural = 'Тарифные планы'
+        ordering = ['order', 'price']
 
     def __str__(self):
         return self.name
@@ -178,6 +182,12 @@ class UserSubscription(models.Model):
         default=True,
         verbose_name='Активна'
     )
+    # Поле для хранения ID платежа из ЮKassa (на будущее)
+    yookassa_payment_id = models.CharField(
+        max_length=255,
+        blank=True,
+        verbose_name='ID платежа в ЮKassa'
+    )
 
     class Meta:
         verbose_name = 'Подписка пользователя'
@@ -200,31 +210,45 @@ class UserSubscription(models.Model):
         Автоматически устанавливает дату окончания, если она не указана,
         исходя из длительности тарифа.
         """
-        if not self.end_date and self.plan:
+        if not self.end_date and self.plan and self.plan.duration_days:
             self.end_date = self.start_date + timezone.timedelta(days=self.plan.duration_days)
         super().save(*args, **kwargs)
+
+    def get_progress_percentage(self):
+        """
+        Возвращает процент использованного времени подписки
+        """
+        if not self.end_date or not self.start_date:
+            return 0
+
+        now = timezone.now()
+        total_seconds = (self.end_date - self.start_date).total_seconds()
+        passed_seconds = (now - self.start_date).total_seconds()
+
+        if passed_seconds <= 0:
+            return 0
+        if passed_seconds >= total_seconds:
+            return 100
+
+        return int((passed_seconds / total_seconds) * 100)
 
 
 class Payment(models.Model):
     """
-    Модель для отслеживания платежей
+    Модель для отслеживания платежей (для будущей интеграции с ЮKassa)
     """
     PAYMENT_STATUS = [
         ('pending', 'Ожидает оплаты'),
-        ('processing', 'В обработке'),
-        ('completed', 'Оплачен'),
-        ('failed', 'Ошибка'),
-        ('refunded', 'Возврат'),
+        ('succeeded', 'Успешно'),
+        ('canceled', 'Отменен'),
     ]
 
-    PAYMENT_METHOD = [
-        ('card', 'Банковская карта'),
-        ('yookassa', 'ЮKassa'),
-        ('tinkoff', 'Тинькофф'),
-        ('sbp', 'СБП'),
-    ]
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+        verbose_name='ID платежа'
+    )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -247,16 +271,15 @@ class Payment(models.Model):
         default='pending',
         verbose_name='Статус'
     )
-    payment_method = models.CharField(
-        max_length=20,
-        choices=PAYMENT_METHOD,
-        default='card',
-        verbose_name='Способ оплаты'
-    )
-    payment_id = models.CharField(
+    # Поля для ЮKassa (на будущее)
+    yookassa_payment_id = models.CharField(
         max_length=255,
         blank=True,
-        verbose_name='ID платежа в платежной системе'
+        verbose_name='ID платежа в ЮKassa'
+    )
+    yookassa_confirmation_url = models.URLField(
+        blank=True,
+        verbose_name='Ссылка на оплату'
     )
     created_at = models.DateTimeField(
         auto_now_add=True,
@@ -273,20 +296,17 @@ class Payment(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'Платеж {self.id} - {self.user.email} - {self.amount}₽'
+        return f'Платеж {self.id} - {self.amount}₽ - {self.get_status_display()}'
 
-    def complete_payment(self):
+    def create_subscription(self):
         """
-        Завершает платеж и создает подписку
+        Создает подписку после успешной оплаты
         """
-        self.status = 'completed'
-        self.save()
-
-        # Создаем подписку
         subscription = UserSubscription.objects.create(
             user=self.user,
             plan=self.plan,
             start_date=timezone.now(),
-            is_active=True
+            is_active=True,
+            yookassa_payment_id=self.yookassa_payment_id
         )
         return subscription
