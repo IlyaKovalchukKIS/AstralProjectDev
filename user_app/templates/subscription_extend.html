@@ -4,88 +4,52 @@
 {% block title %}Продление подписки - Мистический Портал{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/astral.css' %}">
+<!--<link rel="stylesheet" href="{% static 'css/base.css' %}">-->
+<!--<link rel="stylesheet" href="{% static 'css/astral.css' %}">-->
 <style>
+    /* Сброс стилей для предотвращения конфликтов */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
     .extend-container {
         min-height: calc(100vh - 200px);
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 2rem;
+        padding: 1rem;
+        width: 100%;
     }
 
     .extend-card {
         background: rgba(12, 12, 26, 0.8);
         backdrop-filter: blur(20px);
         border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 50px;
-        padding: 3rem;
-        max-width: 900px;
+        border-radius: 30px;
+        padding: 2rem;
+        max-width: 1000px;
         width: 100%;
         position: relative;
         overflow: hidden;
-        animation: cardAppear 0.8s ease-out;
-    }
-
-    @keyframes cardAppear {
-        from {
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-    }
-
-    .extend-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-        animation: rotate 20s linear infinite;
-        z-index: -1;
-    }
-
-    @keyframes rotate {
-        from {
-            transform: rotate(0deg);
-        }
-        to {
-            transform: rotate(360deg);
-        }
     }
 
     .extend-header {
         text-align: center;
-        margin-bottom: 3rem;
-        position: relative;
+        margin-bottom: 2rem;
     }
 
     .extend-header i {
-        font-size: 4rem;
+        font-size: 3rem;
         background: linear-gradient(135deg, #8b5cf6, #ec4899);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
-        animation: floatIcon 3s ease-in-out infinite;
-    }
-
-    @keyframes floatIcon {
-        0%, 100% {
-            transform: translateY(0);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
+        margin-bottom: 0.5rem;
     }
 
     .extend-header h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
         background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -94,7 +58,6 @@
 
     .extend-header p {
         color: rgba(255, 255, 255, 0.7);
-        font-size: 1.1rem;
     }
 
     /* Тестовый режим бейдж */
@@ -105,7 +68,7 @@
         padding: 0.5rem 1rem;
         border-radius: 50px;
         display: inline-block;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
         font-size: 0.9rem;
         text-align: center;
         width: 100%;
@@ -119,16 +82,15 @@
     .current-subscription {
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         border: 2px solid #8b5cf6;
-        border-radius: 30px;
-        padding: 2rem;
+        border-radius: 20px;
+        padding: 1.5rem;
         margin-bottom: 2rem;
-        position: relative;
     }
 
     .current-subscription h3 {
         color: #8b5cf6;
-        font-size: 1.3rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -136,59 +98,59 @@
 
     .subscription-info {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
         gap: 1rem;
     }
 
     .info-item {
         text-align: center;
-        padding: 1rem;
+        padding: 0.8rem;
         background: rgba(0, 0, 0, 0.3);
-        border-radius: 20px;
+        border-radius: 15px;
     }
 
     .info-label {
         color: #8b5cf6;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .info-value {
         color: #fff;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
     }
 
     .info-value.highlight {
         color: #ec4899;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
     }
 
     /* Прогресс-бар */
     .progress-container {
-        margin: 1.5rem 0;
+        margin: 1rem 0;
     }
 
     .progress-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
         color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
     }
 
     .progress-bar-bg {
-        height: 10px;
+        height: 8px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 5px;
+        border-radius: 4px;
         overflow: hidden;
     }
 
     .progress-bar-fill {
         height: 100%;
         background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        border-radius: 5px;
+        border-radius: 4px;
         transition: width 0.3s ease;
     }
 
@@ -199,8 +161,8 @@
 
     .extend-options h3 {
         color: #8b5cf6;
-        font-size: 1.3rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -215,40 +177,38 @@
     .option-card {
         background: rgba(255, 255, 255, 0.05);
         border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 20px;
-        padding: 1.5rem;
+        border-radius: 15px;
+        padding: 1.2rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         position: relative;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
+        user-select: none;
     }
 
     .option-card:hover {
-        transform: translateY(-5px);
+        transform: translateY(-3px);
         border-color: #8b5cf6;
-        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
     }
 
     .option-card.selected {
         border-color: #ec4899;
         background: rgba(236, 72, 153, 0.1);
-        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+        box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
     }
 
     .option-card.popular::before {
         content: '★ ПОПУЛЯРНОЕ ★';
         position: absolute;
-        top: 15px;
-        right: -30px;
+        top: 8px;
+        right: -25px;
         background: linear-gradient(90deg, #8b5cf6, #ec4899);
         color: white;
-        padding: 0.3rem 2rem;
+        padding: 0.2rem 1.5rem;
         transform: rotate(45deg);
-        font-size: 0.7rem;
+        font-size: 0.6rem;
         font-weight: bold;
         white-space: nowrap;
         z-index: 2;
@@ -257,26 +217,25 @@
     .option-card input[type="radio"] {
         position: absolute;
         opacity: 0;
-        width: 0;
-        height: 0;
+        pointer-events: none;
     }
 
     .option-icon {
-        width: 60px;
-        height: 60px;
+        width: 50px;
+        height: 50px;
         background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
         border: 2px solid #8b5cf6;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 1rem;
+        margin: 0 auto 0.8rem;
     }
 
     .option-icon i {
-        font-size: 2rem;
+        font-size: 1.5rem;
         color: #8b5cf6;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
     }
 
     .option-card:hover .option-icon i {
@@ -285,16 +244,16 @@
     }
 
     .option-duration {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         font-weight: bold;
         color: #8b5cf6;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .option-description {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: rgba(255, 255, 255, 0.6);
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.3rem;
     }
 
     .price-container {
@@ -302,44 +261,45 @@
     }
 
     .original-price {
-        font-size: 1rem;
+        font-size: 0.9rem;
         color: rgba(255, 255, 255, 0.4);
         text-decoration: line-through;
         display: block;
     }
 
     .final-price {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-weight: bold;
         color: #ec4899;
+        display: block;
     }
 
     .price-per-month {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
         color: rgba(255, 255, 255, 0.5);
         display: block;
-        margin-top: 0.3rem;
+        margin-top: 0.2rem;
     }
 
     .discount-badge {
         position: absolute;
-        top: 10px;
-        right: -30px;
+        top: 5px;
+        right: 5px;
         background: linear-gradient(90deg, #ec4899, #8b5cf6);
         color: white;
-        padding: 0.3rem 2rem;
-        transform: rotate(45deg);
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
         font-size: 0.7rem;
         font-weight: bold;
-        white-space: nowrap;
+        z-index: 2;
     }
 
     /* Итого */
     .total-section {
         background: rgba(139, 92, 246, 0.1);
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin: 2rem 0;
+        border-radius: 15px;
+        padding: 1.2rem;
+        margin: 1.5rem 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -349,36 +309,36 @@
 
     .total-label {
         color: #8b5cf6;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
     }
 
+    .total-amount-container {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .total-original-price {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.5);
+        text-decoration: line-through;
+    }
+
     .total-amount {
-        font-size: 2.5rem;
+        font-size: 2rem;
         font-weight: bold;
         color: #ec4899;
         transition: all 0.3s ease;
     }
 
     .total-amount.updated {
-        animation: priceUpdate 0.5s ease;
+        animation: priceUpdate 0.3s ease;
     }
 
     @keyframes priceUpdate {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-            color: #8b5cf6;
-        }
-    }
-
-    .total-original-price {
-        font-size: 1.2rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-decoration: line-through;
-        margin-right: 1rem;
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); color: #8b5cf6; }
     }
 
     /* Кнопки действий */
@@ -386,19 +346,18 @@
         display: flex;
         gap: 1rem;
         justify-content: center;
-        margin-top: 2rem;
-        flex-wrap: wrap;
+        margin-top: 1.5rem;
     }
 
     .action-btn {
-        padding: 1rem 2rem;
+        padding: 0.8rem 1.5rem;
         border-radius: 50px;
         font-weight: 600;
         text-decoration: none;
-        transition: all 0.3s ease;
+        transition: all 0.2s ease;
         border: none;
         cursor: pointer;
-        font-size: 1rem;
+        font-size: 0.95rem;
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
@@ -410,9 +369,8 @@
     }
 
     .action-btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
-        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
     }
 
     .action-btn-outline {
@@ -423,32 +381,50 @@
 
     .action-btn-outline:hover {
         background: rgba(139, 92, 246, 0.1);
-        transform: translateY(-3px);
-        color: #ec4899;
-        border-color: #ec4899;
+        transform: translateY(-2px);
+    }
+
+    /* Предупреждение */
+    .warning-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid #ef4444;
+        border-radius: 15px;
+        padding: 0.8rem;
+        margin: 1rem 0;
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .warning-message i {
+        font-size: 1.2rem;
+    }
+
+    /* Дополнительная информация */
+    .info-footer {
+        margin-top: 1.5rem;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.85rem;
+        border-top: 1px solid rgba(139, 92, 246, 0.2);
+        padding-top: 1.5rem;
+    }
+
+    .info-footer i {
+        color: #8b5cf6;
+        margin-right: 0.3rem;
     }
 
     /* Адаптивность */
     @media (max-width: 768px) {
-        .extend-card {
-            padding: 1.5rem;
-        }
-
-        .extend-header h1 {
-            font-size: 1.8rem;
-        }
-
-        .options-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
         .subscription-info {
             grid-template-columns: 1fr;
         }
 
-        .total-section {
-            flex-direction: column;
-            text-align: center;
+        .options-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
 
         .action-buttons {
@@ -465,60 +441,10 @@
         .options-grid {
             grid-template-columns: 1fr;
         }
-    }
 
-    /* Предупреждение */
-    .warning-message {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid #ef4444;
-        border-radius: 20px;
-        padding: 1rem;
-        margin: 1rem 0;
-        color: #ef4444;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .warning-message i {
-        font-size: 1.5rem;
-    }
-
-    /* Дополнительная информация */
-    .info-footer {
-        margin-top: 2rem;
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.9rem;
-        border-top: 1px solid rgba(139, 92, 246, 0.2);
-        padding-top: 2rem;
-    }
-
-    .info-footer i {
-        color: #8b5cf6;
-        margin-right: 0.5rem;
-    }
-
-    /* Добавьте эти стили для улучшения кликабельности */
-    .option-card {
-        cursor: pointer;
-        position: relative;
-        z-index: 1;
-        user-select: none;
-    }
-
-    .option-card input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        width: 0;
-        height: 0;
-        pointer-events: none;
-    }
-
-    .option-card.selected {
-        border-color: #ec4899;
-        background: rgba(236, 72, 153, 0.1);
-        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+        .extend-card {
+            padding: 1rem;
+        }
     }
 </style>
 {% endblock %}
@@ -592,47 +518,46 @@
             <form method="post" id="extendForm">
                 {% csrf_token %}
 
-                <div class="options-grid">
+                <div class="options-grid" id="optionsGrid">
                     {% for option in extension_options %}
-                    <div class="option-card {% if option.is_popular %}popular{% endif %}" 
+                    {% with price_info=price_data|get_item:option.id %}
+                    <div class="option-card {% if option.is_popular %}popular{% endif %}"
                          data-option-id="{{ option.id }}"
-                         data-months="{{ option.months }}"
+                         data-final-price="{{ price_info.final|floatformat:0 }}"
+                         data-original-price="{{ price_info.original|floatformat:0 }}"
                          data-discount="{{ option.discount_percent }}"
-                         data-price="{{ price_data|get_item:option.id|get_item:'final' }}">
-                        
-                        <input type="radio" name="extension_option" value="{{ option.id }}" 
+                         onclick="selectOption(this)">
+
+                        <input type="radio" name="extension_option" value="{{ option.id }}"
                                id="option_{{ option.id }}" {% if forloop.first %}checked{% endif %}>
-                        
+
                         <div class="option-icon">
                             <i class="{{ option.icon|default:'fas fa-moon' }}"></i>
                         </div>
-                        
+
                         <div class="option-duration">{{ option.name }}</div>
-                        
+
                         {% if option.description %}
                         <div class="option-description">{{ option.description }}</div>
                         {% endif %}
-                        
+
                         <div class="price-container">
                             {% if option.discount_percent > 0 %}
-                            <span class="original-price">
-                                {{ price_data|get_item:option.id|get_item:'original' }} ₽
-                            </span>
+                            <span class="original-price">{{ price_info.original|floatformat:0 }} ₽</span>
                             {% endif %}
-                            <span class="final-price">
-                                {{ price_data|get_item:option.id|get_item:'final' }} ₽
-                            </span>
+                            <span class="final-price">{{ price_info.final|floatformat:0 }} ₽</span>
                             <span class="price-per-month">
-                                {{ price_data|get_item:option.id|get_item:'monthly' }} ₽/мес
+                                {% widthratio price_info.final option.months 1 %} ₽/мес
                             </span>
                         </div>
-                        
+
                         {% if option.discount_percent > 0 %}
                         <div class="discount-badge">-{{ option.discount_percent }}%</div>
                         {% endif %}
                     </div>
+                    {% endwith %}
                     {% empty %}
-                    <div class="col-12 text-center">
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem;">
                         <p>Варианты продления временно недоступны</p>
                     </div>
                     {% endfor %}
@@ -641,31 +566,34 @@
                 <!-- Итого к оплате -->
                 <div class="total-section">
                     <span class="total-label">Итого к оплате:</span>
-                    <div>
+                    <div class="total-amount-container">
                         {% with first_option=extension_options.first %}
-                            {% if first_option and first_option.discount_percent > 0 %}
+                        {% if first_option %}
+                        {% with first_price=price_data|get_item:first_option.id %}
+                            {% if first_option.discount_percent > 0 %}
                             <span class="total-original-price" id="totalOriginalPrice">
-                                {{ price_data|get_item:first_option.id|get_item:'original' }} ₽
+                                {{ first_price.original|floatformat:0 }} ₽
                             </span>
                             {% endif %}
                             <span class="total-amount" id="totalAmount">
-                                {% if first_option %}
-                                    {{ price_data|get_item:first_option.id|get_item:'final' }} ₽
-                                {% else %}
-                                    {{ subscription.plan.price|floatformat:0 }} ₽
-                                {% endif %}
+                                {{ first_price.final|floatformat:0 }} ₽
                             </span>
+                        {% endwith %}
+                        {% else %}
+                            <span class="total-amount" id="totalAmount">
+                                {{ subscription.plan.price|floatformat:0 }} ₽
+                            </span>
+                        {% endif %}
                         {% endwith %}
                     </div>
                 </div>
 
                 <!-- Кнопки действий -->
                 <div class="action-buttons">
-                    <button type="submit" class="action-btn action-btn-primary">
+                    <button type="submit" class="action-btn action-btn-primary" id="submitBtn">
                         <i class="fas fa-check"></i> Продлить в тестовом режиме
                     </button>
-                    <a href="{% url 'user_app:subscription_detail' subscription.id %}"
-                       class="action-btn action-btn-outline">
+                    <a href="{% url 'user_app:subscription_detail' subscription.id %}" class="action-btn action-btn-outline">
                         <i class="fas fa-arrow-left"></i> Вернуться
                     </a>
                 </div>
@@ -678,146 +606,91 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-    $(document).ready(function() {
-        console.log('Document ready');
+// Функция для выбора опции
+function selectOption(element) {
+    // Получаем цену из data-атрибутов
+    const finalPrice = element.dataset.finalPrice;
+    const originalPrice = element.dataset.originalPrice;
+    const discount = element.dataset.discount;
 
-        // Базовая цена
-        const basePrice = parseFloat('{{ subscription.plan.price|floatformat:0 }}');
-        console.log('Base price:', basePrice);
+    console.log('Selected option:', {finalPrice, originalPrice, discount}); // Для отладки
 
-        // Словарь с ценами для каждого варианта
-        const priceData = {
-            {% for option in extension_options %}
-            '{{ option.id }}': {
-                original: {{ price_data|get_item:option.id|get_item:'original' }},
-                final: {{ price_data|get_item:option.id|get_item:'final' }},
-                monthly: {{ price_data|get_item:option.id|get_item:'monthly' }},
-                discount: {{ option.discount_percent }}
-            },
-            {% endfor %}
-        };
-
-        // Функция форматирования цены
-        function formatPrice(price) {
-            return Math.round(price).toLocaleString('ru-RU') + ' ₽';
-        }
-
-        // Функция обновления отображения цены
-        function updatePrice() {
-            const selectedCard = $('.option-card.selected');
-            if (!selectedCard.length) {
-                console.log('No selected card found');
-                return;
-            }
-
-            const optionId = selectedCard.data('option-id');
-            const priceInfo = priceData[optionId];
-
-            if (!priceInfo) {
-                console.log('No price info for option:', optionId);
-                return;
-            }
-
-            console.log('Updating price for option:', optionId, priceInfo);
-
-            // Обновляем итоговую сумму
-            const totalOriginalPriceEl = $('#totalOriginalPrice');
-            const totalAmountEl = $('#totalAmount');
-
-            if (priceInfo.discount > 0) {
-                if (totalOriginalPriceEl.length) {
-                    totalOriginalPriceEl.text(formatPrice(priceInfo.original)).show();
-                } else {
-                    $('<span class="total-original-price" id="totalOriginalPrice"></span>')
-                        .text(formatPrice(priceInfo.original))
-                        .insertBefore(totalAmountEl);
-                }
-            } else {
-                $('#totalOriginalPrice').hide();
-            }
-
-            totalAmountEl.addClass('updated');
-            totalAmountEl.text(formatPrice(priceInfo.final));
-
-            setTimeout(() => totalAmountEl.removeClass('updated'), 500);
-        }
-
-        // Обработчик кликов на карточки
-        $('.option-card').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            const clickedCard = $(this);
-            console.log('Card clicked:', clickedCard.data('option-id'));
-
-            // Убираем выделение со всех карточек
-            $('.option-card').removeClass('selected');
-
-            // Добавляем выделение текущей карточке
-            clickedCard.addClass('selected');
-
-            // Отмечаем radio внутри карточки
-            const radio = clickedCard.find('input[type="radio"]');
-            radio.prop('checked', true);
-
-            // Обновляем цену
-            updatePrice();
-        });
-
-        // Устанавливаем первую карточку как выбранную по умолчанию
-        function setDefaultSelection() {
-            console.log('Setting default selection');
-            const firstCard = $('.option-card').first();
-            if (firstCard.length) {
-                firstCard.addClass('selected');
-                firstCard.find('input[type="radio"]').prop('checked', true);
-                updatePrice();
-            }
-        }
-
-        // Вызываем установку по умолчанию
-        setDefaultSelection();
-
-        // Обработка отправки формы
-        $('#extendForm').on('submit', function(e) {
-            e.preventDefault();
-
-            // Проверяем, выбран ли вариант
-            if (!$('input[name="extension_option"]:checked').length) {
-                alert('Пожалуйста, выберите срок продления');
-                return false;
-            }
-
-            const selectedOptionId = $('input[name="extension_option"]:checked').val();
-            console.log('Submitting with option ID:', selectedOptionId);
-
-            const btn = $(this).find('button[type="submit"]');
-            btn.html('<i class="fas fa-spinner fa-spin"></i> Обработка...');
-            btn.prop('disabled', true);
-
-            // Реальная отправка формы
-            this.submit();
-        });
-
-        // Анимация при наведении
-        $('.option-card').hover(
-            function() {
-                $(this).find('.option-icon i').css({
-                    'transform': 'scale(1.2) rotate(5deg)',
-                    'transition': 'all 0.3s ease'
-                });
-            },
-            function() {
-                $(this).find('.option-icon i').css({
-                    'transform': 'scale(1) rotate(0)',
-                    'transition': 'all 0.3s ease'
-                });
-            }
-        );
+    // Убираем выделение со всех карточек
+    document.querySelectorAll('.option-card').forEach(card => {
+        card.classList.remove('selected');
     });
+
+    // Добавляем выделение текущей карточке
+    element.classList.add('selected');
+
+    // Отмечаем radio внутри карточки
+    const radio = element.querySelector('input[type="radio"]');
+    if (radio) {
+        radio.checked = true;
+    }
+
+    // Обновляем итоговую цену
+    updateTotalPrice(finalPrice, originalPrice, discount);
+}
+
+// Функция обновления итоговой цены
+function updateTotalPrice(finalPrice, originalPrice, discount) {
+    const totalAmount = document.getElementById('totalAmount');
+    const totalOriginalPrice = document.getElementById('totalOriginalPrice');
+
+    if (totalAmount && finalPrice) {
+        totalAmount.classList.add('updated');
+        totalAmount.textContent = finalPrice + ' ₽';
+
+        setTimeout(() => {
+            totalAmount.classList.remove('updated');
+        }, 300);
+    }
+
+    if (totalOriginalPrice) {
+        if (discount > 0 && originalPrice) {
+            totalOriginalPrice.textContent = originalPrice + ' ₽';
+            totalOriginalPrice.style.display = 'inline';
+        } else {
+            totalOriginalPrice.style.display = 'none';
+        }
+    }
+}
+
+// Выделяем первую карточку при загрузке
+document.addEventListener('DOMContentLoaded', function() {
+    const firstCard = document.querySelector('.option-card');
+    if (firstCard) {
+        firstCard.classList.add('selected');
+
+        // Обновляем цену для первой карточки
+        const finalPrice = firstCard.dataset.finalPrice;
+        const originalPrice = firstCard.dataset.originalPrice;
+        const discount = firstCard.dataset.discount;
+
+        if (finalPrice) {
+            updateTotalPrice(finalPrice, originalPrice, discount);
+        }
+    }
+});
+
+// Обработка отправки формы
+document.getElementById('extendForm')?.addEventListener('submit', function(e) {
+    const selectedRadio = document.querySelector('input[name="extension_option"]:checked');
+
+    if (!selectedRadio) {
+        e.preventDefault();
+        alert('Пожалуйста, выберите срок продления');
+        return false;
+    }
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
+        submitBtn.disabled = true;
+    }
+});
 </script>
 {% endblock %}
