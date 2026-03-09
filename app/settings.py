@@ -173,3 +173,6 @@ AUTHENTICATION_BACKENDS = [
 
 SELECT2_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
 SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
+
+#YooMoney
+SECRET_API_KEY_YOOMONEY = config('SECRET_API_KEY_YOOMONEY')
