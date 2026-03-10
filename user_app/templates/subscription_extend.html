@@ -4,449 +4,9 @@
 {% block title %}Продление подписки - Мистический Портал{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subscription_extend.css' %}">
 <!--<link rel="stylesheet" href="{% static 'css/base.css' %}">-->
 <!--<link rel="stylesheet" href="{% static 'css/astral.css' %}">-->
-<style>
-    /* Сброс стилей для предотвращения конфликтов */
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    .extend-container {
-        min-height: calc(100vh - 200px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 1rem;
-        width: 100%;
-    }
-
-    .extend-card {
-        background: rgba(12, 12, 26, 0.8);
-        backdrop-filter: blur(20px);
-        border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 30px;
-        padding: 2rem;
-        max-width: 1000px;
-        width: 100%;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .extend-header {
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-
-    .extend-header i {
-        font-size: 3rem;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
-
-    .extend-header h1 {
-        font-size: 2rem;
-        background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 0.5rem;
-    }
-
-    .extend-header p {
-        color: rgba(255, 255, 255, 0.7);
-    }
-
-    /* Тестовый режим бейдж */
-    .test-mode-badge {
-        background: rgba(245, 158, 11, 0.2);
-        border: 1px solid #f59e0b;
-        color: #f59e0b;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        display: inline-block;
-        margin-bottom: 1.5rem;
-        font-size: 0.9rem;
-        text-align: center;
-        width: 100%;
-    }
-
-    .test-mode-badge i {
-        margin-right: 0.5rem;
-    }
-
-    /* Текущая подписка */
-    .current-subscription {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-        border: 2px solid #8b5cf6;
-        border-radius: 20px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .current-subscription h3 {
-        color: #8b5cf6;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .subscription-info {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-    }
-
-    .info-item {
-        text-align: center;
-        padding: 0.8rem;
-        background: rgba(0, 0, 0, 0.3);
-        border-radius: 15px;
-    }
-
-    .info-label {
-        color: #8b5cf6;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        margin-bottom: 0.3rem;
-    }
-
-    .info-value {
-        color: #fff;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .info-value.highlight {
-        color: #ec4899;
-        font-size: 1.3rem;
-    }
-
-    /* Прогресс-бар */
-    .progress-container {
-        margin: 1rem 0;
-    }
-
-    .progress-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 0.3rem;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 0.9rem;
-    }
-
-    .progress-bar-bg {
-        height: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .progress-bar-fill {
-        height: 100%;
-        background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        border-radius: 4px;
-        transition: width 0.3s ease;
-    }
-
-    /* Варианты продления */
-    .extend-options {
-        margin: 2rem 0;
-    }
-
-    .extend-options h3 {
-        color: #8b5cf6;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .options-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-    }
-
-    .option-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 15px;
-        padding: 1.2rem;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        position: relative;
-        overflow: hidden;
-        user-select: none;
-    }
-
-    .option-card:hover {
-        transform: translateY(-3px);
-        border-color: #8b5cf6;
-        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
-    }
-
-    .option-card.selected {
-        border-color: #ec4899;
-        background: rgba(236, 72, 153, 0.1);
-        box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
-    }
-
-    .option-card.popular::before {
-        content: '★ ПОПУЛЯРНОЕ ★';
-        position: absolute;
-        top: 8px;
-        right: -25px;
-        background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        color: white;
-        padding: 0.2rem 1.5rem;
-        transform: rotate(45deg);
-        font-size: 0.6rem;
-        font-weight: bold;
-        white-space: nowrap;
-        z-index: 2;
-    }
-
-    .option-card input[type="radio"] {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    .option-icon {
-        width: 50px;
-        height: 50px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-        border: 2px solid #8b5cf6;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 0.8rem;
-    }
-
-    .option-icon i {
-        font-size: 1.5rem;
-        color: #8b5cf6;
-        transition: all 0.2s ease;
-    }
-
-    .option-card:hover .option-icon i {
-        color: #ec4899;
-        transform: scale(1.1);
-    }
-
-    .option-duration {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #8b5cf6;
-        margin-bottom: 0.3rem;
-    }
-
-    .option-description {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.6);
-        margin-bottom: 0.3rem;
-    }
-
-    .price-container {
-        margin: 0.5rem 0;
-    }
-
-    .original-price {
-        font-size: 0.9rem;
-        color: rgba(255, 255, 255, 0.4);
-        text-decoration: line-through;
-        display: block;
-    }
-
-    .final-price {
-        font-size: 1.3rem;
-        font-weight: bold;
-        color: #ec4899;
-        display: block;
-    }
-
-    .price-per-month {
-        font-size: 0.7rem;
-        color: rgba(255, 255, 255, 0.5);
-        display: block;
-        margin-top: 0.2rem;
-    }
-
-    .discount-badge {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        background: linear-gradient(90deg, #ec4899, #8b5cf6);
-        color: white;
-        padding: 0.2rem 0.5rem;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: bold;
-        z-index: 2;
-    }
-
-    /* Итого */
-    .total-section {
-        background: rgba(139, 92, 246, 0.1);
-        border-radius: 15px;
-        padding: 1.2rem;
-        margin: 1.5rem 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-    }
-
-    .total-label {
-        color: #8b5cf6;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .total-amount-container {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .total-original-price {
-        font-size: 1.1rem;
-        color: rgba(255, 255, 255, 0.5);
-        text-decoration: line-through;
-    }
-
-    .total-amount {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #ec4899;
-        transition: all 0.3s ease;
-    }
-
-    .total-amount.updated {
-        animation: priceUpdate 0.3s ease;
-    }
-
-    @keyframes priceUpdate {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); color: #8b5cf6; }
-    }
-
-    /* Кнопки действий */
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin-top: 1.5rem;
-    }
-
-    .action-btn {
-        padding: 0.8rem 1.5rem;
-        border-radius: 50px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        border: none;
-        cursor: pointer;
-        font-size: 0.95rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .action-btn-primary {
-        background: linear-gradient(45deg, #8b5cf6, #ec4899);
-        color: white;
-    }
-
-    .action-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
-    }
-
-    .action-btn-outline {
-        background: transparent;
-        border: 2px solid #8b5cf6;
-        color: #8b5cf6;
-    }
-
-    .action-btn-outline:hover {
-        background: rgba(139, 92, 246, 0.1);
-        transform: translateY(-2px);
-    }
-
-    /* Предупреждение */
-    .warning-message {
-        background: rgba(239, 68, 68, 0.1);
-        border: 1px solid #ef4444;
-        border-radius: 15px;
-        padding: 0.8rem;
-        margin: 1rem 0;
-        color: #ef4444;
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
-        font-size: 0.9rem;
-    }
-
-    .warning-message i {
-        font-size: 1.2rem;
-    }
-
-    /* Дополнительная информация */
-    .info-footer {
-        margin-top: 1.5rem;
-        text-align: center;
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 0.85rem;
-        border-top: 1px solid rgba(139, 92, 246, 0.2);
-        padding-top: 1.5rem;
-    }
-
-    .info-footer i {
-        color: #8b5cf6;
-        margin-right: 0.3rem;
-    }
-
-    /* Адаптивность */
-    @media (max-width: 768px) {
-        .subscription-info {
-            grid-template-columns: 1fr;
-        }
-
-        .options-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .action-btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .options-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .extend-card {
-            padding: 1rem;
-        }
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -570,17 +130,17 @@
                         {% with first_option=extension_options.first %}
                         {% if first_option %}
                         {% with first_price=price_data|get_item:first_option.id %}
-                            {% if first_option.discount_percent > 0 %}
-                            <span class="total-original-price" id="totalOriginalPrice">
+                        {% if first_option.discount_percent > 0 %}
+                        <span class="total-original-price" id="totalOriginalPrice">
                                 {{ first_price.original|floatformat:0 }} ₽
                             </span>
-                            {% endif %}
-                            <span class="total-amount" id="totalAmount">
+                        {% endif %}
+                        <span class="total-amount" id="totalAmount">
                                 {{ first_price.final|floatformat:0 }} ₽
                             </span>
                         {% endwith %}
                         {% else %}
-                            <span class="total-amount" id="totalAmount">
+                        <span class="total-amount" id="totalAmount">
                                 {{ subscription.plan.price|floatformat:0 }} ₽
                             </span>
                         {% endif %}
@@ -593,7 +153,8 @@
                     <button type="submit" class="action-btn action-btn-primary" id="submitBtn">
                         <i class="fas fa-check"></i> Продлить в тестовом режиме
                     </button>
-                    <a href="{% url 'user_app:subscription_detail' subscription.id %}" class="action-btn action-btn-outline">
+                    <a href="{% url 'user_app:subscription_detail' subscription.id %}"
+                       class="action-btn action-btn-outline">
                         <i class="fas fa-arrow-left"></i> Вернуться
                     </a>
                 </div>
@@ -608,89 +169,89 @@
 </div>
 
 <script>
-// Функция для выбора опции
-function selectOption(element) {
-    // Получаем цену из data-атрибутов
-    const finalPrice = element.dataset.finalPrice;
-    const originalPrice = element.dataset.originalPrice;
-    const discount = element.dataset.discount;
+    // Функция для выбора опции
+    function selectOption(element) {
+        // Получаем цену из data-атрибутов
+        const finalPrice = element.dataset.finalPrice;
+        const originalPrice = element.dataset.originalPrice;
+        const discount = element.dataset.discount;
 
-    console.log('Selected option:', {finalPrice, originalPrice, discount}); // Для отладки
+        console.log('Selected option:', {finalPrice, originalPrice, discount}); // Для отладки
 
-    // Убираем выделение со всех карточек
-    document.querySelectorAll('.option-card').forEach(card => {
-        card.classList.remove('selected');
+        // Убираем выделение со всех карточек
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+
+        // Добавляем выделение текущей карточке
+        element.classList.add('selected');
+
+        // Отмечаем radio внутри карточки
+        const radio = element.querySelector('input[type="radio"]');
+        if (radio) {
+            radio.checked = true;
+        }
+
+        // Обновляем итоговую цену
+        updateTotalPrice(finalPrice, originalPrice, discount);
+    }
+
+    // Функция обновления итоговой цены
+    function updateTotalPrice(finalPrice, originalPrice, discount) {
+        const totalAmount = document.getElementById('totalAmount');
+        const totalOriginalPrice = document.getElementById('totalOriginalPrice');
+
+        if (totalAmount && finalPrice) {
+            totalAmount.classList.add('updated');
+            totalAmount.textContent = finalPrice + ' ₽';
+
+            setTimeout(() => {
+                totalAmount.classList.remove('updated');
+            }, 300);
+        }
+
+        if (totalOriginalPrice) {
+            if (discount > 0 && originalPrice) {
+                totalOriginalPrice.textContent = originalPrice + ' ₽';
+                totalOriginalPrice.style.display = 'inline';
+            } else {
+                totalOriginalPrice.style.display = 'none';
+            }
+        }
+    }
+
+    // Выделяем первую карточку при загрузке
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstCard = document.querySelector('.option-card');
+        if (firstCard) {
+            firstCard.classList.add('selected');
+
+            // Обновляем цену для первой карточки
+            const finalPrice = firstCard.dataset.finalPrice;
+            const originalPrice = firstCard.dataset.originalPrice;
+            const discount = firstCard.dataset.discount;
+
+            if (finalPrice) {
+                updateTotalPrice(finalPrice, originalPrice, discount);
+            }
+        }
     });
 
-    // Добавляем выделение текущей карточке
-    element.classList.add('selected');
+    // Обработка отправки формы
+    document.getElementById('extendForm')?.addEventListener('submit', function (e) {
+        const selectedRadio = document.querySelector('input[name="extension_option"]:checked');
 
-    // Отмечаем radio внутри карточки
-    const radio = element.querySelector('input[type="radio"]');
-    if (radio) {
-        radio.checked = true;
-    }
-
-    // Обновляем итоговую цену
-    updateTotalPrice(finalPrice, originalPrice, discount);
-}
-
-// Функция обновления итоговой цены
-function updateTotalPrice(finalPrice, originalPrice, discount) {
-    const totalAmount = document.getElementById('totalAmount');
-    const totalOriginalPrice = document.getElementById('totalOriginalPrice');
-
-    if (totalAmount && finalPrice) {
-        totalAmount.classList.add('updated');
-        totalAmount.textContent = finalPrice + ' ₽';
-
-        setTimeout(() => {
-            totalAmount.classList.remove('updated');
-        }, 300);
-    }
-
-    if (totalOriginalPrice) {
-        if (discount > 0 && originalPrice) {
-            totalOriginalPrice.textContent = originalPrice + ' ₽';
-            totalOriginalPrice.style.display = 'inline';
-        } else {
-            totalOriginalPrice.style.display = 'none';
+        if (!selectedRadio) {
+            e.preventDefault();
+            alert('Пожалуйста, выберите срок продления');
+            return false;
         }
-    }
-}
 
-// Выделяем первую карточку при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    const firstCard = document.querySelector('.option-card');
-    if (firstCard) {
-        firstCard.classList.add('selected');
-
-        // Обновляем цену для первой карточки
-        const finalPrice = firstCard.dataset.finalPrice;
-        const originalPrice = firstCard.dataset.originalPrice;
-        const discount = firstCard.dataset.discount;
-
-        if (finalPrice) {
-            updateTotalPrice(finalPrice, originalPrice, discount);
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
+            submitBtn.disabled = true;
         }
-    }
-});
-
-// Обработка отправки формы
-document.getElementById('extendForm')?.addEventListener('submit', function(e) {
-    const selectedRadio = document.querySelector('input[name="extension_option"]:checked');
-
-    if (!selectedRadio) {
-        e.preventDefault();
-        alert('Пожалуйста, выберите срок продления');
-        return false;
-    }
-
-    const submitBtn = document.getElementById('submitBtn');
-    if (submitBtn) {
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработка...';
-        submitBtn.disabled = true;
-    }
-});
+    });
 </script>
 {% endblock %}

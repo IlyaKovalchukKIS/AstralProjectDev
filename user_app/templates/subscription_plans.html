@@ -1,276 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load pluralize %}
 
 {% block title %}Выбор тарифа - Мистический Портал{% endblock %}
-
 {% block extra_css %}
-<style>
-    .plans-container {
-        padding: 2rem 0;
-    }
-
-    .plans-header {
-        text-align: center;
-        margin-bottom: 4rem;
-        position: relative;
-    }
-
-    .plans-header i {
-        font-size: 4rem;
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
-        animation: floatIcon 3s ease-in-out infinite;
-    }
-
-    .plans-header h1 {
-        font-size: 3rem;
-        background: linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 1rem;
-    }
-
-    .plans-header p {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 1.2rem;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-
-    .plans-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        padding: 1rem;
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-
-    .plan-card {
-        background: rgba(12, 12, 26, 0.8);
-        backdrop-filter: blur(10px);
-        border: 2px solid rgba(139, 92, 246, 0.3);
-        border-radius: 30px;
-        padding: 2rem;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.4s ease;
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-    }
-
-    .plan-card:hover {
-        transform: translateY(-10px);
-        border-color: #ec4899;
-        box-shadow: 0 20px 60px rgba(236, 72, 153, 0.3);
-    }
-
-    .plan-card.popular {
-        border-color: #ec4899;
-        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
-        transform: scale(1.05);
-        z-index: 2;
-    }
-
-    .plan-card.popular::before {
-        content: '★ ПОПУЛЯРНЫЙ ★';
-        position: absolute;
-        top: 40px;
-        right: -65px;
-        background: linear-gradient(90deg, #8b5cf6, #ec4899);
-        color: white;
-        padding: 0.5rem 3rem;
-        transform: rotate(45deg);
-        font-size: 0.8rem;
-        font-weight: bold;
-        letter-spacing: 1px;
-    }
-
-
-    .plan-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
-        border: 2px solid #8b5cf6;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-    }
-
-    .plan-icon i {
-        font-size: 2.5rem;
-        color: #8b5cf6;
-        transition: all 0.4s ease;
-    }
-
-    .plan-card:hover .plan-icon i {
-        color: #ec4899;
-        transform: rotate(360deg) scale(1.1);
-    }
-
-    .plan-name {
-        font-size: 2rem;
-        text-align: center;
-        margin-bottom: 1rem;
-        background: linear-gradient(45deg, #8b5cf6, #ec4899);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    .plan-price {
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .price-number {
-        font-size: 3rem;
-        font-weight: bold;
-        color: #8b5cf6;
-    }
-
-    .price-period {
-        color: rgba(255, 255, 255, 0.5);
-        font-size: 1rem;
-    }
-
-    .plan-description {
-        color: rgba(255, 255, 255, 0.7);
-        text-align: center;
-        margin-bottom: 2rem;
-        flex-grow: 1;
-    }
-
-    .plan-features {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 2rem 0;
-    }
-
-    .plan-features li {
-        padding: 0.8rem 0;
-        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-
-    .plan-features li:last-child {
-        border-bottom: none;
-    }
-
-    .plan-features li i {
-        color: #ec4899;
-        width: 20px;
-    }
-
-    .plan-features li span {
-        color: #fff;
-    }
-
-    .plan-btn {
-        display: inline-block;
-        padding: 1rem 2rem;
-        background: linear-gradient(45deg, #8b5cf6, #ec4899);
-        border: none;
-        border-radius: 50px;
-        color: white;
-        font-size: 1.2rem;
-        font-weight: 600;
-        text-decoration: none;
-        text-align: center;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        margin-top: auto;
-    }
-
-    .plan-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s ease;
-    }
-
-    .plan-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
-        color: white;
-        text-decoration: none;
-    }
-
-    .plan-btn:hover::before {
-        left: 100%;
-    }
-
-    .plan-btn.disabled {
-        opacity: 0.5;
-        pointer-events: none;
-        background: linear-gradient(45deg, #6b7280, #9ca3af);
-    }
-
-    .plan-btn.disabled:hover {
-        transform: none;
-        box-shadow: none;
-    }
-
-    .active-badge {
-        background: rgba(16, 185, 129, 0.2);
-        border: 1px solid #10b981;
-        color: #10b981;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        display: inline-block;
-        margin-bottom: 1rem;
-        font-size: 0.9rem;
-    }
-
-    .active-badge i {
-        margin-right: 0.5rem;
-    }
-
-    @keyframes floatIcon {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-10px); }
-    }
-
-    @media (max-width: 768px) {
-        .plans-header h1 {
-            font-size: 2rem;
-        }
-
-        .plans-grid {
-            grid-template-columns: 1fr;
-            max-width: 400px;
-        }
-
-        .plan-card.popular {
-            transform: scale(1);
-        }
-    }
-
-    @media (max-width: 576px) {
-        .plans-container {
-            padding: 1rem;
-        }
-
-        .plan-card {
-            padding: 1.5rem;
-        }
-
-        .price-number {
-            font-size: 2.5rem;
-        }
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/subscription_plans.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -286,82 +20,148 @@
         <div class="active-badge">
             <i class="fas fa-check-circle"></i> У вас активна подписка "{{ active_subscription.plan.name }}"
         </div>
-        <p class="text-muted">Вы можете продлить текущую подписку или выбрать новый тариф после её окончания</p>
+        <p class="text-white">Вы можете продлить текущую подписку или выбрать новый тариф после её окончания</p>
     </div>
     {% endif %}
 
     <div class="plans-grid">
         {% for plan in plans %}
-        <div class="plan-card tarot-card-effect {% if plan.is_popular %}popular{% endif %} fade-in" style="animation-delay: {{ forloop.counter0|add:"0.2" }}s;">
-            <div class="plan-icon">
-                {% if forloop.counter == 1 %}
-                    <i class="fas fa-moon"></i>
-                {% elif forloop.counter == 2 %}
-                    <i class="fas fa-crown"></i>
-                {% elif forloop.counter == 3 %}
-                    <i class="fas fa-infinity"></i>
-                {% else %}
-                    <i class="fas fa-star"></i>
-                {% endif %}
-            </div>
+        <div class="plan-card tarot-card-effect {% if plan.is_popular %}popular{% endif %} fade-in"
+             style="animation-delay: {{ forloop.counter0|add:" 0.2
+        " }}s; {% if plan.color %}border-color: {{ plan.color }};{% endif %}">
 
-            <h2 class="plan-name">{{ plan.name }}</h2>
+        <div class="plan-icon" {% if plan.color %}style="border-color: {{ plan.color }};" {% endif %}>
+            <i class="{{ plan.icon|default:'bi bi-star' }}"></i>
+        </div>
 
-            <div class="plan-price">
-                <span class="price-number">{{ plan.price|floatformat:0 }}</span>
-                <span class="price-period">₽ / {{ plan.duration_days }} дней</span>
-            </div>
+        <h2 class="plan-name">{{ plan.name }}</h2>
 
-            <div class="plan-description">
-                {{ plan.description|linebreaks }}
-            </div>
+        <div class="plan-price">
+            <span class="price-number">{{ plan.price|floatformat:0 }}</span>
+            <span class="price-period">₽ / {{ plan.duration_days }} дней</span>
+        </div>
 
-            <ul class="plan-features">
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>Доступ к {{ plan.duration_days }} дням магии</span>
-                </li>
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>Персональные предсказания</span>
-                </li>
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>Поддержка 24/7</span>
-                </li>
-                {% if plan.price >= 1000 %}
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>Личный маг-консультант</span>
-                </li>
-                {% endif %}
-                {% if plan.price >= 2000 %}
-                <li>
-                    <i class="fas fa-check"></i>
-                    <span>Эксклюзивные ритуалы</span>
-                </li>
-                {% endif %}
-            </ul>
+        <div class="plan-description">
+            {{ plan.description|linebreaks }}
+        </div>
 
-            {% if active_subscription %}
-                <a href="#" class="plan-btn disabled">
-                    <i class="fas fa-lock"></i> Подписка активна
-                </a>
+        <!-- Список привилегий из базы данных -->
+        <ul class="plan-features">
+            {% with privileges=plan.get_privileges_list %}
+            {% if privileges %}
+            {% for privilege in privileges %}
+            <li {% if forloop.first %}class="featured-privilege" {% endif %}>
+<!--                <i class="{{ privilege.icon|default:'fas fa-check' }}"></i>-->
+                <i class="{{ privilege.icon|default:'bi bi-check' }}"></i>
+                <span>
+                                    {{ privilege.name }}
+                                    {% if privilege.value %}
+                                        <span class="privilege-badge">{{ privilege.value }}</span>
+                                    {% endif %}
+                                </span>
+            </li>
+<!--            {% if forloop.counter == 3 and not forloop.last %}-->
+<!--            &lt;!&ndash; Разделитель после первых 3 привилегий &ndash;&gt;-->
+<!--            <li class="text-center" style="justify-content: center; border-bottom: none; padding: 0.3rem 0;">-->
+<!--                <small style="color: rgba(255,255,255,0.3);">и другие преимущества...</small>-->
+<!--            </li>-->
+<!--            {% endif %}-->
+            {% endfor %}
             {% else %}
-                <a href="{% url 'user_app:subscription_checkout' plan.id %}" class="plan-btn">
-                    <i class="fas fa-gem"></i> Выбрать тариф
-                </a>
+            <!-- Запасные варианты, если привилегии не указаны -->
+            <li>
+                <i class="bi bi-check"></i>
+                <span>Доступ к {{ plan.duration_days }} дням магии</span>
+            </li>
+            <li>
+                <i class="bi bi-check"></i>
+                <span>Персональные предсказания</span>
+            </li>
+            <li>
+                <i class="bi bi-check"></i>
+                <span>Поддержка 24/7</span>
+            </li>
+            {% if plan.price|floatformat:0|add:"0" >= 1000 %}
+            <li>
+                <i class="bi bi-check"></i>
+                <span>Личный маг-консультант</span>
+            </li>
             {% endif %}
-        </div>
-        {% empty %}
-        <div class="col-12 text-center">
-            <div class="empty-state">
-                <i class="fas fa-crystal-ball"></i>
-                <h3>Тарифы временно недоступны</h3>
-                <p>Скоро здесь появятся магические предложения</p>
-            </div>
-        </div>
-        {% endfor %}
+            {% if plan.price|floatformat:0|add:"0" >= 2000 %}
+            <li>
+                <i class="bi bi-check"></i>
+                <span>Эксклюзивные ритуалы</span>
+            </li>
+            {% endif %}
+            {% endif %}
+            {% endwith %}
+        </ul>
+
+        <!-- Счетчик привилегий -->
+        <!--        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.3);">-->
+        <!--            {% with count=plan.privileges.count %}-->
+        <!--            {% if count > 0 %}-->
+        <!--            {{ count }} {{ count|pluralize:"привилегия,привилегии,привилегий" }}-->
+        <!--            {% endif %}-->
+        <!--            {% endwith %}-->
+        <!--        </div>-->
+
+        {% if active_subscription %}
+        <a href="#" class="plan-btn disabled">
+            <i class="fas fa-lock"></i> Подписка активна
+        </a>
+        {% else %}
+        <a href="{% url 'user_app:subscription_checkout' plan.id %}" class="plan-btn">
+            <i class="fas fa-gem"></i> Выбрать тариф
+        </a>
+        {% endif %}
     </div>
+    {% empty %}
+    <div class="col-12 text-center">
+        <div class="empty-state">
+            <i class="fas fa-crystal-ball"></i>
+            <h3>Тарифы временно недоступны</h3>
+            <p>Скоро здесь появятся магические предложения</p>
+        </div>
+    </div>
+    {% endfor %}
 </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        // Добавляем подсказки для привилегий
+        $('.plan-features li').each(function () {
+            const $li = $(this);
+            const text = $li.find('span').text().trim();
+
+            // Если текст слишком длинный, добавляем title для подсказки
+            if (text.length > 30) {
+                $li.attr('title', text);
+            }
+        });
+
+        // Анимация при наведении на привилегии
+        $('.plan-features li').hover(
+            function () {
+                $(this).find('i').css({
+                    'transform': 'scale(1.2)',
+                    'transition': 'all 0.2s ease'
+                });
+            },
+            function () {
+                $(this).find('i').css({
+                    'transform': 'scale(1)'
+                });
+            }
+        );
+
+        // Подсветка популярных привилегий
+        $('.featured-privilege').each(function () {
+            $(this).append('<span class="privilege-badge" style="background: rgba(236,72,153,0.2); border-color: #ec4899;">🔥 топ</span>');
+        });
+    });
+</script>
 {% endblock %}
