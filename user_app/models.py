@@ -109,9 +109,77 @@ class User(AbstractUser):
         return active_sub
 
 
+class Privilege(models.Model):
+    """
+    Модель привилегий, доступных в подписках.
+    """
+    PRIVILEGE_TYPES = [
+        ('feature', 'Функция'),
+        ('access', 'Доступ'),
+        ('limit', 'Лимит'),
+        ('bonus', 'Бонус'),
+    ]
+
+    name = models.CharField(
+        max_length=100,
+        verbose_name='Название привилегии'
+    )
+    description = models.TextField(
+        verbose_name='Описание привилегии'
+    )
+    privilege_type = models.CharField(
+        max_length=20,
+        choices=PRIVILEGE_TYPES,
+        default='feature',
+        verbose_name='Тип привилегии'
+    )
+    icon = models.CharField(
+        max_length=50,
+        default='fa-solid fa-star',
+        verbose_name='Иконка FontAwesome',
+        help_text='Класс иконки, например: fa-solid fa-crown'
+    )
+    code = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name='Код привилегии',
+        help_text='Уникальный код для проверки в коде, например: "tarot_reading"'
+    )
+    value = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name='Значение',
+        help_text='Числовое значение (лимиты) или дополнительная информация'
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активно'
+    )
+    order = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Порядок сортировки'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+
+    class Meta:
+        verbose_name = 'Привилегия'
+        verbose_name_plural = 'Привилегии'
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return f"{self.name} ({self.get_privilege_type_display()})"
+
+
 class SubscriptionPlan(models.Model):
     """
-    Модель тарифного плана подписки.
+    Модель тарифного плана подписки с привилегиями.
     """
     name = models.CharField(
         max_length=100,
@@ -130,6 +198,15 @@ class SubscriptionPlan(models.Model):
         blank=True,
         verbose_name='Описание'
     )
+
+    # Связь с привилегиями (многие ко многим)
+    privileges = models.ManyToManyField(
+        Privilege,
+        blank=True,
+        related_name='subscription_plans',
+        verbose_name='Привилегии'
+    )
+
     is_popular = models.BooleanField(
         default=False,
         verbose_name='Популярный тариф'
@@ -139,6 +216,28 @@ class SubscriptionPlan(models.Model):
         verbose_name='Порядок сортировки'
     )
 
+    # Визуальные настройки
+    color = models.CharField(
+        max_length=20,
+        default='#8b5cf6',
+        verbose_name='Цвет тарифа',
+        help_text='HEX код цвета, например: #8b5cf6'
+    )
+    icon = models.CharField(
+        max_length=50,
+        default='fa-solid fa-crown',
+        verbose_name='Иконка тарифа'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+
     class Meta:
         verbose_name = 'Тарифный план'
         verbose_name_plural = 'Тарифные планы'
@@ -146,6 +245,10 @@ class SubscriptionPlan(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.price}₽/{self.duration_days}дн"
+
+    def get_privileges_list(self):
+        """Возвращает список привилегий для отображения"""
+        return self.privileges.filter(is_active=True).order_by('order')
 
 
 class ExtensionOption(models.Model):
@@ -321,6 +424,14 @@ class UserSubscription(models.Model):
         delta = self.end_date - now
         return delta.days
 
+    def get_privileges(self):
+        """Возвращает все привилегии, доступные по этой подписке"""
+        return self.plan.privileges.filter(is_active=True).order_by('order')
+
+    def has_privilege(self, privilege_code):
+        """Проверяет, есть ли у подписки определенная привилегия по коду"""
+        return self.plan.privileges.filter(code=privilege_code, is_active=True).exists()
+
     def extend(self, extension_option, payment_id=None):
         """
         Продлевает подписку на основе выбранного варианта продления
@@ -441,7 +552,7 @@ class Payment(models.Model):
         verbose_name='Подписка'
     )
     extension_option = models.ForeignKey(
-        ExtensionOption,
+        'ExtensionOption',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

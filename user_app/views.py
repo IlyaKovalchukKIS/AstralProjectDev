@@ -1,4 +1,7 @@
 import uuid
+import logging
+import json
+from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, get_backends
 from django.contrib.auth.decorators import login_required
@@ -6,40 +9,140 @@ from django.contrib import messages
 from django.urls import reverse
 from django.utils import timezone
 from django.conf import settings
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 from .forms import EmailAuthenticationForm, MysticUserCreationForm, ProfileUpdateForm
-from .models import User, SubscriptionPlan, UserSubscription, Payment, ExtensionOption, ExtensionHistory
-import logging
-from datetime import timedelta
+from .models import SubscriptionPlan, UserSubscription, Payment, ExtensionOption, ExtensionHistory
+
+# Импортируем requests для прямых запросов к API ЮKassa
+import requests
 
 logger = logging.getLogger(__name__)
 
 
-# ===== ЗАГЛУШКА ДЛЯ ЮKASSA =====
-# Для тестирования без реальной оплаты
-# Раскомментируйте код ниже, когда будете готовы подключить реальную ЮKassa
+# ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ЮKASSA =====
 
-# import yookassa
-# from yookassa import Configuration, Payment as YooKassaPayment
-# Configuration.configure(settings.YOOKASSA_SHOP_ID, settings.YOOKASSA_SECRET_KEY)
+def create_yookassa_payment(amount, description, return_url, idempotence_key, metadata=None):
+    """
+    Создание платежа через прямой HTTP запрос к API ЮKassa
+    """
+    shop_id = settings.YOOKASSA_SHOP_ID
+    secret_key = settings.YOOKASSA_SECRET_KEY
 
-class MockPayment:
-    """Заглушка для тестирования платежей"""
+    if not shop_id or not secret_key:
+        raise Exception("Не настроены ключи ЮKassa в .env файле")
 
-    def __init__(self, id, confirmation_url):
-        self.id = id
-        self.confirmation = type('obj', (object,), {'confirmation_url': confirmation_url})
-        self.status = 'pending'
+    # Формируем данные для платежа
+    payment_data = {
+        "amount": {
+            "value": f"{float(amount):.2f}",
+            "currency": "RUB"
+        },
+        "confirmation": {
+            "type": "redirect",
+            "return_url": return_url
+        },
+        "capture": True,
+        "description": description,
+        "test": settings.YOOKASSA_TEST_MODE
+    }
+
+    # Добавляем метаданные если есть
+    if metadata:
+        payment_data["metadata"] = metadata
+
+    # Логируем запрос (без секретных данных)
+    logger.info(f"Отправка запроса к ЮKassa: создание платежа на сумму {amount} RUB")
+
+    try:
+        # Отправляем запрос с базовой аутентификацией
+        response = requests.post(
+            'https://api.yookassa.ru/v3/payments',
+            auth=(shop_id, secret_key),  # Важно: именно так, через кортеж
+            headers={
+                'Content-Type': 'application/json',
+                'Idempotence-Key': idempotence_key
+            },
+            json=payment_data,
+            timeout=30
+        )
+
+        # Логируем статус ответа
+        logger.info(f"Статус ответа от ЮKassa: {response.status_code}")
+
+        # Проверяем ответ
+        if response.status_code in (200, 201):
+            result = response.json()
+            logger.info(f"✅ Платеж создан успешно. ID: {result.get('id')}")
+            return result
+        else:
+            # Пытаемся получить описание ошибки
+            try:
+                error_data = response.json()
+                error_msg = error_data.get('description', 'Неизвестная ошибка')
+                error_code = error_data.get('code', '')
+                error_param = error_data.get('parameter', '')
+
+                logger.error(f"❌ Ошибка ЮKassa: {error_msg} (код: {error_code}, параметр: {error_param})")
+
+                # Формируем понятное сообщение об ошибке
+                if error_code == 'invalid_credentials':
+                    raise Exception("Ошибка аутентификации в платежной системе. Проверьте ключи API.")
+                elif error_code == 'bad_request':
+                    raise Exception(f"Неверный запрос к платежной системе: {error_msg}")
+                else:
+                    raise Exception(f"Ошибка платежной системы: {error_msg}")
+
+            except ValueError:
+                # Если не удалось распарсить JSON
+                response.raise_for_status()
+
+    except requests.exceptions.Timeout:
+        logger.error("❌ Таймаут при запросе к ЮKassa")
+        raise Exception("Превышено время ожидания ответа от платежной системы")
+
+    except requests.exceptions.ConnectionError:
+        logger.error("❌ Ошибка подключения к ЮKassa")
+        raise Exception("Не удалось подключиться к платежной системе")
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"❌ Ошибка запроса к ЮKassa: {e}")
+        raise Exception(f"Ошибка при обращении к платежной системе: {str(e)}")
 
 
-def create_mock_payment(amount, description, return_url):
-    """Создает заглушку платежа для тестирования"""
-    payment_id = str(uuid.uuid4())
-    # В тестовом режиме сразу перенаправляем на страницу успеха
-    return MockPayment(payment_id, return_url)
+def get_yookassa_payment(payment_id):
+    """
+    Получение информации о платеже из ЮKassa
+    """
+    shop_id = settings.YOOKASSA_SHOP_ID
+    secret_key = settings.YOOKASSA_SECRET_KEY
+
+    if not shop_id or not secret_key:
+        raise Exception("Не настроены ключи ЮKassa")
+
+    try:
+        response = requests.get(
+            f'https://api.yookassa.ru/v3/payments/{payment_id}',
+            auth=(shop_id, secret_key),
+            headers={'Content-Type': 'application/json'},
+            timeout=30
+        )
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            try:
+                error_data = response.json()
+                raise Exception(error_data.get('description', 'Неизвестная ошибка'))
+            except:
+                response.raise_for_status()
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка получения платежа из ЮKassa: {e}")
+        raise
 
 
-# ===== КОНЕЦ ЗАГЛУШКИ =====
-
+# ===== АУТЕНТИФИКАЦИЯ =====
 
 def register_view(request):
     """Регистрация пользователя"""
@@ -96,6 +199,8 @@ def logout_view(request):
     return redirect('home')
 
 
+# ===== ПРОФИЛЬ =====
+
 @login_required
 def profile_view(request):
     """Личный кабинет пользователя"""
@@ -130,6 +235,8 @@ def profile_update_view(request):
     return render(request, 'profile_update.html', {'form': form})
 
 
+# ===== ПОДПИСКИ И ПЛАТЕЖИ =====
+
 @login_required
 def subscription_plans_view(request):
     """Страница выбора тарифа"""
@@ -145,7 +252,9 @@ def subscription_plans_view(request):
 
 @login_required
 def subscription_checkout_view(request, plan_id):
-    """Оформление подписки (упрощенная версия без формы)"""
+    """
+    Оформление подписки с оплатой через ЮKassa
+    """
     plan = get_object_or_404(SubscriptionPlan, id=plan_id)
 
     # Проверяем активную подписку
@@ -155,69 +264,57 @@ def subscription_checkout_view(request, plan_id):
 
     if request.method == 'POST':
         try:
-            # ===== ТЕСТОВЫЙ РЕЖИМ (без реальной оплаты) =====
-            # Создаем подписку
-            subscription = UserSubscription.objects.create(
-                user=request.user,
-                plan=plan,
-                start_date=timezone.now(),
-                is_active=True
-            )
+            # Проверяем наличие ключей ЮKassa
+            if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
+                logger.error("Ключи ЮKassa не настроены в .env файле")
+                messages.error(request, 'Платежная система временно недоступна. Пожалуйста, попробуйте позже.')
+                return redirect('user_app:subscription_plans')
 
-            # Создаем запись о платеже в БД (без поля plan)
+            # Создаем запись о платеже в БД
             payment = Payment.objects.create(
                 user=request.user,
-                subscription=subscription,  # Используем subscription вместо plan
                 amount=plan.price,
-                status='succeeded'  # В тестовом режиме сразу успешно
+                status='pending'
             )
 
-            messages.success(request, f'Подписка "{plan.name}" успешно активирована! (ТЕСТОВЫЙ РЕЖИМ)')
-            return redirect('user_app:profile')
+            logger.info(f"Создана запись платежа #{payment.id} для пользователя {request.user.email}")
 
-            # ===== РЕАЛЬНЫЙ РЕЖИМ (раскомментировать для ЮKassa) =====
-            # # Создаем запись о платеже в БД
-            # payment = Payment.objects.create(
-            #     user=request.user,
-            #     subscription=None,  # Сначала без подписки
-            #     amount=plan.price,
-            #     status='pending'
-            # )
-            #
-            # # Создаем платеж в ЮKassa
-            # idempotence_key = str(uuid.uuid4())
-            #
-            # yoo_payment = YooKassaPayment.create({
-            #     "amount": {
-            #         "value": f"{plan.price:.2f}",
-            #         "currency": "RUB"
-            #     },
-            #     "confirmation": {
-            #         "type": "redirect",
-            #         "return_url": request.build_absolute_uri(
-            #             reverse('user_app:subscription_success', args=[str(payment.id)])
-            #         )
-            #     },
-            #     "capture": True,
-            #     "description": f"Подписка '{plan.name}' для {request.user.email}",
-            #     "metadata": {
-            #         "payment_id": str(payment.id),
-            #         "user_id": request.user.id,
-            #         "plan_id": plan.id
-            #     }
-            # }, idempotence_key)
-            #
-            # # Сохраняем данные платежа от ЮKassa
-            # payment.yookassa_payment_id = yoo_payment.id
-            # payment.yookassa_confirmation_url = yoo_payment.confirmation.confirmation_url
-            # payment.save()
-            #
-            # # Перенаправляем пользователя на страницу оплаты ЮKassa
-            # return redirect(yoo_payment.confirmation.confirmation_url)
+            # Формируем данные для платежа
+            idempotence_key = str(uuid.uuid4())
+            description = f"Подписка '{plan.name}' для {request.user.email}"
+            return_url = request.build_absolute_uri(
+                reverse('user_app:subscription_success', args=[str(payment.id)])
+            )
+
+            metadata = {
+                "payment_id": str(payment.id),
+                "user_id": str(request.user.id),
+                "plan_id": str(plan.id),
+                "payment_type": "subscription"
+            }
+
+            # Создаем платеж через ЮKassa
+            yoo_payment = create_yookassa_payment(
+                amount=float(plan.price),
+                description=description,
+                return_url=return_url,
+                idempotence_key=idempotence_key,
+                metadata=metadata
+            )
+
+            # Сохраняем данные платежа от ЮKassa
+            payment.yookassa_payment_id = yoo_payment['id']
+            payment.save()
+
+            logger.info(f"✅ Платеж #{payment.id} создан в ЮKassa. ID: {yoo_payment['id']}")
+
+            # Перенаправляем пользователя на страницу оплаты ЮKassa
+            confirmation_url = yoo_payment['confirmation']['confirmation_url']
+            return redirect(confirmation_url)
 
         except Exception as e:
-            logger.error(f"Ошибка создания платежа: {e}")
-            messages.error(request, 'Ошибка при создании платежа. Пожалуйста, попробуйте позже.')
+            logger.error(f"❌ Ошибка создания платежа: {str(e)}", exc_info=True)
+            messages.error(request, f'Ошибка при создании платежа: {str(e)}')
             return redirect('user_app:subscription_plans')
 
     # GET запрос - показываем страницу подтверждения
@@ -226,20 +323,75 @@ def subscription_checkout_view(request, plan_id):
 
 @login_required
 def subscription_success_view(request, payment_id):
-    """Страница успешной оплаты"""
+    """
+    Страница успешной оплаты (обработка возврата из ЮKassa)
+    """
     payment = get_object_or_404(Payment, id=payment_id, user=request.user)
+    subscription = None
 
-    # В тестовом режиме просто показываем успех
-    subscription = UserSubscription.objects.filter(
-        user=request.user,
-        plan=payment.subscription.plan if payment.subscription else None,
-        is_active=True
-    ).first()
+    try:
+        # Если платеж еще в статусе pending, проверяем его статус в ЮKassa
+        if payment.status == 'pending' and payment.yookassa_payment_id:
+            try:
+                # Получаем информацию о платеже из ЮKassa
+                yoo_payment = get_yookassa_payment(payment.yookassa_payment_id)
+
+                # Если платеж успешен, создаем подписку
+                if yoo_payment['status'] == 'succeeded':
+                    # Получаем plan_id из metadata
+                    metadata = yoo_payment.get('metadata', {})
+                    plan_id = metadata.get('plan_id')
+
+                    if plan_id:
+                        try:
+                            plan = SubscriptionPlan.objects.get(id=plan_id)
+
+                            # Создаем подписку
+                            subscription = UserSubscription.objects.create(
+                                user=request.user,
+                                plan=plan,
+                                start_date=timezone.now(),
+                                is_active=True,
+                                yookassa_payment_id=payment.yookassa_payment_id
+                            )
+
+                            # Обновляем платеж
+                            payment.subscription = subscription
+                            payment.status = 'succeeded'
+                            payment.save()
+
+                            logger.info(f"✅ Подписка #{subscription.id} создана для пользователя {request.user.email}")
+                            messages.success(request, f'✅ Подписка "{plan.name}" успешно активирована!')
+
+                        except SubscriptionPlan.DoesNotExist:
+                            logger.error(f"План подписки {plan_id} не найден")
+                            messages.error(request, 'Ошибка при активации подписки')
+
+                elif yoo_payment['status'] == 'canceled':
+                    payment.status = 'canceled'
+                    payment.save()
+                    messages.warning(request, 'Платеж был отменен')
+
+            except Exception as e:
+                logger.error(f"Ошибка при проверке платежа в ЮKassa: {e}")
+
+        # Если платеж уже успешен, пытаемся найти подписку
+        elif payment.status == 'succeeded':
+            subscription = payment.subscription
+
+    except Exception as e:
+        logger.error(f"Ошибка в subscription_success_view: {e}", exc_info=True)
+        messages.error(request, 'Произошла ошибка при обработке платежа')
+
+    # Если подписка не найдена, пробуем получить активную подписку пользователя
+    if not subscription:
+        subscription = request.user.get_active_subscription()
 
     context = {
         'payment': payment,
         'subscription': subscription,
     }
+
     return render(request, 'subscription_success.html', context)
 
 
@@ -257,7 +409,7 @@ def subscription_detail_view(request, subscription_id):
 @login_required
 def subscription_extend_view(request, subscription_id):
     """
-    Представление для продления подписки с выбором вариантов из БД
+    Продление подписки с оплатой через ЮKassa
     """
     subscription = get_object_or_404(UserSubscription, id=subscription_id, user=request.user)
 
@@ -296,64 +448,59 @@ def subscription_extend_view(request, subscription_id):
         # Рассчитываем цену со скидкой
         price_info = selected_option.calculate_price(base_price)
 
-        # Создаем запись о платеже
-        payment = Payment.objects.create(
-            user=request.user,
-            subscription=subscription,
-            extension_option=selected_option,
-            amount=price_info['final'],
-            status='succeeded',  # В тестовом режиме сразу успешно
-            yookassa_payment_id=f"test_payment_{uuid.uuid4()}"
-        )
+        try:
+            # Проверяем наличие ключей ЮKassa
+            if not settings.YOOKASSA_SHOP_ID or not settings.YOOKASSA_SECRET_KEY:
+                logger.error("Ключи ЮKassa не настроены в .env файле")
+                messages.error(request, 'Платежная система временно недоступна.')
+                return redirect('user_app:subscription_extend', subscription_id=subscription.id)
 
-        # Продлеваем подписку
-        old_end_date = subscription.end_date
-        days_to_add = selected_option.days
+            # Создаем запись о платеже в БД
+            payment = Payment.objects.create(
+                user=request.user,
+                subscription=subscription,
+                extension_option=selected_option,
+                amount=price_info['final'],
+                status='pending'
+            )
 
-        if subscription.end_date > timezone.now():
-            # Если подписка активна, добавляем дни к текущей дате окончания
-            new_end_date = subscription.end_date + timedelta(days=days_to_add)
-        else:
-            # Если подписка истекла, начинаем с текущей даты
-            new_end_date = timezone.now() + timedelta(days=days_to_add)
-            subscription.is_active = True
+            # Формируем данные для платежа
+            idempotence_key = str(uuid.uuid4())
+            description = f"Продление подписки '{subscription.plan.name}' на {selected_option.months} мес."
+            return_url = request.build_absolute_uri(
+                reverse('user_app:subscription_success', args=[str(payment.id)])
+            )
 
-        subscription.end_date = new_end_date
-        subscription.extended_count += 1
-        subscription.last_extended_date = timezone.now()
-        subscription.save()
+            metadata = {
+                "payment_id": str(payment.id),
+                "user_id": str(request.user.id),
+                "subscription_id": str(subscription.id),
+                "extension_option_id": str(selected_option.id),
+                "payment_type": "extension"
+            }
 
-        # Создаем запись в истории продлений
-        ExtensionHistory.objects.create(
-            subscription=subscription,
-            extension_option=selected_option,
-            months_added=selected_option.months,
-            discount_percent=selected_option.discount_percent,
-            amount_paid=price_info['final'],
-            old_end_date=old_end_date,
-            new_end_date=new_end_date,
-            payment_id=payment.yookassa_payment_id
-        )
+            # Создаем платеж в ЮKassa
+            yoo_payment = create_yookassa_payment(
+                amount=price_info['final'],
+                description=description,
+                return_url=return_url,
+                idempotence_key=idempotence_key,
+                metadata=metadata
+            )
 
-        # Формируем сообщение об успехе
-        discount_text = f" со скидкой {selected_option.discount_percent}%" if selected_option.discount_percent > 0 else ""
+            # Сохраняем данные платежа
+            payment.yookassa_payment_id = yoo_payment['id']
+            payment.save()
 
-        # Склоняем слово "месяц"
-        months = selected_option.months
-        if months % 10 == 1 and months % 100 != 11:
-            month_word = "месяц"
-        elif 2 <= months % 10 <= 4 and (months % 100 < 10 or months % 100 >= 20):
-            month_word = "месяца"
-        else:
-            month_word = "месяцев"
+            logger.info(f"✅ Платеж на продление #{payment.id} создан в ЮKassa")
 
-        messages.success(
-            request,
-            f'✅ Подписка успешно продлена на {months} {month_word}{discount_text}! '
-            f'Новая дата окончания: {new_end_date.strftime("%d.%m.%Y")}'
-        )
+            # Перенаправляем на оплату
+            return redirect(yoo_payment['confirmation']['confirmation_url'])
 
-        return redirect('user_app:subscription_detail', subscription_id=subscription.id)
+        except Exception as e:
+            logger.error(f"❌ Ошибка создания платежа для продления: {e}", exc_info=True)
+            messages.error(request, f'Ошибка при создании платежа: {str(e)}')
+            return redirect('user_app:subscription_extend', subscription_id=subscription.id)
 
     context = {
         'subscription': subscription,
@@ -375,34 +522,143 @@ def subscription_history_view(request):
     return render(request, 'subscription_history.html', context)
 
 
-# Webhook для ЮKassa (закомментирован до реального подключения)
-"""
+# ===== WEBHOOK ДЛЯ ЮKASSA =====
+
 @csrf_exempt
 def yookassa_webhook_view(request):
+    """
+    Webhook для получения уведомлений от ЮKassa о статусе платежей
+    URL: /user/webhook/yookassa/
+    """
     if request.method == 'POST':
         try:
-            import json
-            from yookassa.domain.notification import WebhookNotificationFactory
-
+            # Получаем данные из запроса
             event_json = json.loads(request.body)
-            notification = WebhookNotificationFactory().create(event_json)
 
-            if notification.event == 'payment.succeeded':
-                payment_object = notification.object
-                metadata = payment_object.metadata
+            logger.info(f"Получен webhook от ЮKassa: {event_json.get('event')}")
 
-                if metadata and 'payment_id' in metadata:
-                    try:
-                        payment = Payment.objects.get(id=metadata['payment_id'])
-                        payment.status = 'succeeded'
-                        payment.save()
-                        payment.create_subscription()
-                    except Payment.DoesNotExist:
-                        pass
+            # Обрабатываем разные типы событий
+            event = event_json.get('event')
+            payment_object = event_json.get('object', {})
+
+            # Получаем метаданные платежа
+            metadata = payment_object.get('metadata', {})
+            payment_id = metadata.get('payment_id')
+
+            if not payment_id:
+                logger.warning("Webhook: не найден payment_id в метаданных")
+                return HttpResponse(status=200)
+
+            try:
+                # Находим наш платеж в БД
+                payment = Payment.objects.get(id=payment_id)
+
+                # Обрабатываем событие
+                if event == 'payment.succeeded':
+                    # Платеж успешен
+                    logger.info(f"Webhook: платеж {payment_id} успешен")
+
+                    payment.status = 'succeeded'
+                    payment.save()
+
+                    # Если это оплата подписки (не продление)
+                    if metadata.get('payment_type') == 'subscription' and not payment.subscription:
+                        plan_id = metadata.get('plan_id')
+                        if plan_id:
+                            try:
+                                plan = SubscriptionPlan.objects.get(id=plan_id)
+
+                                # Создаем подписку
+                                subscription = UserSubscription.objects.create(
+                                    user=payment.user,
+                                    plan=plan,
+                                    start_date=timezone.now(),
+                                    is_active=True,
+                                    yookassa_payment_id=payment.yookassa_payment_id
+                                )
+
+                                payment.subscription = subscription
+                                payment.save()
+
+                                logger.info(
+                                    f"Webhook: подписка #{subscription.id} создана для пользователя {payment.user.id}")
+
+                            except SubscriptionPlan.DoesNotExist:
+                                logger.error(f"Webhook: план {plan_id} не найден")
+
+                    # Если это продление подписки
+                    elif metadata.get('payment_type') == 'extension' and not payment.subscription:
+                        subscription_id = metadata.get('subscription_id')
+                        extension_option_id = metadata.get('extension_option_id')
+
+                        if subscription_id and extension_option_id:
+                            try:
+                                subscription = UserSubscription.objects.get(
+                                    id=subscription_id,
+                                    user=payment.user
+                                )
+                                extension_option = ExtensionOption.objects.get(
+                                    id=extension_option_id
+                                )
+
+                                # Продлеваем подписку
+                                old_end_date = subscription.end_date
+                                days_to_add = extension_option.days
+
+                                if subscription.end_date and subscription.end_date > timezone.now():
+                                    new_end_date = subscription.end_date + timedelta(days=days_to_add)
+                                else:
+                                    new_end_date = timezone.now() + timedelta(days=days_to_add)
+                                    subscription.is_active = True
+
+                                subscription.end_date = new_end_date
+                                subscription.extended_count += 1
+                                subscription.last_extended_date = timezone.now()
+                                subscription.save()
+
+                                # Обновляем платеж
+                                payment.subscription = subscription
+                                payment.extension_option = extension_option
+                                payment.save()
+
+                                # Создаем запись в истории
+                                ExtensionHistory.objects.create(
+                                    subscription=subscription,
+                                    extension_option=extension_option,
+                                    months_added=extension_option.months,
+                                    discount_percent=extension_option.discount_percent,
+                                    amount_paid=payment.amount,
+                                    old_end_date=old_end_date,
+                                    new_end_date=new_end_date,
+                                    payment_id=payment.yookassa_payment_id
+                                )
+
+                                logger.info(f"Webhook: подписка #{subscription.id} продлена")
+
+                            except (UserSubscription.DoesNotExist, ExtensionOption.DoesNotExist) as e:
+                                logger.error(f"Webhook: ошибка при продлении: {e}")
+
+                elif event == 'payment.canceled':
+                    # Платеж отменен
+                    logger.info(f"Webhook: платеж {payment_id} отменен")
+                    payment.status = 'canceled'
+                    payment.save()
+
+                elif event == 'refund.succeeded':
+                    # Возврат средств
+                    logger.info(f"Webhook: возврат средств по платежу {payment_id}")
+
+            except Payment.DoesNotExist:
+                logger.error(f"Webhook: платеж {payment_id} не найден в БД")
 
             return HttpResponse(status=200)
-        except Exception:
+
+        except json.JSONDecodeError:
+            logger.error("Webhook: ошибка парсинга JSON")
             return HttpResponse(status=400)
 
+        except Exception as e:
+            logger.error(f"Webhook: неожиданная ошибка: {e}", exc_info=True)
+            return HttpResponse(status=500)
+
     return HttpResponse(status=405)
-"""

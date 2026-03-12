@@ -20,4 +20,6 @@ urlpatterns = [
     path('subscription/<int:subscription_id>/', views.subscription_detail_view, name='subscription_detail'),
     path('subscription/<int:subscription_id>/extend/', views.subscription_extend_view, name='subscription_extend'),
     path('subscription/history/', views.subscription_history_view, name='subscription_history'),
+    # Webhook для ЮKassa
+    path('webhook/yookassa/', views.yookassa_webhook_view, name='yookassa_webhook'),
 ]

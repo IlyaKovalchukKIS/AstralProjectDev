@@ -70,7 +70,8 @@ INSTALLED_APPS = [
     'django_select2',
     'tarot_app',
     'tg_bot',
-    'user_app'
+    'user_app',
+    'payment_app'
 ]
 
 MIDDLEWARE = [
@@ -174,5 +175,12 @@ AUTHENTICATION_BACKENDS = [
 SELECT2_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css'
 SELECT2_JS = 'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js'
 
-#YooMoney
-SECRET_API_KEY_YOOMONEY = config('SECRET_API_KEY_YOOMONEY')
+# Настройки ЮKassa
+YOOKASSA_SHOP_ID = config('YOOKASSA_SHOP_ID', default='')
+YOOKASSA_SECRET_KEY = config('YOOKASSA_SECRET_KEY', default='')
+YOOKASSA_TEST_MODE = config('YOOKASSA_TEST_MODE', default=True, cast=bool)
+
+# Проверка, что ключи не пустые
+if not YOOKASSA_SHOP_ID or not YOOKASSA_SECRET_KEY:
+    import warnings
+    warnings.warn("ЮKassa ключи не настроены! Платежи не будут работать.")

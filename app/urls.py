@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('tarot_app.urls')),
     path('user/', include('user_app.urls')),
+    path('payment/', include('payment_app.urls')),
 ]
 
 if settings.DEBUG:
