@@ -1,43 +1,7 @@
 {% load static %}
-<style>
-    .navbar {
-        background: linear-gradient(180deg, rgba(26, 26, 46, 0.95), rgba(15, 15, 35, 0.98));
-        backdrop-filter: blur(10px);
-        border-bottom: 2px solid #8b5cf6;
-        padding: 1rem 0;
-    }
-
-    .navbar .nav-link {
-        color: #f4f4f4 !important;
-        font-family: 'Georgia', serif;
-        padding: 0.5rem 1rem;
-        margin: 0 0.2rem;
-        border-radius: 25px;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .navbar .nav-link:hover,
-    .navbar .nav-link.active {
-        background: linear-gradient(45deg, #8b5cf6, #ec4899);
-        transform: translateY(-2px);
-    }
-
-    .navbar .nav-link i {
-        transition: transform 0.3s ease;
-    }
-
-    .navbar .nav-link:hover i {
-        transform: rotate(360deg);
-    }
-
-    @media (max-width: 991px) {
-        .navbar .nav-link {
-            margin: 0.5rem 0;
-            text-align: center;
-        }
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/header.css' %}">
+{% endblock %}
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
@@ -55,68 +19,73 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'user_app:subscription_plans' %}">
-                            <i class="bi bi-house-door me-1"></i>Тарифы
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
                             <i class="bi bi-house-door me-1"></i>Главная
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/user/subscription/plans/' %}active{% endif %}"
+                           href="{% url 'user_app:subscription_plans' %}">
+                            <i class="bi bi-tags me-1"></i>Тарифы
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if '/taro' in request.path %}active{% endif %}" href="{% url 'tarot' %}">
-                            <i class="bi bi-grid-3x3-gap-fill me-1"></i>Таро
+                            <i class="bi bi-suit-spade-fill me-1"></i>Таро
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if '/runes' in request.path %}active{% endif %}" href="{% url 'runes' %}">
-                            <i class="bi bi-gem me-1"></i>Руны
+                            <i class="bi bi-tree me-1"></i>Руны
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if '/moon-calendar' in request.path %}active{% endif %}" href="{% url 'moon_calendar' %}">
+                        <a class="nav-link {% if '/moon-calendar' in request.path %}active{% endif %}"
+                           href="{% url 'moon_calendar' %}">
                             <i class="bi bi-moon-stars me-1"></i>Лунный календарь
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if '/human-design' in request.path %}active{% endif %}" href="{% url 'human_design' %}">
+                        <a class="nav-link {% if '/human-design' in request.path %}active{% endif %}"
+                           href="{% url 'human_design' %}">
                             <i class="bi bi-person-standing-dress me-1"></i>HumanDesign
                         </a>
                     </li>
                     {% if user.is_authenticated %}
-                        <!-- Пользователь авторизован -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link astral-link dropdown-toggle" href="#" id="userDropdown"
-                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> {{ user.get_full_name_or_email|truncatechars:20 }}
-                            </a>
-                            <ul class="dropdown-menu astral-dropdown dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="{% url 'user_app:profile' %}">
-                                    <i class="fas fa-id-card"></i> Личный кабинет
-                                </a></li>
-                                <li><a class="dropdown-item" href="{% url 'user_app:profile_update' %}">
-                                    <i class="fas fa-edit"></i> Редактировать профиль
-                                </a></li>
+                    <!-- Пользователь авторизован -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link astral-link dropdown-toggle" href="#" id="userDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i> {{ user.get_full_name_or_email|truncatechars:20 }}
+                        </a>
+                        <ul class="dropdown-menu astral-dropdown dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'user_app:profile' %}">
+                                <i class="fas fa-id-card"></i> Личный кабинет
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'user_app:profile_update' %}">
+                                <i class="fas fa-edit"></i> Редактировать профиль
+                            </a></li>
 
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="post" action="{% url 'user_app:logout' %}" style="display: inline;">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt"></i> Выйти
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form method="post" action="{% url 'user_app:logout' %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt"></i> Выйти
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
                     {% else %}
-                        <!-- Пользователь не авторизован -->
-                        <li class="nav-item">
-                            <a class="nav-link astral-link" href="{% url 'user_app:login' %}">
-                                <i class="fas fa-sign-in-alt"></i> Войти
-                            </a>
-                        </li>
+                    <!-- Пользователь не авторизован -->
+                    <li class="nav-item">
+                        <a class="nav-link astral-link" href="{% url 'user_app:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>

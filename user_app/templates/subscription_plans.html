@@ -15,124 +15,131 @@
         <p>Откройте доступ к магическим знаниям и эксклюзивным предсказаниям</p>
     </div>
 
-    {% if active_subscription %}
+    <!-- Блок для авторизованных пользователей с активной подпиской -->
+    {% if user.is_authenticated and active_subscription %}
     <div class="text-center mb-5">
         <div class="active-badge">
             <i class="fas fa-check-circle"></i> У вас активна подписка "{{ active_subscription.plan.name }}"
         </div>
-        <p class="text-white">Вы можете продлить текущую подписку или выбрать новый тариф после её окончания</p>
+        <p class="text-white">Вы можете продлить текущую подписку или сменить тариф прямо сейчас</p>
     </div>
     {% endif %}
 
     <div class="plans-grid">
         {% for plan in plans %}
         <div class="plan-card tarot-card-effect {% if plan.is_popular %}popular{% endif %} fade-in"
-             style="animation-delay: {{ forloop.counter0|add:" 0.2
-        " }}s; {% if plan.color %}border-color: {{ plan.color }};{% endif %}">
+             style="animation-delay: {{ forloop.counter0|add:'0.2' }}s; {% if plan.color %}border-color: {{ plan.color }};{% endif %}">
 
-        <div class="plan-icon" {% if plan.color %}style="border-color: {{ plan.color }};" {% endif %}>
-            <i class="{{ plan.icon|default:'bi bi-star' }}"></i>
-        </div>
+            <div class="plan-icon" {% if plan.color %}style="border-color: {{ plan.color }};" {% endif %}>
+                <i class="{{ plan.icon|default:'bi bi-star' }}"></i>
+            </div>
 
-        <h2 class="plan-name">{{ plan.name }}</h2>
+            <h2 class="plan-name">{{ plan.name }}</h2>
 
-        <div class="plan-price">
-            <span class="price-number">{{ plan.price|floatformat:0 }}</span>
-            <span class="price-period">₽ / {{ plan.duration_days }} дней</span>
-        </div>
+            <div class="plan-price">
+                <span class="price-number">{{ plan.price|floatformat:0 }}</span>
+                <span class="price-period">₽ / {{ plan.duration_days }} дней</span>
+            </div>
 
-        <div class="plan-description">
-            {{ plan.description|linebreaks }}
-        </div>
+            <div class="plan-description">
+                {{ plan.description|linebreaks }}
+            </div>
 
-        <!-- Список привилегий из базы данных -->
-        <ul class="plan-features">
-            {% with privileges=plan.get_privileges_list %}
-            {% if privileges %}
-            {% for privilege in privileges %}
-            <li {% if forloop.first %}class="featured-privilege" {% endif %}>
-                <!--                <i class="{{ privilege.icon|default:'fas fa-check' }}"></i>-->
-                <i class="{{ privilege.icon|default:'bi bi-check' }}"></i>
-                <span>
-                                    {{ privilege.name }}
-                                    {% if privilege.value %}
-                                        <span class="privilege-badge">{{ privilege.value }}</span>
-                                    {% endif %}
-                                </span>
-            </li>
-            <!--            {% if forloop.counter == 3 and not forloop.last %}-->
-            <!--            &lt;!&ndash; Разделитель после первых 3 привилегий &ndash;&gt;-->
-            <!--            <li class="text-center" style="justify-content: center; border-bottom: none; padding: 0.3rem 0;">-->
-            <!--                <small style="color: rgba(255,255,255,0.3);">и другие преимущества...</small>-->
-            <!--            </li>-->
-            <!--            {% endif %}-->
-            {% endfor %}
+            <!-- Список привилегий из базы данных -->
+            <ul class="plan-features">
+                {% with privileges=plan.get_privileges_list %}
+                {% if privileges %}
+                {% for privilege in privileges %}
+                <li {% if forloop %} class="featured-privilege" {% endif %}>
+                    <i class="{{ privilege.icon|default:'bi bi-check' }}"></i>
+                    <span>
+                            {{ privilege.name }}
+                            {% if privilege.value %}
+                                <span class="privilege-badge">{{ privilege.value }}</span>
+                            {% endif %}
+                        </span>
+                </li>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </ul>
+
+            <!-- Кнопки действий в зависимости от статуса пользователя и подписки -->
+            {% if user.is_authenticated %}
+            <!-- Авторизованный пользователь -->
+            {% if active_subscription %}
+            <!-- Есть активная подписка -->
+            {% if active_subscription.plan.id == plan.id %}
+            <a href="#" class="plan-btn disabled">
+                <i class="fas fa-check-circle"></i> Текущий тариф
+            </a>
             {% else %}
-            <!-- Запасные варианты, если привилегии не указаны -->
-            <li>
-                <i class="bi bi-check"></i>
-                <span>Доступ к {{ plan.duration_days }} дням магии</span>
-            </li>
-            <li>
-                <i class="bi bi-check"></i>
-                <span>Персональные предсказания</span>
-            </li>
-            <li>
-                <i class="bi bi-check"></i>
-                <span>Поддержка 24/7</span>
-            </li>
-            {% if plan.price|floatformat:0|add:"0" >= 1000 %}
-            <li>
-                <i class="bi bi-check"></i>
-                <span>Личный маг-консультант</span>
-            </li>
+            <a href="{% url 'user_app:subscription_change' %}?plan_id={{ plan.id }}" class="plan-btn change-plan">
+                <i class="fas fa-exchange-alt"></i> Сменить на этот тариф
+            </a>
             {% endif %}
-            {% if plan.price|floatformat:0|add:"0" >= 2000 %}
-            <li>
-                <i class="bi bi-check"></i>
-                <span>Эксклюзивные ритуалы</span>
-            </li>
+            {% else %}
+            <!-- Нет активной подписки -->
+            <a href="{% url 'user_app:subscription_checkout' plan.id %}" class="plan-btn">
+                <i class="fas fa-gem"></i> Выбрать тариф
+            </a>
             {% endif %}
+            {% else %}
+            <!-- Неавторизованный пользователь -->
+            <a href="{% url 'user_app:login' %}?next={% url 'user_app:subscription_checkout' plan.id %}"
+               class="plan-btn">
+                <i class="fas fa-gem"></i> Оформить подписку
+            </a>
             {% endif %}
-            {% endwith %}
-        </ul>
-
-        <!-- Счетчик привилегий -->
-        <!--        <div style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.3);">-->
-        <!--            {% with count=plan.privileges.count %}-->
-        <!--            {% if count > 0 %}-->
-        <!--            {{ count }} {{ count|pluralize:"привилегия,привилегии,привилегий" }}-->
-        <!--            {% endif %}-->
-        <!--            {% endwith %}-->
-        <!--        </div>-->
-
-        {% if active_subscription %}
-        {% if active_subscription.plan.id == plan.id %}
-        <a href="#" class="plan-btn disabled">
-            <i class="fas fa-check-circle"></i> Текущий тариф
-        </a>
-        {% else %}
-        <a href="{% url 'user_app:subscription_change' %}?plan_id={{ plan.id }}" class="plan-btn change-plan">
-            <i class="fas fa-exchange-alt"></i> Сменить на этот тариф
-        </a>
-        {% endif %}
-        {% else %}
-        <a href="{% url 'user_app:subscription_checkout' plan.id %}" class="plan-btn">
-            <i class="fas fa-gem"></i> Выбрать тариф
-        </a>
-        {% endif %}
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="empty-state">
+                <i class="fas fa-crystal-ball"></i>
+                <h3>Тарифы временно недоступны</h3>
+                <p>Скоро здесь появятся магические предложения</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div class="col-12 text-center">
-        <div class="empty-state">
-            <i class="fas fa-crystal-ball"></i>
-            <h3>Тарифы временно недоступны</h3>
-            <p>Скоро здесь появятся магические предложения</p>
+</div>
+
+<!-- Модальное окно для неавторизованных пользователей (опционально) -->
+{% if not user.is_authenticated %}
+<div class="modal fade" id="authRequiredModal" tabindex="-1" aria-labelledby="authRequiredModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content"
+             style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #8b5cf6; border-radius: 30px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="authRequiredModalLabel" style="color: #8b5cf6;">
+                    <i class="fas fa-lock me-2"></i>Необходима авторизация
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <i class="fas fa-crystal-ball" style="font-size: 4rem; color: #8b5cf6; margin-bottom: 1rem;"></i>
+                <h4 style="color: white; margin-bottom: 1rem;">Откройте мир магии</h4>
+                <p style="color: rgba(255,255,255,0.7); margin-bottom: 2rem;">
+                    Чтобы оформить подписку и получить доступ к эксклюзивным предсказаниям,<br>
+                    пожалуйста, войдите в аккаунт или зарегистрируйтесь.
+                </p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="#" class="btn btn-outline" id="modalLoginBtn"
+                       style="border-color: #8b5cf6; color: #8b5cf6;">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                    </a>
+                    <a href="#" class="btn btn-primary" id="modalRegisterBtn"
+                       style="background: linear-gradient(45deg, #8b5cf6, #ec4899);">
+                        <i class="fas fa-user-plus me-2"></i>Регистрация
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-    {% endfor %}
 </div>
-</div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -167,6 +174,23 @@
         // Подсветка популярных привилегий
         $('.featured-privilege').each(function () {
             $(this).append('<span class="privilege-badge" style="background: rgba(236,72,153,0.2); border-color: #ec4899;">🔥 топ</span>');
+        });
+
+        // Обработка модального окна для неавторизованных пользователей
+        let selectedPlanUrl = '';
+
+        // Перехватываем клик по кнопке оформления для неавторизованных
+        $('.plan-btn[href*="login"]').click(function (e) {
+            e.preventDefault();
+            selectedPlanUrl = $(this).attr('href');
+
+            // Обновляем ссылки в модальном окне
+            $('#modalLoginBtn').attr('href', selectedPlanUrl);
+            $('#modalRegisterBtn').attr('href', selectedPlanUrl.replace('login', 'register'));
+
+            // Показываем модальное окно
+            var modal = new bootstrap.Modal(document.getElementById('authRequiredModal'));
+            modal.show();
         });
     });
 </script>

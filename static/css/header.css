@@ -1,0 +1,37 @@
+.navbar {
+    background: linear-gradient(180deg, rgba(26, 26, 46, 0.95), rgba(15, 15, 35, 0.98));
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid #8b5cf6;
+    padding: 1rem 0;
+}
+
+.navbar .nav-link {
+    color: #f4f4f4 !important;
+    font-family: 'Georgia', serif;
+    padding: 0.5rem 1rem;
+    margin: 0 0.2rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link.active {
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    transform: translateY(-2px);
+}
+
+.navbar .nav-link i {
+    transition: transform 0.3s ease;
+}
+
+.navbar .nav-link:hover i {
+    transform: rotate(360deg);
+}
+
+@media (max-width: 991px) {
+    .navbar .nav-link {
+        margin: 0.5rem 0;
+        text-align: center;
+    }
+}

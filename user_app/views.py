@@ -237,22 +237,28 @@ def profile_update_view(request):
 
 # ===== ПОДПИСКИ И ПЛАТЕЖИ =====
 
-@login_required
 def subscription_plans_view(request):
     """Страница выбора тарифа"""
     plans = SubscriptionPlan.objects.all().order_by('order', 'price')
-    active_subscription = request.user.get_active_subscription()
 
-    # Расчет оставшихся дней для текущей подписки
+    # Проверяем, авторизован ли пользователь
+    active_subscription = None
     remaining_days = 0
-    if active_subscription:
-        delta = active_subscription.end_date - timezone.now()
-        remaining_days = max(0, delta.days)
 
+    if request.user.is_authenticated:
+        active_subscription = request.user.get_active_subscription()
+
+        # Расчет оставшихся дней для текущей подписки
+        if active_subscription:
+            delta = active_subscription.end_date - timezone.now()
+            remaining_days = max(0, delta.days)
+
+    # Добавляем параметр в контекст, чтобы в шаблоне знать, авторизован ли пользователь
     context = {
         'plans': plans,
         'active_subscription': active_subscription,
         'remaining_days': remaining_days,
+        'is_authenticated': request.user.is_authenticated,  # Явно передаем статус авторизации
     }
     return render(request, 'subscription_plans.html', context)
 

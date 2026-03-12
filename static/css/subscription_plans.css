@@ -333,12 +333,93 @@
 
 /* Добавить в конец файла subscription_plans.css */
 .plan-btn.change-plan {
-    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
     border: none;
 }
 
 .plan-btn.change-plan:hover {
-    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+/* Стили для всплывающих подсказок привилегий */
+.privilege-tooltip {
+    position: absolute;
+    z-index: 9999;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    border: 2px solid #8b5cf6;
+    border-radius: 15px;
+    padding: 1rem;
+    max-width: 300px;
+    min-width: 200px;
+    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.3);
+    backdrop-filter: blur(10px);
+    display: none;
+    animation: tooltipFadeIn 0.2s ease;
+    pointer-events: none;
+}
+
+.privilege-tooltip::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #8b5cf6;
+}
+
+.privilege-tooltip.tooltip-right::before {
+    left: auto;
+    right: -8px;
+    border-right: none;
+    border-left: 8px solid #8b5cf6;
+}
+
+.tooltip-content h4 {
+    color: #ec4899;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.tooltip-content p {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.privilege-hover {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 10px;
+    cursor: help;
+}
+
+@keyframes tooltipFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для мобильных устройств */
+@media (max-width: 768px) {
+    .privilege-tooltip {
+        max-width: 250px;
+        font-size: 0.85rem;
+    }
+
+    .privilege-tooltip::before {
+        display: none;
+    }
 }

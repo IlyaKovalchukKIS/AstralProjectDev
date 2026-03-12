@@ -6,7 +6,7 @@
 }
 
 body {
-    font-family: 'Georgia', serif;
+    font-family: 'Georgia', fantasy;
     background: linear-gradient(135deg, #1a1a2e, #16213e, #0f0f23);
     color: #f4f4f4;
     min-height: 100vh;
