@@ -51,7 +51,7 @@
             {% if privileges %}
             {% for privilege in privileges %}
             <li {% if forloop.first %}class="featured-privilege" {% endif %}>
-<!--                <i class="{{ privilege.icon|default:'fas fa-check' }}"></i>-->
+                <!--                <i class="{{ privilege.icon|default:'fas fa-check' }}"></i>-->
                 <i class="{{ privilege.icon|default:'bi bi-check' }}"></i>
                 <span>
                                     {{ privilege.name }}
@@ -60,12 +60,12 @@
                                     {% endif %}
                                 </span>
             </li>
-<!--            {% if forloop.counter == 3 and not forloop.last %}-->
-<!--            &lt;!&ndash; Разделитель после первых 3 привилегий &ndash;&gt;-->
-<!--            <li class="text-center" style="justify-content: center; border-bottom: none; padding: 0.3rem 0;">-->
-<!--                <small style="color: rgba(255,255,255,0.3);">и другие преимущества...</small>-->
-<!--            </li>-->
-<!--            {% endif %}-->
+            <!--            {% if forloop.counter == 3 and not forloop.last %}-->
+            <!--            &lt;!&ndash; Разделитель после первых 3 привилегий &ndash;&gt;-->
+            <!--            <li class="text-center" style="justify-content: center; border-bottom: none; padding: 0.3rem 0;">-->
+            <!--                <small style="color: rgba(255,255,255,0.3);">и другие преимущества...</small>-->
+            <!--            </li>-->
+            <!--            {% endif %}-->
             {% endfor %}
             {% else %}
             <!-- Запасные варианты, если привилегии не указаны -->
@@ -107,9 +107,15 @@
         <!--        </div>-->
 
         {% if active_subscription %}
+        {% if active_subscription.plan.id == plan.id %}
         <a href="#" class="plan-btn disabled">
-            <i class="fas fa-lock"></i> Подписка активна
+            <i class="fas fa-check-circle"></i> Текущий тариф
         </a>
+        {% else %}
+        <a href="{% url 'user_app:subscription_change' %}?plan_id={{ plan.id }}" class="plan-btn change-plan">
+            <i class="fas fa-exchange-alt"></i> Сменить на этот тариф
+        </a>
+        {% endif %}
         {% else %}
         <a href="{% url 'user_app:subscription_checkout' plan.id %}" class="plan-btn">
             <i class="fas fa-gem"></i> Выбрать тариф

@@ -330,3 +330,15 @@
         padding: 0.7rem 0;
     }
 }
+
+/* Добавить в конец файла subscription_plans.css */
+.plan-btn.change-plan {
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+    border: none;
+}
+
+.plan-btn.change-plan:hover {
+    background: linear-gradient(135deg, #7c3aed, #2563eb);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}

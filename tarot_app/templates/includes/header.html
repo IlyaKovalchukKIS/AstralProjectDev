@@ -55,6 +55,11 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'user_app:subscription_plans' %}">
+                            <i class="bi bi-house-door me-1"></i>Тарифы
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
                             <i class="bi bi-house-door me-1"></i>Главная
                         </a>
@@ -93,11 +98,7 @@
                                 <li><a class="dropdown-item" href="{% url 'user_app:profile_update' %}">
                                     <i class="fas fa-edit"></i> Редактировать профиль
                                 </a></li>
-                                {% if active_subscription %}
-                                <li><a class="dropdown-item" href="#">
-                                    <i class="fas fa-gem"></i> Моя подписка
-                                </a></li>
-                                {% endif %}
+
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form method="post" action="{% url 'user_app:logout' %}" style="display: inline;">

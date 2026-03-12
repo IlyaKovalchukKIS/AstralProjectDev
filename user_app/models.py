@@ -211,6 +211,13 @@ class SubscriptionPlan(models.Model):
         default=False,
         verbose_name='Популярный тариф'
     )
+
+    # ДОБАВЛЯЕМ ЭТО ПОЛЕ:
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name='Активен'
+    )
+
     order = models.PositiveIntegerField(
         default=0,
         verbose_name='Порядок сортировки'
@@ -380,6 +387,9 @@ class UserSubscription(models.Model):
         blank=True,
         verbose_name='ID платежа в ЮKassa'
     )
+    previous_subscription = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True,
+                                              related_name='next_subscription')
+    status = models.CharField(max_length=20, default='active')  # active, cancelled, changed, expired
 
     class Meta:
         verbose_name = 'Подписка пользователя'
@@ -530,7 +540,11 @@ class Payment(models.Model):
         ('succeeded', 'Успешно'),
         ('canceled', 'Отменен'),
     ]
-
+    PAYMENT_TYPES = (
+        ('subscription', 'Новая подписка'),
+        ('extension', 'Продление'),
+        ('change', 'Смена тарифа'),
+    )
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -582,6 +596,8 @@ class Payment(models.Model):
         auto_now=True,
         verbose_name='Дата обновления'
     )
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='subscription')
+    metadata = models.JSONField(default=dict, blank=True)
 
     class Meta:
         verbose_name = 'Платеж'

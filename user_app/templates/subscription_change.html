@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Смена тарифа - Мистический Портал{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/subscription_change.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="change-container">
+    <div class="change-header fade-in">
+        <i class="fas fa-exchange-alt"></i>
+        <h1>Смена тарифа</h1>
+        <p>Детальный расчет стоимости с учетом остатка дней</p>
+    </div>
+
+    <div class="change-card fade-in">
+        <!-- Прогресс смены тарифа -->
+        <div class="change-progress">
+            <div class="progress-step completed">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <div class="step-label">Текущий тариф</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step active">
+                <div class="step-icon"><i class="fas fa-calculator"></i></div>
+                <div class="step-label">Расчет</div>
+            </div>
+            <div class="progress-line"></div>
+            <div class="progress-step">
+                <div class="step-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="step-label">Оплата</div>
+            </div>
+        </div>
+
+        <!-- Сравнение тарифов -->
+        <div class="plans-comparison">
+            <!-- Текущий тариф -->
+            <div class="plan-box current-plan-box">
+                <div class="plan-badge current">
+                    <i class="fas fa-check-circle"></i> Текущий тариф
+                </div>
+                <h2 class="plan-name">{{ current_subscription.plan.name }}</h2>
+                <div class="plan-price-info">
+                    <span class="price">{{ current_subscription.plan.price|floatformat:0 }} ₽</span>
+                    <span class="period">/ {{ current_subscription.plan.duration_days }} дней</span>
+                </div>
+                
+                <div class="plan-dates">
+                    <div class="date-item">
+                        <i class="far fa-calendar-alt"></i>
+                        <span>Начало: {{ current_subscription.start_date|date:"d.m.Y" }}</span>
+                    </div>
+                    <div class="date-item">
+                        <i class="far fa-calendar-check"></i>
+                        <span>Окончание: {{ current_subscription.end_date|date:"d.m.Y" }}</span>
+                    </div>
+                </div>
+
+                <div class="remaining-days-info">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>Осталось дней: <strong>{{ remaining_days }}</strong></span>
+                </div>
+
+                <div class="plan-features">
+                    <h4>Включено:</h4>
+                    <ul>
+                        {% with privileges=current_subscription.plan.get_privileges_list %}
+                        {% for privilege in privileges %}
+                        <li><i class="fas fa-check-circle"></i> {{ privilege.name }}</li>
+                        {% endfor %}
+                        {% endwith %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Иконка перехода -->
+            <div class="transition-icon">
+                <i class="fas fa-arrow-right"></i>
+                <i class="fas fa-magic magic-icon"></i>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+
+            <!-- Новый тариф -->
+            <div class="plan-box new-plan-box">
+                <div class="plan-badge new">
+                    <i class="fas fa-star"></i> Новый тариф
+                </div>
+                <h2 class="plan-name">{{ new_plan.name }}</h2>
+                <div class="plan-price-info">
+                    <span class="price">{{ new_plan.price|floatformat:0 }} ₽</span>
+                    <span class="period">/ {{ new_plan.duration_days }} дней</span>
+                </div>
+
+                {% if new_plan.is_popular %}
+                <div class="popular-badge">Популярный</div>
+                {% endif %}
+
+                <div class="plan-features">
+                    <h4>Включено:</h4>
+                    <ul>
+                        {% with privileges=new_plan.get_privileges_list %}
+                        {% for privilege in privileges %}
+                        <li><i class="fas fa-star"></i> {{ privilege.name }}</li>
+                        {% endfor %}
+                        {% endwith %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Детальный расчет -->
+        <div class="calculation-details">
+            <h3 class="calculation-title">
+                <i class="fas fa-calculator"></i>
+                Детальный расчет стоимости
+            </h3>
+
+            <div class="calculation-grid">
+                <div class="calculation-item">
+                    <div class="item-label">
+                        <i class="fas fa-tag"></i>
+                        Стоимость нового тарифа
+                    </div>
+                    <div class="item-value">{{ new_plan.price|floatformat:0 }} ₽</div>
+                </div>
+
+                <div class="calculation-item">
+                    <div class="item-label">
+                        <i class="fas fa-hourglass-half"></i>
+                        Остаток от текущего тарифа ({{ remaining_days }} дней)
+                    </div>
+                    <div class="item-value credit">- {{ remaining_value|floatformat:0 }} ₽</div>
+                </div>
+
+                {% if discount_amount > 0 %}
+                <div class="calculation-item discount">
+                    <div class="item-label">
+                        <i class="fas fa-gift"></i>
+                        Специальное предложение
+                    </div>
+                    <div class="item-value">- {{ discount_amount|floatformat:0 }} ₽</div>
+                </div>
+                {% endif %}
+
+                <div class="calculation-item total">
+                    <div class="item-label">
+                        <i class="fas fa-gem"></i>
+                        Итого к оплате
+                    </div>
+                    <div class="item-value total-price">{{ amount_to_pay|floatformat:0 }} ₽</div>
+                </div>
+            </div>
+
+            {% if amount_to_pay == 0 %}
+            <div class="free-upgrade-alert">
+                <i class="fas fa-gift"></i>
+                <div class="alert-content">
+                    <h4>Поздравляем! Смена тарифа бесплатно!</h4>
+                    <p>Стоимость нового тарифа полностью покрывается остатком текущей подписки.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Информационный блок -->
+        <div class="info-block">
+            <i class="fas fa-info-circle"></i>
+            <div class="info-content">
+                <h4>Как это работает?</h4>
+                <p>При смене тарифа мы пересчитываем стоимость оставшихся дней текущей подписки и вычитаем эту сумму из стоимости нового тарифа. Новая подписка начнет действовать сразу после оплаты.</p>
+                <ul>
+                    <li>✓ Оставшиеся дни не сгорают, а конвертируются в деньги</li>
+                    <li>✓ Вы платите только разницу в стоимости</li>
+                    <li>✓ Все привилегии нового тарифа доступны сразу</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Кнопки действий -->
+        <div class="action-buttons">
+            <a href="{% url 'user_app:subscription_plans' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i>
+                Вернуться к выбору
+            </a>
+            
+            <form method="post" action="{% url 'user_app:subscription_change' %}" class="d-inline">
+                {% csrf_token %}
+                <input type="hidden" name="new_plan_id" value="{{ new_plan.id }}">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-check"></i>
+                    {% if amount_to_pay == 0 %}
+                        Подтвердить смену
+                    {% else %}
+                        Оплатить {{ amount_to_pay|floatformat:0 }} ₽
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

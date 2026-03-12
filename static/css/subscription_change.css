@@ -1,0 +1,497 @@
+.change-container {
+    min-height: calc(100vh - 200px);
+    padding: 2rem;
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+}
+
+.change-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.change-header i {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+    animation: floatIcon 3s ease-in-out infinite;
+}
+
+.change-header h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.change-header p {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.1rem;
+}
+
+.change-card {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: rgba(12, 12, 26, 0.8);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 50px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Прогресс смены */
+.change-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step-icon {
+    width: 50px;
+    height: 50px;
+    background: rgba(139, 92, 246, 0.1);
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.progress-step.completed .step-icon {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    border-color: #10b981;
+    color: white;
+}
+
+.progress-step.active .step-icon {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border-color: #ec4899;
+    color: white;
+    box-shadow: 0 0 30px rgba(236, 72, 153, 0.5);
+}
+
+.step-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.progress-line {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #8b5cf6, #ec4899);
+    margin: 0 1rem;
+}
+
+/* Сравнение тарифов */
+.plans-comparison {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.plan-box {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 30px;
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.current-plan-box {
+    border: 2px solid #10b981;
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.new-plan-box {
+    border: 2px solid #8b5cf6;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -12px;
+    left: 2rem;
+    padding: 0.3rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.plan-badge.current {
+    background: #10b981;
+    color: white;
+}
+
+.plan-badge.new {
+    background: #8b5cf6;
+    color: white;
+}
+
+.plan-name {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.plan-price-info {
+    margin-bottom: 1.5rem;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #8b5cf6;
+}
+
+.period {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.popular-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.plan-dates {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 15px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+}
+
+.date-item i {
+    color: #8b5cf6;
+}
+
+.remaining-days-info {
+    background: rgba(236, 72, 153, 0.1);
+    border: 1px solid #ec4899;
+    border-radius: 15px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ec4899;
+}
+
+.plan-features h4 {
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.plan-features li {
+    padding: 0.5rem 0;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plan-features li i {
+    color: #10b981;
+}
+
+.transition-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: #8b5cf6;
+}
+
+.transition-icon .magic-icon {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulse 2s infinite;
+}
+
+/* Детальный расчет */
+.calculation-details {
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 30px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.calculation-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #8b5cf6;
+    margin-bottom: 2rem;
+}
+
+.calculation-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.calculation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.calculation-item:hover {
+    transform: translateX(5px);
+    background: rgba(139, 92, 246, 0.2);
+}
+
+.calculation-item.discount .item-label i {
+    color: #f59e0b;
+}
+
+.calculation-item.total {
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.item-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.item-label i {
+    color: #8b5cf6;
+    width: 20px;
+}
+
+.item-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: white;
+}
+
+.item-value.credit {
+    color: #ec4899;
+}
+
+.total-price {
+    font-size: 1.5rem;
+    color: #8b5cf6 !important;
+}
+
+/* Бесплатное обновление */
+.free-upgrade-alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(52, 211, 153, 0.2));
+    border: 1px solid #10b981;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.free-upgrade-alert i {
+    font-size: 2.5rem;
+    color: #10b981;
+}
+
+.alert-content h4 {
+    color: #10b981;
+    margin-bottom: 0.5rem;
+}
+
+.alert-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+}
+
+/* Информационный блок */
+.info-block {
+    display: flex;
+    gap: 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid #f59e0b;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-block i {
+    font-size: 2rem;
+    color: #f59e0b;
+}
+
+.info-content h4 {
+    color: #f59e0b;
+    margin-bottom: 0.5rem;
+}
+
+.info-content p {
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.5rem;
+}
+
+.info-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.info-content li {
+    margin-bottom: 0.3rem;
+}
+
+/* Кнопки действий */
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid rgba(139, 92, 246, 0.5);
+    color: #8b5cf6;
+}
+
+.btn-outline:hover {
+    border-color: #ec4899;
+    color: #ec4899;
+    transform: translateY(-3px);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #8b5cf6, #ec4899);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+}
+
+/* Анимации */
+@keyframes floatIcon {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Адаптация */
+@media (max-width: 992px) {
+    .plans-comparison {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .transition-icon {
+        flex-direction: row;
+    }
+
+    .transition-icon i:first-child,
+    .transition-icon i:last-child {
+        transform: rotate(90deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .change-card {
+        padding: 1.5rem;
+    }
+
+    .change-progress {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .progress-line {
+        width: 2px;
+        height: 30px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}

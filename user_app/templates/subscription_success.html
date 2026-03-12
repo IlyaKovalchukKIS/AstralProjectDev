@@ -10,17 +10,36 @@
 {% block content %}
 <div class="success-container">
     <div class="success-card">
+        {% if is_test_mode %}
         <div class="test-mode-badge">
             <i class="fas fa-flask"></i> ТЕСТОВЫЙ РЕЖИМ (оплата не производилась)
         </div>
+        {% endif %}
+
+        {% if is_plan_change %}
+        <div class="change-mode-badge">
+            <i class="fas fa-exchange-alt"></i> ТАРИФ УСПЕШНО ИЗМЕНЕН
+        </div>
+        {% endif %}
 
         <div class="success-icon">
             <i class="fas fa-check"></i>
         </div>
 
-        <h1 class="success-title">Подписка активирована!</h1>
+        <h1 class="success-title">
+            {% if is_plan_change %}
+                Тариф изменен!
+            {% else %}
+                Подписка активирована!
+            {% endif %}
+        </h1>
+
         <p class="success-message">
-            Благодарим вас за доверие. Ваша подписка успешно активирована в тестовом режиме.
+            {% if is_plan_change %}
+                Ваш тариф успешно изменен. Новая подписка уже активна!
+            {% else %}
+                Благодарим вас за доверие. Ваша подписка успешно активирована {{ test_mode_text }}.
+            {% endif %}
         </p>
 
         {% if subscription %}
@@ -32,10 +51,24 @@
                 <span class="detail-value">{{ subscription.plan.name }}</span>
             </div>
 
-            <div class="detail-row">
-                <span class="detail-label">Сумма</span>
-                <span class="detail-value">{{ subscription.plan.price }} ₽</span>
+            {% if previous_plan %}
+            <div class="detail-row previous-plan">
+                <span class="detail-label">Предыдущий тариф</span>
+                <span class="detail-value">{{ previous_plan.name }}</span>
             </div>
+            {% endif %}
+
+            <div class="detail-row">
+                <span class="detail-label">Сумма к оплате</span>
+                <span class="detail-value">{{ amount_paid }} ₽</span>
+            </div>
+
+            {% if credit_used %}
+            <div class="detail-row credit-info">
+                <span class="detail-label">Учтено остатков</span>
+                <span class="detail-value">{{ credit_used }} ₽</span>
+            </div>
+            {% endif %}
 
             <div class="detail-row">
                 <span class="detail-label">Дата начала</span>
@@ -60,9 +93,15 @@
             <a href="{% url 'user_app:profile' %}" class="action-btn action-btn-primary">
                 <i class="fas fa-user"></i> Перейти в профиль
             </a>
+            {% if not is_plan_change %}
             <a href="{% url 'user_app:subscription_plans' %}" class="action-btn action-btn-outline">
                 <i class="fas fa-gem"></i> Выбрать другой тариф
             </a>
+            {% else %}
+            <a href="{% url 'user_app:subscription_plans' %}" class="action-btn action-btn-outline">
+                <i class="fas fa-crystal-ball"></i> Вернуться к тарифам
+            </a>
+            {% endif %}
         </div>
     </div>
 </div>
