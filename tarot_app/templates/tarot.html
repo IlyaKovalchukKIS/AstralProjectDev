@@ -5,6 +5,307 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/tarot.css' %}">
+<style>
+    /* Стили для кнопки сохранения и списка сохраненных раскладов */
+    .save-spread-btn {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .save-spread-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+    }
+
+    .save-spread-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .saved-spreads-section {
+        margin-top: 3rem;
+        padding: 2rem;
+        background: rgba(12, 12, 26, 0.8);
+        backdrop-filter: blur(20px);
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 30px;
+    }
+
+    .saved-spreads-title {
+        color: white;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .saved-spreads-title i {
+        color: #8b5cf6;
+        font-size: 2rem;
+    }
+
+    .saved-spreads-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .saved-spread-card {
+        background: rgba(139, 92, 246, 0.1);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .saved-spread-card:hover {
+        transform: translateY(-5px);
+        border-color: #ec4899;
+        box-shadow: 0 10px 30px rgba(236, 72, 153, 0.2);
+    }
+
+    .saved-spread-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .saved-spread-type {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: white;
+        padding: 0.3rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .saved-spread-date {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.8rem;
+    }
+
+    .saved-spread-cards {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .saved-card-mini {
+        width: 40px;
+        height: 60px;
+        background: linear-gradient(135deg, #2a1b3d, #1a1a2e);
+        border: 1px solid #8b5cf6;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .saved-card-mini.upside-down::after {
+        content: '↻';
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        font-size: 10px;
+        color: #ec4899;
+    }
+
+    .saved-spread-question {
+        color: rgba(255, 255, 255, 0.8);
+        font-style: italic;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        padding: 0.5rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    .saved-spread-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .saved-spread-btn {
+        flex: 1;
+        padding: 0.5rem;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.3rem;
+    }
+
+    .saved-spread-btn.view {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: white;
+    }
+
+    .saved-spread-btn.delete {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid #ef4444;
+    }
+
+    .saved-spread-btn.view:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+    }
+
+    .saved-spread-btn.delete:hover {
+        background: rgba(239, 68, 68, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .empty-saved {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-saved i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        color: #8b5cf6;
+    }
+
+    /* Модальное окно для ввода вопроса */
+    .question-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .question-modal.show {
+        display: flex;
+    }
+
+    .question-modal-content {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 2px solid #8b5cf6;
+        border-radius: 30px;
+        padding: 2rem;
+        max-width: 500px;
+        width: 90%;
+        position: relative;
+    }
+
+    .question-modal-title {
+        color: #8b5cf6;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .question-input {
+        width: 100%;
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid #8b5cf6;
+        border-radius: 15px;
+        color: white;
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .question-input:focus {
+        outline: none;
+        border-color: #ec4899;
+        box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+    }
+
+    .question-modal-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .question-modal-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .question-modal-btn.cancel {
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .question-modal-btn.save {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        color: white;
+    }
+
+    .question-modal-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    /* Индикатор сохранения */
+    .save-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #10b981, #34d399);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 3000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -55,9 +356,37 @@
             </div>
         </div>
     </div>
+
+    <!-- Кнопка сохранения расклада -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <button class="save-spread-btn" id="saveSpreadBtn" disabled>
+                <i class="bi bi-bookmark-star"></i>
+                Сохранить этот расклад
+            </button>
+        </div>
+    </div>
+
+    <!-- Сохраненные расклады -->
+    <div class="row">
+        <div class="col-12">
+            <div class="saved-spreads-section">
+                <h2 class="saved-spreads-title">
+                    <i class="bi bi-journal-bookmark-fill"></i>
+                    Ваши сохраненные расклады
+                </h2>
+                <div id="savedSpreadsContainer">
+                    <div class="empty-saved">
+                        <i class="bi bi-journal-text"></i>
+                        <p>У вас пока нет сохраненных раскладов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Кастомное модальное окно (проще и надежнее) -->
+<!-- Модальное окно для карты -->
 <div class="custom-modal" id="cardModal">
     <div class="custom-modal-content">
         <button class="custom-modal-close" id="closeModalBtn">&times;</button>
@@ -76,19 +405,45 @@
         </div>
     </div>
 </div>
+
+<!-- Модальное окно для ввода вопроса -->
+<div class="question-modal" id="questionModal">
+    <div class="question-modal-content">
+        <h3 class="question-modal-title">
+            <i class="bi bi-question-circle"></i>
+            Сохранить расклад
+        </h3>
+        <input type="text" class="question-input" id="questionInput"
+               placeholder="Введите ваш вопрос (необязательно)" maxlength="200">
+        <div class="question-modal-buttons">
+            <button class="question-modal-btn cancel" id="cancelSaveBtn">
+                <i class="bi bi-x"></i> Отмена
+            </button>
+            <button class="question-modal-btn save" id="confirmSaveBtn">
+                <i class="bi bi-check"></i> Сохранить
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Элементы DOM
         const spreadOne = document.getElementById('spreadOne');
         const spreadThree = document.getElementById('spreadThree');
         const spreadCeltic = document.getElementById('spreadCeltic');
         const spreadContainer = document.getElementById('spreadContainer');
         const spreadPlaceholder = document.getElementById('spreadPlaceholder');
+        const saveSpreadBtn = document.getElementById('saveSpreadBtn');
+        const savedSpreadsContainer = document.getElementById('savedSpreadsContainer');
+        const questionModal = document.getElementById('questionModal');
+        const questionInput = document.getElementById('questionInput');
+        const cancelSaveBtn = document.getElementById('cancelSaveBtn');
+        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
 
-        // Элементы модального окна
+        // Элементы модального окна карты
         const modal = document.getElementById('cardModal');
         const closeModalBtn = document.getElementById('closeModalBtn');
         const modalTitle = document.getElementById('modalTitle');
@@ -112,33 +467,224 @@
         ];
 
         let currentCard = null;
+        let currentSpread = null;
+        let currentSpreadType = null;
 
-        // Функции для модального окна
+        // Загрузка сохраненных раскладов из localStorage
+        function loadSavedSpreads() {
+            const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
+            renderSavedSpreads(savedSpreads);
+        }
+
+        // Сохранение расклада
+        function saveSpread(question = '') {
+            if (!currentSpread || !currentSpreadType) return;
+
+            const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
+
+            const newSpread = {
+                id: Date.now(),
+                date: new Date().toISOString(),
+                type: currentSpreadType,
+                cards: currentSpread.map(card => ({
+                    id: card.id,
+                    name: card.name,
+                    description: card.description,
+                    description_flip: card.description_flip || '',
+                    is_upside_down: card.is_upside_down,
+                    image_url: card.image_url
+                })),
+                question: question.trim()
+            };
+
+            savedSpreads.unshift(newSpread);
+            localStorage.setItem('tarotSpreads', JSON.stringify(savedSpreads));
+
+            renderSavedSpreads(savedSpreads);
+            showNotification('Расклад успешно сохранен!');
+
+            questionInput.value = '';
+            questionModal.classList.remove('show');
+        }
+
+        // Удаление расклада
+        function deleteSpread(id) {
+            if (confirm('Вы уверены, что хотите удалить этот расклад?')) {
+                const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
+                const filtered = savedSpreads.filter(s => s.id !== id);
+                localStorage.setItem('tarotSpreads', JSON.stringify(filtered));
+                renderSavedSpreads(filtered);
+                showNotification('Расклад удален', 'warning');
+            }
+        }
+
+        // Просмотр сохраненного расклада
+        function viewSavedSpread(spread) {
+            // Восстанавливаем карты из сохраненного расклада
+            currentSpread = spread.cards;
+            currentSpreadType = spread.type;
+
+            // Отображаем карты
+            renderCards(spread.cards, spread.type);
+            saveSpreadBtn.disabled = false;
+
+            // Подсвечиваем активную кнопку
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            if (spread.type === 'one') {
+                spreadOne.classList.add('active');
+            } else if (spread.type === 'three') {
+                spreadThree.classList.add('active');
+            } else if (spread.type === 'celtic') {
+                spreadCeltic.classList.add('active');
+            }
+
+            // Прокручиваем к контейнеру с картами
+            spreadContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Отображение сохраненных раскладов
+        function renderSavedSpreads(spreads) {
+            if (spreads.length === 0) {
+                savedSpreadsContainer.innerHTML = `
+                    <div class="empty-saved">
+                        <i class="bi bi-journal-text"></i>
+                        <p>У вас пока нет сохраненных раскладов</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="saved-spreads-grid">';
+
+            spreads.forEach((spread) => {
+                const date = new Date(spread.date);
+                const formattedDate = date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                let typeText = '';
+                if (spread.type === 'one') typeText = 'Одна карта';
+                else if (spread.type === 'three') typeText = 'Три карты';
+                else if (spread.type === 'celtic') typeText = 'Кельтский крест';
+
+                html += `
+                    <div class="saved-spread-card" data-spread-id="${spread.id}">
+                        <div class="saved-spread-header">
+                            <span class="saved-spread-type">${typeText}</span>
+                            <span class="saved-spread-date">${formattedDate}</span>
+                        </div>
+                        <div class="saved-spread-cards">
+                `;
+
+                spread.cards.slice(0, 5).forEach(card => {
+                    html += `
+                        <div class="saved-card-mini ${card.is_upside_down ? 'upside-down' : ''}">
+                            ${card.name.substring(0, 2)}
+                        </div>
+                    `;
+                });
+
+                if (spread.cards.length > 5) {
+                    html += `<div class="saved-card-mini">+${spread.cards.length - 5}</div>`;
+                }
+
+                html += `</div>`;
+
+                if (spread.question) {
+                    html += `<div class="saved-spread-question">"${spread.question}"</div>`;
+                }
+
+                html += `
+                        <div class="saved-spread-actions">
+                            <button class="saved-spread-btn view" data-spread-id="${spread.id}">
+                                <i class="bi bi-eye"></i> Просмотр
+                            </button>
+                            <button class="saved-spread-btn delete" data-spread-id="${spread.id}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            savedSpreadsContainer.innerHTML = html;
+
+            // Добавляем обработчики для новых кнопок
+            addSavedSpreadHandlers(spreads);
+        }
+
+        // Добавление обработчиков для сохраненных раскладов
+        function addSavedSpreadHandlers(spreads) {
+            // Обработчики для кнопок просмотра
+            document.querySelectorAll('.saved-spread-btn.view').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const spreadId = parseInt(this.dataset.spreadId);
+                    const spread = spreads.find(s => s.id === spreadId);
+                    if (spread) {
+                        viewSavedSpread(spread);
+                    } else {
+                        console.error('Spread not found:', spreadId);
+                        showNotification('Ошибка при загрузке расклада', 'error');
+                    }
+                });
+            });
+
+            // Обработчики для кнопок удаления
+            document.querySelectorAll('.saved-spread-btn.delete').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const spreadId = parseInt(this.dataset.spreadId);
+                    deleteSpread(spreadId);
+                });
+            });
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'save-notification';
+            notification.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Функции для модального окна карты
         function openModal() {
             modal.classList.add('show');
-            document.body.style.overflow = 'hidden'; // запрещаем прокрутку фона
+            document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             modal.classList.remove('show');
-            document.body.style.overflow = ''; // возвращаем прокрутку
+            document.body.style.overflow = '';
         }
 
-        // Закрытие по клику на фон
-        modal.addEventListener('click', function(e) {
+        modal.addEventListener('click', function (e) {
             if (e.target === modal) {
                 closeModal();
             }
         });
 
-        // Закрытие по Escape
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape' && modal.classList.contains('show')) {
                 closeModal();
             }
         });
 
-        // Закрытие по кнопке
         closeModalBtn.addEventListener('click', closeModal);
 
         // Функция перемешивания массива
@@ -157,7 +703,11 @@
             const selected = shuffled.slice(0, count);
 
             return selected.map(card => ({
-                ...card,
+                id: card.id,
+                name: card.name,
+                description: card.description,
+                description_flip: card.description_flip || '',
+                image_url: card.image_url,
                 is_upside_down: Math.random() < 0.3
             }));
         }
@@ -196,9 +746,9 @@
                             <div class="card-position">${index + 1}. ${positions[index]}</div>
                             <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
                                 ${card.image_url ?
-                                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
-                                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
-                                }
+                        `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                        `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                    }
                             </div>
                         </div>
                     `;
@@ -217,9 +767,9 @@
                              data-upside-down="${card.is_upside_down}">
                             <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
                                 ${card.image_url ?
-                                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
-                                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
-                                }
+                        `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                        `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                    }
                             </div>
                         </div>
                     `;
@@ -236,6 +786,7 @@
 
             spreadContainer.innerHTML = html;
             spreadPlaceholder.style.display = 'none';
+            saveSpreadBtn.disabled = false;
 
             addCardClickHandlers();
         }
@@ -243,7 +794,7 @@
         // Обработчики клика на карты
         function addCardClickHandlers() {
             document.querySelectorAll('.card-wrapper').forEach(wrapper => {
-                wrapper.addEventListener('click', function() {
+                wrapper.addEventListener('click', function () {
                     const card = {
                         id: this.dataset.id,
                         name: this.dataset.name,
@@ -282,7 +833,7 @@
         }
 
         // Обработчики кнопок раскладов
-        spreadOne.addEventListener('click', function() {
+        spreadOne.addEventListener('click', function () {
             [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
 
@@ -295,11 +846,13 @@
 
             setTimeout(() => {
                 const cards = getRandomCards(1);
+                currentSpread = cards;
+                currentSpreadType = 'one';
                 renderCards(cards, 'one');
             }, 500);
         });
 
-        spreadThree.addEventListener('click', function() {
+        spreadThree.addEventListener('click', function () {
             [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
 
@@ -312,11 +865,13 @@
 
             setTimeout(() => {
                 const cards = getRandomCards(3);
+                currentSpread = cards;
+                currentSpreadType = 'three';
                 renderCards(cards, 'three');
             }, 500);
         });
 
-        spreadCeltic.addEventListener('click', function() {
+        spreadCeltic.addEventListener('click', function () {
             [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
 
@@ -329,12 +884,14 @@
 
             setTimeout(() => {
                 const cards = getRandomCards(10);
+                currentSpread = cards;
+                currentSpreadType = 'celtic';
                 renderCards(cards, 'celtic');
             }, 500);
         });
 
         // Кнопки переключения значений в модалке
-        showUpright.addEventListener('click', function() {
+        showUpright.addEventListener('click', function () {
             if (currentCard) {
                 modalDesc.textContent = currentCard.description;
                 if (modalImage.style.display !== 'none') {
@@ -343,7 +900,7 @@
             }
         });
 
-        showReversed.addEventListener('click', function() {
+        showReversed.addEventListener('click', function () {
             if (currentCard && currentCard.description_flip) {
                 modalDesc.textContent = currentCard.description_flip;
                 if (modalImage.style.display !== 'none') {
@@ -351,6 +908,34 @@
                 }
             }
         });
+
+        // Обработчик кнопки сохранения
+        saveSpreadBtn.addEventListener('click', function () {
+            if (currentSpread) {
+                questionModal.classList.add('show');
+                questionInput.focus();
+            }
+        });
+
+        // Обработчики модального окна вопроса
+        cancelSaveBtn.addEventListener('click', function () {
+            questionModal.classList.remove('show');
+            questionInput.value = '';
+        });
+
+        confirmSaveBtn.addEventListener('click', function () {
+            saveSpread(questionInput.value);
+        });
+
+        questionModal.addEventListener('click', function (e) {
+            if (e.target === questionModal) {
+                questionModal.classList.remove('show');
+                questionInput.value = '';
+            }
+        });
+
+        // Загрузка сохраненных раскладов
+        loadSavedSpreads();
 
         // Проверка наличия карт
         if (allCards.length === 0) {
