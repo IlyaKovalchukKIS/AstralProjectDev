@@ -34,23 +34,23 @@
                             <i class="bi bi-suit-spade-fill me-1"></i>Таро
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/runes' in request.path %}active{% endif %}" href="{% url 'runes' %}">
-                            <i class="bi bi-tree me-1"></i>Руны
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/moon-calendar' in request.path %}active{% endif %}"
-                           href="{% url 'moon_calendar' %}">
-                            <i class="bi bi-moon-stars me-1"></i>Лунный календарь
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if '/human-design' in request.path %}active{% endif %}"
-                           href="{% url 'human_design' %}">
-                            <i class="bi bi-person-standing-dress me-1"></i>HumanDesign
-                        </a>
-                    </li>
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link {% if '/runes' in request.path %}active{% endif %}" href="{% url 'runes' %}">-->
+                    <!--                            <i class="bi bi-tree me-1"></i>Руны-->
+                    <!--                        </a>-->
+                    <!--                    </li>-->
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link {% if '/moon-calendar' in request.path %}active{% endif %}"-->
+                    <!--                           href="{% url 'moon_calendar' %}">-->
+                    <!--                            <i class="bi bi-moon-stars me-1"></i>Лунный календарь-->
+                    <!--                        </a>-->
+                    <!--                    </li>-->
+                    <!--                    <li class="nav-item">-->
+                    <!--                        <a class="nav-link {% if '/human-design' in request.path %}active{% endif %}"-->
+                    <!--                           href="{% url 'human_design' %}">-->
+                    <!--                            <i class="bi bi-person-standing-dress me-1"></i>HumanDesign-->
+                    <!--                        </a>-->
+                    <!--                    </li>-->
                     {% if user.is_authenticated %}
                     <!-- Пользователь авторизован -->
                     <li class="nav-item dropdown">
