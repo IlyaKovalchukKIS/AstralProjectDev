@@ -438,548 +438,603 @@
 
 {% block extra_js %}
 <script>
-   document.addEventListener('DOMContentLoaded', function () {
-    // Элементы DOM
-    const spreadOne = document.getElementById('spreadOne');
-    const spreadThree = document.getElementById('spreadThree');
-    const spreadCeltic = document.getElementById('spreadCeltic');
-    const spreadContainer = document.getElementById('spreadContainer');
-    const spreadPlaceholder = document.getElementById('spreadPlaceholder');
-    const saveSpreadBtn = document.getElementById('saveSpreadBtn');
-    const savedSpreadsContainer = document.getElementById('savedSpreadsContainer');
-    const questionModal = document.getElementById('questionModal');
-    const questionInput = document.getElementById('questionInput');
-    const cancelSaveBtn = document.getElementById('cancelSaveBtn');
-    const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+    document.addEventListener('DOMContentLoaded', function () {
+        // Элементы DOM
+        const spreadOne = document.getElementById('spreadOne');
+        const spreadThree = document.getElementById('spreadThree');
+        const spreadCeltic = document.getElementById('spreadCeltic');
+        const spreadContainer = document.getElementById('spreadContainer');
+        const spreadPlaceholder = document.getElementById('spreadPlaceholder');
+        const saveSpreadBtn = document.getElementById('saveSpreadBtn');
+        const savedSpreadsContainer = document.getElementById('savedSpreadsContainer');
+        const questionModal = document.getElementById('questionModal');
+        const questionInput = document.getElementById('questionInput');
+        const cancelSaveBtn = document.getElementById('cancelSaveBtn');
+        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
 
-    // Элементы модального окна карты
-    const modal = document.getElementById('cardModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-    const modalImage = document.getElementById('modalImage');
-    const modalFooter = document.getElementById('modalFooter');
-    const showUpright = document.getElementById('showUpright');
-    const showReversed = document.getElementById('showReversed');
+        // Элементы модального окна карты
+        const modal = document.getElementById('cardModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+        const modalImage = document.getElementById('modalImage');
+        const modalFooter = document.getElementById('modalFooter');
+        const showUpright = document.getElementById('showUpright');
+        const showReversed = document.getElementById('showReversed');
 
-    // Все карты из базы данных
-    const allCards = [
-        {% for card in cards %}
-        {
-            id: {{ card.id }},
-            name: "{{ card.name|escapejs }}",
-            description: `{{ card.description|escapejs }}`,
-            description_flip: `{{ card.description_flip|default:''|escapejs }}`,
-            image_url: "{% if card.image %}{{ card.image.url }}{% endif %}"
-        },
-        {% endfor %}
-    ];
+        // Базовый URL для API
+        const API_BASE_URL = '/api/spreads/';
 
-    let currentCard = null;
-    let currentSpread = null;
-    let currentSpreadType = null;
+        // Все карты из базы данных
+        const allCards = [
+            {% for card in cards %}
+            {
+                id: {{ card.id }},
+                name: "{{ card.name|escapejs }}",
+                description: `{{ card.description|escapejs }}`,
+                description_flip: `{{ card.description_flip|default:''|escapejs }}`,
+                image_url: "{% if card.image %}{{ card.image.url }}{% endif %}"
+            },
+            {% endfor %}
+        ];
 
-    // Загрузка сохраненных раскладов из localStorage
-    function loadSavedSpreads() {
-        const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
-        renderSavedSpreads(savedSpreads);
-    }
+        let currentCard = null;
+        let currentSpread = null;
+        let currentSpreadType = null;
 
-    // Сохранение расклада
-    function saveSpread(question = '') {
-        if (!currentSpread || !currentSpreadType) return;
-
-        const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
-
-        const newSpread = {
-            id: Date.now(),
-            date: new Date().toISOString(),
-            type: currentSpreadType,
-            cards: currentSpread.map(card => ({
-                id: card.id,
-                name: card.name,
-                description: card.description,
-                description_flip: card.description_flip || '',
-                is_upside_down: card.is_upside_down,
-                image_url: card.image_url
-            })),
-            question: question.trim()
-        };
-
-        savedSpreads.unshift(newSpread);
-        localStorage.setItem('tarotSpreads', JSON.stringify(savedSpreads));
-
-        renderSavedSpreads(savedSpreads);
-        showNotification('Расклад успешно сохранен!');
-
-        questionInput.value = '';
-        questionModal.classList.remove('show');
-    }
-
-    // Удаление расклада
-    function deleteSpread(id) {
-        if (confirm('Вы уверены, что хотите удалить этот расклад?')) {
-            const savedSpreads = JSON.parse(localStorage.getItem('tarotSpreads') || '[]');
-            const filtered = savedSpreads.filter(s => s.id !== id);
-            localStorage.setItem('tarotSpreads', JSON.stringify(filtered));
-            renderSavedSpreads(filtered);
-            showNotification('Расклад удален', 'warning');
-        }
-    }
-
-    // Просмотр сохраненного расклада
-    function viewSavedSpread(spread) {
-        // Восстанавливаем карты из сохраненного расклада
-        currentSpread = spread.cards;
-        currentSpreadType = spread.type;
-
-        // Отображаем карты
-        renderCards(spread.cards, spread.type);
-        saveSpreadBtn.disabled = false;
-
-        // Подсвечиваем активную кнопку
-        [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
-        if (spread.type === 'one') {
-            spreadOne.classList.add('active');
-        } else if (spread.type === 'three') {
-            spreadThree.classList.add('active');
-        } else if (spread.type === 'celtic') {
-            spreadCeltic.classList.add('active');
+        // Функция для получения CSRF токена из куки
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
 
-        // Прокручиваем к контейнеру с картами
-        spreadContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+        const csrfToken = getCookie('csrftoken');
 
-    // Отображение сохраненных раскладов
-    function renderSavedSpreads(spreads) {
-        if (spreads.length === 0) {
+        // Базовая функция для fetch запросов
+        async function fetchAPI(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            };
+
+            const fetchOptions = {...defaultOptions, ...options};
+
+            try {
+                const response = await fetch(url, fetchOptions);
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        showNotification('Необходимо войти в систему', 'error');
+                        setTimeout(() => {
+                            window.location.href = '/login/?next=' + encodeURIComponent(window.location.pathname);
+                        }, 2000);
+                        return null;
+                    }
+                    if (response.status === 404) {
+                        throw new Error('Ресурс не найден');
+                    }
+                    throw new Error(`Ошибка сервера: ${response.status}`);
+                }
+
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return await response.json();
+                }
+                return {success: true};
+            } catch (error) {
+                console.error('Fetch error:', error);
+                throw error;
+            }
+        }
+
+        // Загрузка сохраненных раскладов
+        async function loadSavedSpreads() {
+            try {
+                const data = await fetchAPI(API_BASE_URL);
+                if (data) {
+                    renderSavedSpreads(data);
+                } else {
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading spreads:', error);
+                showEmptyState();
+            }
+        }
+
+        function showEmptyState() {
             savedSpreadsContainer.innerHTML = `
                 <div class="empty-saved">
                     <i class="bi bi-journal-text"></i>
                     <p>У вас пока нет сохраненных раскладов</p>
                 </div>
             `;
-            return;
         }
 
-        let html = '<div class="saved-spreads-grid">';
+        // Сохранение расклада
+        async function saveSpread(question = '') {
+            if (!currentSpread || !currentSpreadType) {
+                showNotification('Нет расклада для сохранения', 'error');
+                return;
+            }
 
-        spreads.forEach((spread) => {
-            const date = new Date(spread.date);
-            const formattedDate = date.toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
+            const spreadData = {
+                spread_type: currentSpreadType,
+                question: question.trim(),
+                cards: currentSpread.map(card => ({
+                    id: card.id,
+                    name: card.name,
+                    description: card.description,
+                    description_flip: card.description_flip || '',
+                    is_upside_down: card.is_upside_down || false,
+                    image_url: card.image_url || ''
+                }))
+            };
 
-            let typeText = '';
-            if (spread.type === 'one') typeText = 'Одна карта';
-            else if (spread.type === 'three') typeText = 'Три карты';
-            else if (spread.type === 'celtic') typeText = 'Кельтский крест';
+            try {
+                const data = await fetchAPI(API_BASE_URL + 'save/', {
+                    method: 'POST',
+                    body: JSON.stringify(spreadData)
+                });
 
-            html += `
-                <div class="saved-spread-card" data-spread-id="${spread.id}">
-                    <div class="saved-spread-header">
-                        <span class="saved-spread-type">${typeText}</span>
-                        <span class="saved-spread-date">${formattedDate}</span>
-                    </div>
-                    <div class="saved-spread-cards">
-            `;
-
-            spread.cards.slice(0, 5).forEach(card => {
-                if (card.image_url) {
-                    html += `
-                        <div class="saved-card-mini ${card.is_upside_down ? 'upside-down' : ''}"
-                             style="background: none; overflow: hidden; padding: 0;">
-                            <img src="${card.image_url}"
-                                 alt="${card.name}"
-                                 style="width: 100%; height: 100%; object-fit: cover;
-                                        ${card.is_upside_down ? 'transform: rotate(180deg);' : ''}"
-                                 loading="lazy">
-                        </div>
-                    `;
+                if (data && data.success) {
+                    showNotification('Расклад успешно сохранен!');
+                    questionInput.value = '';
+                    questionModal.classList.remove('show');
+                    await loadSavedSpreads();
                 } else {
-                    html += `
-                        <div class="saved-card-mini ${card.is_upside_down ? 'upside-down' : ''}">
-                            ${card.name.substring(0, 2)}
-                        </div>
-                    `;
+                    showNotification('Ошибка при сохранении', 'error');
                 }
-            });
+            } catch (error) {
+                console.error('Error saving spread:', error);
+                showNotification('Ошибка при сохранении: ' + error.message, 'error');
+            }
+        }
 
-            if (spread.cards.length > 5) {
-                html += `<div class="saved-card-mini">+${spread.cards.length - 5}</div>`;
+        // Удаление расклада
+        async function deleteSpread(id) {
+            if (!confirm('Вы уверены, что хотите удалить этот расклад?')) {
+                return;
             }
 
-            html += `</div>`;
+            try {
+                const data = await fetchAPI(API_BASE_URL + id + '/delete/', {
+                    method: 'DELETE'
+                });
 
-            if (spread.question) {
-                html += `<div class="saved-spread-question">"${spread.question}"</div>`;
+                if (data && data.success) {
+                    showNotification('Расклад удален');
+                    await loadSavedSpreads();
+                } else {
+                    showNotification('Ошибка при удалении', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting spread:', error);
+                showNotification('Ошибка при удалении: ' + error.message, 'error');
+            }
+        }
+
+        // Просмотр сохраненного расклада
+        async function viewSavedSpread(spreadId) {
+            try {
+                const data = await fetchAPI(API_BASE_URL + spreadId + '/');
+
+                if (!data) return;
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Преобразуем данные для отображения
+                currentSpread = (data.cards || []).map(card => ({
+                    ...card,
+                    is_upside_down: card.is_upside_down || false
+                }));
+                currentSpreadType = data.type;
+
+                renderCards(currentSpread, data.type);
+                saveSpreadBtn.disabled = false;
+
+                // Подсвечиваем активную кнопку
+                [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+                if (data.type === 'one') {
+                    spreadOne.classList.add('active');
+                } else if (data.type === 'three') {
+                    spreadThree.classList.add('active');
+                } else if (data.type === 'celtic') {
+                    spreadCeltic.classList.add('active');
+                }
+
+                spreadContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
+            } catch (error) {
+                console.error('Error loading spread:', error);
+                showNotification('Ошибка загрузки расклада: ' + error.message, 'error');
+            }
+        }
+
+        // Отображение сохраненных раскладов
+        function renderSavedSpreads(spreads) {
+            if (!spreads || spreads.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            let html = '<div class="saved-spreads-grid">';
+
+            spreads.forEach((spread) => {
+                const date = new Date(spread.created_at || spread.date);
+                const formattedDate = date.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const typeText = spread.type_display ||
+                    (spread.type === 'one' ? 'Одна карта' :
+                     spread.type === 'three' ? 'Три карты' : 'Кельтский крест');
+
+                html += `
+                    <div class="saved-spread-card" data-spread-id="${spread.id}">
+                        <div class="saved-spread-header">
+                            <span class="saved-spread-type">${typeText}</span>
+                            <span class="saved-spread-date">${formattedDate}</span>
+                        </div>
+                        <div class="saved-spread-cards">
+                `;
+
+                (spread.cards || []).slice(0, 5).forEach(card => {
+                    if (card.image_url) {
+                        html += `
+                            <div class="saved-card-mini ${card.is_upside_down ? 'upside-down' : ''}">
+                                <img src="${card.image_url}"
+                                     alt="${card.name}"
+                                     style="width: 100%; height: 100%; object-fit: cover;
+                                            ${card.is_upside_down ? 'transform: rotate(180deg);' : ''}"
+                                     loading="lazy"
+                                     onerror="this.style.display='none'; this.parentNode.innerHTML='${card.name ? card.name.substring(0, 2) : '??'}';">
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="saved-card-mini ${card.is_upside_down ? 'upside-down' : ''}">
+                                ${card.name ? card.name.substring(0, 2) : '??'}
+                            </div>
+                        `;
+                    }
+                });
+
+                if ((spread.cards || []).length > 5) {
+                    html += `<div class="saved-card-mini">+${spread.cards.length - 5}</div>`;
+                }
+
+                html += `</div>`;
+
+                if (spread.question) {
+                    html += `<div class="saved-spread-question">"${spread.question}"</div>`;
+                }
+
+                html += `
+                        <div class="saved-spread-actions">
+                            <button class="saved-spread-btn view" onclick="viewSavedSpread(${spread.id})">
+                                <i class="bi bi-eye"></i> Просмотр
+                            </button>
+                            <button class="saved-spread-btn delete" onclick="deleteSpread(${spread.id})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            savedSpreadsContainer.innerHTML = html;
+        }
+
+        // Показать уведомление
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'save-notification';
+            notification.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Функции для модального окна карты
+        function openModal() {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
+            }
+        });
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        // Функция перемешивания массива
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Получение случайных карт
+        function getRandomCards(count) {
+            if (allCards.length === 0) return [];
+            const shuffled = shuffleArray([...allCards]);
+            const selected = shuffled.slice(0, count);
+
+            return selected.map(card => ({
+                id: card.id,
+                name: card.name,
+                description: card.description,
+                description_flip: card.description_flip || '',
+                image_url: card.image_url,
+                is_upside_down: Math.random() < 0.3
+            }));
+        }
+
+        // Отображение карт
+        function renderCards(cards, spreadType) {
+            if (!cards || cards.length === 0) {
+                spreadContainer.innerHTML = `
+                    <div class="text-center p-5">
+                        <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
+                        <p class="lead mt-3">Недостаточно карт в колоде</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+
+            if (spreadType === 'celtic') {
+                html = '<div class="celtic-cross">';
+                const positions = [
+                    'Настоящее', 'Препятствие', 'Прошлое', 'Будущее',
+                    'Сознание', 'Подсознание', 'Совет', 'Окружение',
+                    'Надежды', 'Итог'
+                ];
+
+                cards.forEach((card, index) => {
+                    const cardData = encodeURIComponent(JSON.stringify({
+                        name: card.name,
+                        description: card.description,
+                        description_flip: card.description_flip || '',
+                        image_url: card.image_url || '',
+                        is_upside_down: card.is_upside_down
+                    }));
+
+                    html += `
+                        <div class="card-wrapper" onclick='showCardModal(${JSON.stringify(card).replace(/'/g, "\\'")})'>
+                            <div class="card-position">${index + 1}. ${positions[index]}</div>
+                            <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
+                                ${card.image_url ?
+                        `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                        `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                    }
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            } else {
+                html = '<div class="cards-grid">';
+                cards.forEach(card => {
+                    html += `
+                        <div class="card-wrapper" onclick='showCardModal(${JSON.stringify(card).replace(/'/g, "\\'")})'>
+                            <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
+                                ${card.image_url ?
+                        `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
+                        `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
+                    }
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
             }
 
             html += `
-                    <div class="saved-spread-actions">
-                        <button class="saved-spread-btn view" data-spread-id="${spread.id}">
-                            <i class="bi bi-eye"></i> Просмотр
-                        </button>
-                        <button class="saved-spread-btn delete" data-spread-id="${spread.id}">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </div>
+                <div class="text-center mt-4 text-secondary">
+                    <i class="bi bi-info-circle"></i>
+                    Нажмите на карту, чтобы увидеть описание
                 </div>
             `;
+
+            spreadContainer.innerHTML = html;
+            spreadPlaceholder.style.display = 'none';
+            saveSpreadBtn.disabled = false;
+        }
+
+        // Показать модальное окно с картой
+        window.showCardModal = function(card) {
+            currentCard = card;
+
+            modalTitle.textContent = card.name;
+
+            const description = card.is_upside_down && card.description_flip ?
+                card.description_flip : card.description;
+            modalDesc.textContent = description;
+
+            if (card.image_url) {
+                modalImage.src = card.image_url;
+                modalImage.style.display = 'block';
+                modalImage.style.transform = card.is_upside_down ? 'rotate(180deg)' : 'none';
+            } else {
+                modalImage.style.display = 'none';
+            }
+
+            modalFooter.style.display = card.description_flip ? 'flex' : 'none';
+
+            openModal();
+        };
+
+        // Обработчики кнопок раскладов
+        spreadOne.addEventListener('click', function () {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Расклад одной карты...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const cards = getRandomCards(1);
+                currentSpread = cards;
+                currentSpreadType = 'one';
+                renderCards(cards, 'one');
+            }, 500);
         });
 
-        html += '</div>';
-        savedSpreadsContainer.innerHTML = html;
+        spreadThree.addEventListener('click', function () {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
 
-        // Добавляем обработчики для новых кнопок
-        addSavedSpreadHandlers(spreads);
-    }
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Расклад трёх карт...</p>
+                </div>
+            `;
 
-    // Добавление обработчиков для сохраненных раскладов
-    function addSavedSpreadHandlers(spreads) {
-        // Обработчики для кнопок просмотра
-        document.querySelectorAll('.saved-spread-btn.view').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const spreadId = parseInt(this.dataset.spreadId);
-                const spread = spreads.find(s => s.id === spreadId);
-                if (spread) {
-                    viewSavedSpread(spread);
-                } else {
-                    console.error('Spread not found:', spreadId);
-                    showNotification('Ошибка при загрузке расклада', 'error');
+            setTimeout(() => {
+                const cards = getRandomCards(3);
+                currentSpread = cards;
+                currentSpreadType = 'three';
+                renderCards(cards, 'three');
+            }, 500);
+        });
+
+        spreadCeltic.addEventListener('click', function () {
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            spreadContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p class="mt-3">Кельтский крест...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                const cards = getRandomCards(10);
+                currentSpread = cards;
+                currentSpreadType = 'celtic';
+                renderCards(cards, 'celtic');
+            }, 500);
+        });
+
+        // Кнопки переключения значений в модалке
+        showUpright.addEventListener('click', function () {
+            if (currentCard) {
+                modalDesc.textContent = currentCard.description;
+                if (modalImage.style.display !== 'none') {
+                    modalImage.style.transform = 'none';
                 }
-            });
+            }
         });
 
-        // Обработчики для кнопок удаления
-        document.querySelectorAll('.saved-spread-btn.delete').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const spreadId = parseInt(this.dataset.spreadId);
-                deleteSpread(spreadId);
-            });
+        showReversed.addEventListener('click', function () {
+            if (currentCard && currentCard.description_flip) {
+                modalDesc.textContent = currentCard.description_flip;
+                if (modalImage.style.display !== 'none') {
+                    modalImage.style.transform = 'rotate(180deg)';
+                }
+            }
         });
-    }
 
-    // Показать уведомление
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.className = 'save-notification';
-        notification.innerHTML = `
-            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            ${message}
-        `;
-        document.body.appendChild(notification);
+        // Обработчик кнопки сохранения
+        saveSpreadBtn.addEventListener('click', function () {
+            if (currentSpread) {
+                questionModal.classList.add('show');
+                questionInput.focus();
+            } else {
+                showNotification('Сначала сделайте расклад', 'warning');
+            }
+        });
 
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
-    }
+        // Обработчики модального окна вопроса
+        cancelSaveBtn.addEventListener('click', function () {
+            questionModal.classList.remove('show');
+            questionInput.value = '';
+        });
 
-    // Функции для модального окна карты
-    function openModal() {
-        modal.classList.add('show');
-        document.body.style.overflow = 'hidden';
-    }
+        confirmSaveBtn.addEventListener('click', function () {
+            saveSpread(questionInput.value);
+        });
 
-    function closeModal() {
-        modal.classList.remove('show');
-        document.body.style.overflow = '';
-    }
+        questionModal.addEventListener('click', function (e) {
+            if (e.target === questionModal) {
+                questionModal.classList.remove('show');
+                questionInput.value = '';
+            }
+        });
 
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
+        // Загрузка сохраненных раскладов
+        loadSavedSpreads();
 
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal.classList.contains('show')) {
-            closeModal();
-        }
-    });
-
-    closeModalBtn.addEventListener('click', closeModal);
-
-    // Функция перемешивания массива
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    // Получение случайных карт
-    function getRandomCards(count) {
-        if (allCards.length === 0) return [];
-        const shuffled = shuffleArray([...allCards]);
-        const selected = shuffled.slice(0, count);
-
-        return selected.map(card => ({
-            id: card.id,
-            name: card.name,
-            description: card.description,
-            description_flip: card.description_flip || '',
-            image_url: card.image_url,
-            is_upside_down: Math.random() < 0.3
-        }));
-    }
-
-    // Отображение карт
-    function renderCards(cards, spreadType) {
-        if (!cards || cards.length === 0) {
+        // Проверка наличия карт
+        if (allCards.length === 0) {
             spreadContainer.innerHTML = `
                 <div class="text-center p-5">
                     <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
-                    <p class="lead mt-3">Недостаточно карт в колоде</p>
+                    <p class="lead mt-3">Карты не найдены</p>
+                    <p class="text-secondary">Добавьте карты через админ-панель</p>
                 </div>
             `;
-            return;
-        }
+            spreadPlaceholder.style.display = 'none';
 
-        let html = '';
-
-        if (spreadType === 'celtic') {
-            html = '<div class="celtic-cross">';
-            const positions = [
-                'Настоящее', 'Препятствие', 'Прошлое', 'Будущее',
-                'Сознание', 'Подсознание', 'Совет', 'Окружение',
-                'Надежды', 'Итог'
-            ];
-
-            cards.forEach((card, index) => {
-                html += `
-                    <div class="card-wrapper"
-                         data-id="${card.id}"
-                         data-name="${card.name}"
-                         data-description="${card.description.replace(/"/g, '&quot;')}"
-                         data-description-flip="${card.description_flip ? card.description_flip.replace(/"/g, '&quot;') : ''}"
-                         data-image="${card.image_url || ''}"
-                         data-upside-down="${card.is_upside_down}">
-                        <div class="card-position">${index + 1}. ${positions[index]}</div>
-                        <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
-                            ${card.image_url ?
-                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
-                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
-                }
-                        </div>
-                    </div>
-                `;
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
             });
-            html += '</div>';
-        } else {
-            html = '<div class="cards-grid">';
-            cards.forEach(card => {
-                html += `
-                    <div class="card-wrapper"
-                         data-id="${card.id}"
-                         data-name="${card.name}"
-                         data-description="${card.description.replace(/"/g, '&quot;')}"
-                         data-description-flip="${card.description_flip ? card.description_flip.replace(/"/g, '&quot;') : ''}"
-                         data-image="${card.image_url || ''}"
-                         data-upside-down="${card.is_upside_down}">
-                        <div class="card ${card.is_upside_down ? 'upside-down' : ''}">
-                            ${card.image_url ?
-                    `<img src="${card.image_url}" alt="${card.name}" loading="lazy">` :
-                    `<div class="no-image"><i class="bi bi-card-image"></i><span>${card.name}</span></div>`
-                }
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
         }
 
-        html += `
-            <div class="text-center mt-4 text-secondary">
-                <i class="bi bi-info-circle"></i>
-                Нажмите на карту, чтобы увидеть описание
-            </div>
-        `;
-
-        spreadContainer.innerHTML = html;
-        spreadPlaceholder.style.display = 'none';
-        saveSpreadBtn.disabled = false;
-
-        addCardClickHandlers();
-    }
-
-    // Обработчики клика на карты
-    function addCardClickHandlers() {
-        document.querySelectorAll('.card-wrapper').forEach(wrapper => {
-            wrapper.addEventListener('click', function () {
-                const card = {
-                    id: this.dataset.id,
-                    name: this.dataset.name,
-                    description: this.dataset.description,
-                    description_flip: this.dataset.descriptionFlip,
-                    image_url: this.dataset.image,
-                    is_upside_down: this.dataset.upsideDown === 'true'
-                };
-
-                showCardModal(card);
-            });
-        });
-    }
-
-    // Показать модальное окно с картой
-    function showCardModal(card) {
-        currentCard = card;
-
-        modalTitle.textContent = card.name;
-
-        const description = card.is_upside_down && card.description_flip ?
-            card.description_flip : card.description;
-        modalDesc.textContent = description;
-
-        if (card.image_url) {
-            modalImage.src = card.image_url;
-            modalImage.style.display = 'block';
-            modalImage.style.transform = card.is_upside_down ? 'rotate(180deg)' : 'none';
-        } else {
-            modalImage.style.display = 'none';
-        }
-
-        modalFooter.style.display = card.description_flip ? 'flex' : 'none';
-
-        openModal();
-    }
-
-    // !!! ВАЖНО: Обработчики кнопок раскладов нужно назначать ДО загрузки сохраненных раскладов !!!
-
-    // Обработчики кнопок раскладов
-    spreadOne.addEventListener('click', function () {
-        [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-
-        spreadContainer.innerHTML = `
-            <div class="loading-spinner">
-                <i class="bi bi-arrow-repeat"></i>
-                <p class="mt-3">Расклад одной карты...</p>
-            </div>
-        `;
-
-        setTimeout(() => {
-            const cards = getRandomCards(1);
-            currentSpread = cards;
-            currentSpreadType = 'one';
-            renderCards(cards, 'one');
-        }, 500);
+        // Делаем функции глобальными
+        window.viewSavedSpread = viewSavedSpread;
+        window.deleteSpread = deleteSpread;
     });
-
-    spreadThree.addEventListener('click', function () {
-        [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-
-        spreadContainer.innerHTML = `
-            <div class="loading-spinner">
-                <i class="bi bi-arrow-repeat"></i>
-                <p class="mt-3">Расклад трёх карт...</p>
-            </div>
-        `;
-
-        setTimeout(() => {
-            const cards = getRandomCards(3);
-            currentSpread = cards;
-            currentSpreadType = 'three';
-            renderCards(cards, 'three');
-        }, 500);
-    });
-
-    spreadCeltic.addEventListener('click', function () {
-        [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-
-        spreadContainer.innerHTML = `
-            <div class="loading-spinner">
-                <i class="bi bi-arrow-repeat"></i>
-                <p class="mt-3">Кельтский крест...</p>
-            </div>
-        `;
-
-        setTimeout(() => {
-            const cards = getRandomCards(10);
-            currentSpread = cards;
-            currentSpreadType = 'celtic';
-            renderCards(cards, 'celtic');
-        }, 500);
-    });
-
-    // Кнопки переключения значений в модалке
-    showUpright.addEventListener('click', function () {
-        if (currentCard) {
-            modalDesc.textContent = currentCard.description;
-            if (modalImage.style.display !== 'none') {
-                modalImage.style.transform = 'none';
-            }
-        }
-    });
-
-    showReversed.addEventListener('click', function () {
-        if (currentCard && currentCard.description_flip) {
-            modalDesc.textContent = currentCard.description_flip;
-            if (modalImage.style.display !== 'none') {
-                modalImage.style.transform = 'rotate(180deg)';
-            }
-        }
-    });
-
-    // Обработчик кнопки сохранения
-    saveSpreadBtn.addEventListener('click', function () {
-        if (currentSpread) {
-            questionModal.classList.add('show');
-            questionInput.focus();
-        }
-    });
-
-    // Обработчики модального окна вопроса
-    cancelSaveBtn.addEventListener('click', function () {
-        questionModal.classList.remove('show');
-        questionInput.value = '';
-    });
-
-    confirmSaveBtn.addEventListener('click', function () {
-        saveSpread(questionInput.value);
-    });
-
-    questionModal.addEventListener('click', function (e) {
-        if (e.target === questionModal) {
-            questionModal.classList.remove('show');
-            questionInput.value = '';
-        }
-    });
-
-    // !!! ВАЖНО: Загрузка сохраненных раскладов должна быть ПОСЛЕ назначения обработчиков !!!
-
-    // Загрузка сохраненных раскладов
-    loadSavedSpreads();
-
-    // Проверка наличия карт
-    if (allCards.length === 0) {
-        spreadContainer.innerHTML = `
-            <div class="text-center p-5">
-                <i class="bi bi-exclamation-triangle display-1" style="color: #8b5cf6;"></i>
-                <p class="lead mt-3">Карты не найдены</p>
-                <p class="text-secondary">Добавьте карты через админ-панель</p>
-            </div>
-        `;
-        spreadPlaceholder.style.display = 'none';
-
-        [spreadOne, spreadThree, spreadCeltic].forEach(btn => {
-            btn.disabled = true;
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-        });
-    }
-});
 </script>
 {% endblock %}
