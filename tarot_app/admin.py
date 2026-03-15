@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TarotCard, Rune, HumanDesign
+from .models import TarotCard, Rune, HumanDesign, TarotSpread
 
 
 @admin.register(TarotCard)
@@ -7,6 +7,14 @@ class TarotCardAdmin(admin.ModelAdmin):
     list_display = ['name', 'arcana_type', 'number', 'image']
     list_filter = ['arcana_type']
     search_fields = ['name']
+    # list_editable = ['number']
+
+
+@admin.register(TarotSpread)
+class TarotSpreadAdmin(admin.ModelAdmin):
+    list_display = ['user', 'spread_type', 'question', 'created_at']
+    list_filter = ['user']
+    search_fields = ['user']
     # list_editable = ['number']
 
 
