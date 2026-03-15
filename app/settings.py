@@ -16,16 +16,16 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 🔥 СТАТИЧЕСКИЕ ФАЙЛЫ
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    BASE_DIR / "static",  # 📁 static/css, static/js
-]
-STATIC_ROOT = BASE_DIR / "staticfiles"  # 📁 collectstatic
-
-# 🔥 МЕДИА ФАЙЛЫ (картинки Таро)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / "media"
+# # 🔥 СТАТИЧЕСКИЕ ФАЙЛЫ
+# STATIC_URL = '/static/'
+# STATICFILES_DIRS = [
+#     BASE_DIR / "static",  # 📁 static/css, static/js
+# ]
+# STATIC_ROOT = BASE_DIR / "staticfiles"  # 📁 collectstatic
+#
+# # 🔥 МЕДИА ФАЙЛЫ (картинки Таро)
+# MEDIA_URL = '/media/'
+# MEDIA_ROOT = BASE_DIR / "media"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django_select2',
+    'django_bootstrap5',
     'tarot_app',
     'tg_bot',
     'user_app',
@@ -142,10 +143,14 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# Настройки для media файлов
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-STATIC_URL = 'static/'
+# Настройки для static файлов (обычно уже есть)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -183,4 +188,5 @@ YOOKASSA_TEST_MODE = config('YOOKASSA_TEST_MODE', default=True, cast=bool)
 # Проверка, что ключи не пустые
 if not YOOKASSA_SHOP_ID or not YOOKASSA_SECRET_KEY:
     import warnings
+
     warnings.warn("ЮKassa ключи не настроены! Платежи не будут работать.")
