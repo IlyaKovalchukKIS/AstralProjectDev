@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -26,6 +27,84 @@ class TarotCard(models.Model):
         return self.name
 
 
+class TarotSpread(models.Model):
+    """
+    Модель для сохранения раскладов Таро с привязкой к пользователю
+    """
+    SPREAD_TYPES = [
+        ('one', 'Одна карта'),
+        ('three', 'Три карты'),
+        ('celtic', 'Кельтский крест'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='tarot_spreads',
+        verbose_name='Пользователь'
+    )
+    spread_type = models.CharField(
+        max_length=20,
+        choices=SPREAD_TYPES,
+        verbose_name='Тип расклада'
+    )
+    question = models.CharField(
+        max_length=200,
+        blank=True,
+        verbose_name='Вопрос'
+    )
+    cards_data = models.JSONField(
+        verbose_name='Данные карт',
+        help_text='JSON с информацией о картах в раскладе'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+    is_favorite = models.BooleanField(
+        default=False,
+        verbose_name='Избранный'
+    )
+    note = models.TextField(
+        blank=True,
+        verbose_name='Заметка'
+    )
+
+    class Meta:
+        verbose_name = 'Расклад Таро'
+        verbose_name_plural = 'Расклады Таро'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Расклад {self.get_spread_type_display()} от {self.created_at.strftime("%d.%m.%Y %H:%M")}'
+
+    def get_cards(self):
+        """Возвращает список карт из JSON"""
+        return self.cards_data.get('cards', [])
+
+    def get_cards_count(self):
+        """Возвращает количество карт в раскладе"""
+        return len(self.get_cards())
+
+    def to_dict(self):
+        """Преобразует расклад в словарь для JSON ответа"""
+        return {
+            'id': self.id,
+            'type': self.spread_type,
+            'type_display': self.get_spread_type_display(),
+            'question': self.question,
+            'date': self.created_at.isoformat(),
+            'created_at': self.created_at.isoformat(),
+            'cards': self.get_cards(),
+            'is_favorite': self.is_favorite,
+            'note': self.note
+        }
+
+
 class Rune(models.Model):
     """Модель руны (заглушка)"""
     name = models.CharField(max_length=50, unique=True, verbose_name="Название")
@@ -50,4 +129,3 @@ class HumanDesign(models.Model):
     class Meta:
         verbose_name = "Human Design"
         verbose_name_plural = "Human Designs"
-
