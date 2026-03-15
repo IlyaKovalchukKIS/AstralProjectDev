@@ -55,43 +55,43 @@
         </div>
     </div>
 
-    <!-- Статистика (СДЕЛАНА КЛИКАБЕЛЬНОЙ) -->
-    <div class="row mb-5">
-        <div class="col-md-4 mb-4">
-            <a href="{% url 'user_app:subscription_history' %}" class="card-link">
-                <div class="stat-card tarot-card-effect">
-                    <div class="stat-icon">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div class="stat-value">{{ subscriptions_count|default:"0" }}</div>
-                    <div class="stat-label">Всего подписок</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 mb-4">
-            <a href="{% if active_subscription %}{% url 'user_app:subscription_detail' active_subscription.id %}{% else %}{% url 'user_app:subscription_plans' %}{% endif %}"
-               class="card-link">
-                <div class="stat-card tarot-card-effect">
-                    <div class="stat-icon">
-                        <i class="fas fa-gem"></i>
-                    </div>
-                    <div class="stat-value">{% if active_subscription %}1{% else %}0{% endif %}</div>
-                    <div class="stat-label">Активных подписок</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4 mb-4">
-            <a href="{% url 'user_app:profile' %}" class="card-link">
-                <div class="stat-card tarot-card-effect">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-value">{{ user.date_joined|date:"Y" }}</div>
-                    <div class="stat-label">На сайте с</div>
-                </div>
-            </a>
-        </div>
-    </div>
+<!--    &lt;!&ndash; Статистика (СДЕЛАНА КЛИКАБЕЛЬНОЙ) &ndash;&gt;-->
+<!--    <div class="row mb-5">-->
+<!--        <div class="col-md-4 mb-4">-->
+<!--            <a href="{% url 'user_app:subscription_history' %}" class="card-link">-->
+<!--                <div class="stat-card tarot-card-effect">-->
+<!--                    <div class="stat-icon">-->
+<!--                        <i class="fas fa-crown"></i>-->
+<!--                    </div>-->
+<!--                    <div class="stat-value">{{ subscriptions_count|default:"0" }}</div>-->
+<!--                    <div class="stat-label">Всего подписок</div>-->
+<!--                </div>-->
+<!--            </a>-->
+<!--        </div>-->
+<!--        <div class="col-md-4 mb-4">-->
+<!--            <a href="{% if active_subscription %}{% url 'user_app:subscription_detail' active_subscription.id %}{% else %}{% url 'user_app:subscription_plans' %}{% endif %}"-->
+<!--               class="card-link">-->
+<!--                <div class="stat-card tarot-card-effect">-->
+<!--                    <div class="stat-icon">-->
+<!--                        <i class="fas fa-gem"></i>-->
+<!--                    </div>-->
+<!--                    <div class="stat-value">{% if active_subscription %}1{% else %}0{% endif %}</div>-->
+<!--                    <div class="stat-label">Активных подписок</div>-->
+<!--                </div>-->
+<!--            </a>-->
+<!--        </div>-->
+<!--        <div class="col-md-4 mb-4">-->
+<!--            <a href="{% url 'user_app:profile' %}" class="card-link">-->
+<!--                <div class="stat-card tarot-card-effect">-->
+<!--                    <div class="stat-icon">-->
+<!--                        <i class="fas fa-clock"></i>-->
+<!--                    </div>-->
+<!--                    <div class="stat-value">{{ user.date_joined|date:"Y" }}</div>-->
+<!--                    <div class="stat-label">На сайте с</div>-->
+<!--                </div>-->
+<!--            </a>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <!-- Детальная информация -->
     <div class="row">
