@@ -185,7 +185,7 @@
         font-size: 1.2rem;
     }
 
-    /* Стили для ответа нейросети в сохраненном раскладе */
+    /* Стили для аккордеона */
     .saved-ai-response {
         margin-top: 2rem;
         padding: 1.5rem;
@@ -196,32 +196,115 @@
     }
 
     .saved-ai-response-header {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .accordion-trigger {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        margin-bottom: 1rem;
-        padding-bottom: 0.5rem;
-        border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+        color: #10b981;
     }
 
-    .saved-ai-response-header i {
-        color: #10b981;
+    .accordion-trigger i:first-child {
         font-size: 1.5rem;
     }
 
-    .saved-ai-response-header h4 {
-        color: #10b981;
+    .accordion-trigger h4 {
         margin: 0;
+        flex: 1;
         font-size: 1.2rem;
+        color: #10b981;
+    }
+
+    .accordion-icon {
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .accordion-icon.rotated {
+        transform: rotate(180deg);
+    }
+
+    .saved-ai-response-content-wrapper {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease-out, opacity 0.3s ease;
+        opacity: 0;
+        margin-top: 0;
+    }
+
+    .saved-ai-response-content-wrapper.expanded {
+        max-height: 2000px; /* Достаточно для очень длинного текста */
+        opacity: 1;
+        margin-top: 1rem;
+        transition: max-height 0.5s ease-in, opacity 0.3s ease 0.1s;
     }
 
     .saved-ai-response-content {
         color: rgba(255, 255, 255, 0.9);
         line-height: 1.6;
         white-space: pre-wrap;
+        padding: 0.5rem 0;
     }
 
-    /* Остальные стили (без изменений) */
+    /* Стили для форматированного текста внутри ответа */
+    .saved-ai-response-content h1,
+    .saved-ai-response-content h2,
+    .saved-ai-response-content h3,
+    .saved-ai-response-content h4 {
+        color: #10b981;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .saved-ai-response-content h1:first-child,
+    .saved-ai-response-content h2:first-child,
+    .saved-ai-response-content h3:first-child,
+    .saved-ai-response-content h4:first-child {
+        margin-top: 0;
+    }
+
+    .saved-ai-response-content p {
+        margin-bottom: 1rem;
+    }
+
+    .saved-ai-response-content ul,
+    .saved-ai-response-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+
+    .saved-ai-response-content li {
+        margin-bottom: 0.3rem;
+    }
+
+    .saved-ai-response-content strong {
+        color: #10b981;
+        font-weight: 600;
+    }
+
+    .saved-ai-response-content em {
+        color: rgba(255, 255, 255, 0.8);
+        font-style: italic;
+    }
+
+    .saved-ai-response-content blockquote {
+        border-left: 3px solid #10b981;
+        padding-left: 1rem;
+        margin-left: 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-style: italic;
+    }
+
+    .saved-ai-response-content hr {
+        border: none;
+        border-top: 1px solid rgba(16, 185, 129, 0.3);
+        margin: 1.5rem 0;
+    }
+
+    /* Стили для сохраненных раскладов */
     .saved-spreads-section {
         margin-top: 3rem;
         padding: 2rem;
@@ -716,135 +799,6 @@
             width: 95%;
         }
     }
-    /* Стили для аккордеона */
-.saved-ai-response {
-    margin-top: 2rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
-    border: 2px solid #10b981;
-    border-radius: 20px;
-    animation: fadeIn 0.5s ease;
-}
-
-.saved-ai-response-header {
-    cursor: pointer;
-    user-select: none;
-}
-
-.accordion-trigger {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #10b981;
-}
-
-.accordion-trigger i:first-child {
-    font-size: 1.5rem;
-}
-
-.accordion-trigger h4 {
-    margin: 0;
-    flex: 1;
-    font-size: 1.2rem;
-}
-
-.accordion-icon {
-    font-size: 1.2rem;
-    transition: transform 0.3s ease;
-}
-
-.accordion-icon.rotated {
-    transform: rotate(180deg);
-}
-
-.saved-ai-response-content-wrapper {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.5s ease-out, opacity 0.3s ease;
-    opacity: 0;
-    margin-top: 0;
-}
-
-.saved-ai-response-content-wrapper.expanded {
-    max-height: 1000px; /* Достаточно для длинного текста */
-    opacity: 1;
-    margin-top: 1rem;
-    transition: max-height 0.5s ease-in, opacity 0.3s ease 0.1s;
-}
-
-.saved-ai-response-content {
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
-    white-space: pre-wrap;
-    padding: 0.5rem 0;
-}
-
-/* Анимация появления */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Стили для форматированного текста внутри ответа */
-.saved-ai-response-content h1,
-.saved-ai-response-content h2,
-.saved-ai-response-content h3,
-.saved-ai-response-content h4 {
-    color: #10b981;
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-}
-
-.saved-ai-response-content h1:first-child,
-.saved-ai-response-content h2:first-child,
-.saved-ai-response-content h3:first-child,
-.saved-ai-response-content h4:first-child {
-    margin-top: 0;
-}
-
-.saved-ai-response-content p {
-    margin-bottom: 1rem;
-}
-
-.saved-ai-response-content ul,
-.saved-ai-response-content ol {
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
-}
-
-.saved-ai-response-content li {
-    margin-bottom: 0.3rem;
-}
-
-.saved-ai-response-content strong {
-    color: #10b981;
-    font-weight: 600;
-}
-
-.saved-ai-response-content em {
-    color: rgba(255, 255, 255, 0.8);
-    font-style: italic;
-}
-
-.saved-ai-response-content blockquote {
-    border-left: 3px solid #10b981;
-    padding-left: 1rem;
-    margin-left: 0;
-    color: rgba(255, 255, 255, 0.7);
-    font-style: italic;
-}
-
-.saved-ai-response-content hr {
-    border: none;
-    border-top: 1px solid rgba(16, 185, 129, 0.3);
-    margin: 1.5rem 0;
-}
 </style>
 {% endblock %}
 
@@ -918,23 +872,23 @@
         </div>
     </div>
 
-<!-- Контейнер для ответа нейросети в текущем раскладе (аккордеон) -->
-<div class="row" id="aiResponseContainer" style="display: none;">
-    <div class="col-12">
-        <div class="saved-ai-response">
-            <div class="saved-ai-response-header" id="aiAccordionHeader">
-                <div class="accordion-trigger">
-                    <i class="bi bi-magic"></i>
-                    <h4>Толкование от нейросети</h4>
-                    <i class="bi bi-chevron-down accordion-icon" id="accordionIcon"></i>
+    <!-- Контейнер для ответа нейросети в текущем раскладе (аккордеон) -->
+    <div class="row" id="aiResponseContainer" style="display: none;">
+        <div class="col-12">
+            <div class="saved-ai-response">
+                <div class="saved-ai-response-header" id="aiAccordionHeader">
+                    <div class="accordion-trigger">
+                        <i class="bi bi-magic"></i>
+                        <h4>Толкование от нейросети</h4>
+                        <i class="bi bi-chevron-down accordion-icon" id="accordionIcon"></i>
+                    </div>
                 </div>
-            </div>
-            <div class="saved-ai-response-content-wrapper" id="aiResponseContent">
-                <div class="saved-ai-response-content" id="currentAIResponse"></div>
+                <div class="saved-ai-response-content-wrapper" id="aiResponseContent">
+                    <div class="saved-ai-response-content" id="currentAIResponse"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Кнопки действий -->
     <div class="row">
@@ -1029,6 +983,9 @@
         const questionInput = document.getElementById('questionInput');
         const aiResponseContainer = document.getElementById('aiResponseContainer');
         const currentAIResponse = document.getElementById('currentAIResponse');
+        const aiAccordionHeader = document.getElementById('aiAccordionHeader');
+        const aiResponseContent = document.getElementById('aiResponseContent');
+        const accordionIcon = document.getElementById('accordionIcon');
 
         // Элементы модального окна карты
         const modal = document.getElementById('cardModal');
@@ -1045,10 +1002,6 @@
         const closeAIModalBtn = document.getElementById('closeAIModalBtn');
         const aiModalResponseContainer = document.getElementById('aiModalResponseContainer');
         const saveAIResponseBtn = document.getElementById('saveAIResponseBtn');
-
-        const aiAccordionHeader = document.getElementById('aiAccordionHeader');
-        const aiResponseContent = document.getElementById('aiResponseContent');
-        const accordionIcon = document.getElementById('accordionIcon');
 
         // Базовый URL для API
         const API_BASE_URL = '/api/spreads/';
@@ -1128,6 +1081,42 @@
                 console.error('Fetch error:', error);
                 throw error;
             }
+        }
+
+        // Функция для переключения аккордеона
+        function toggleAccordion() {
+            const isExpanded = aiResponseContent.classList.contains('expanded');
+
+            if (isExpanded) {
+                aiResponseContent.classList.remove('expanded');
+                accordionIcon.classList.remove('rotated');
+            } else {
+                aiResponseContent.classList.add('expanded');
+                accordionIcon.classList.add('rotated');
+            }
+        }
+
+        // Функция для отображения ответа нейросети
+        function displayAIResponse(response) {
+            if (response && response.trim() !== '') {
+                aiResponseContainer.style.display = 'block';
+                currentAIResponse.innerHTML = response.replace(/\n/g, '<br>');
+
+                // Автоматически раскрываем аккордеон при получении нового ответа
+                setTimeout(() => {
+                    aiResponseContent.classList.add('expanded');
+                    accordionIcon.classList.add('rotated');
+                }, 100);
+            } else {
+                aiResponseContainer.style.display = 'none';
+                aiResponseContent.classList.remove('expanded');
+                accordionIcon.classList.remove('rotated');
+            }
+        }
+
+        // Обработчик клика на заголовок аккордеона
+        if (aiAccordionHeader) {
+            aiAccordionHeader.addEventListener('click', toggleAccordion);
         }
 
         // Следим за вводом вопроса
@@ -1266,7 +1255,7 @@
                 renderCards(currentSpread, data.type);
 
                 // Если есть вопрос, отображаем его в поле ввода
-                if (data.question) {
+                if (data.question && data.question !== 'Без вопроса') {
                     questionInput.value = data.question;
                 }
 
@@ -1276,10 +1265,9 @@
 
                 // Отображаем ответ нейросети если есть
                 if (currentAIResponseText) {
-                    aiResponseContainer.style.display = 'block';
-                    currentAIResponse.innerHTML = currentAIResponseText.replace(/\n/g, '<br>');
+                    displayAIResponse(currentAIResponseText);
                 } else {
-                    aiResponseContainer.style.display = 'none';
+                    displayAIResponse('');
                 }
 
                 // Подсвечиваем активную кнопку
@@ -1440,9 +1428,8 @@
                         </div>
                     `;
 
-                    // Отображаем ответ в основном контейнере
-                    aiResponseContainer.style.display = 'block';
-                    currentAIResponse.innerHTML = formattedResponse;
+                    // Отображаем ответ в основном контейнере с аккордеоном
+                    displayAIResponse(formattedResponse);
 
                     showNotification('Ответ нейросети получен!');
                 } else {
@@ -1666,7 +1653,7 @@
                 currentSpread = cards;
                 currentSpreadType = 'one';
                 currentAIResponseText = ''; // Сбрасываем предыдущий ответ
-                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
+                displayAIResponse(''); // Скрываем контейнер с ответом
                 renderCards(cards, 'one');
             }, 500);
         });
@@ -1687,7 +1674,7 @@
                 currentSpread = cards;
                 currentSpreadType = 'three';
                 currentAIResponseText = ''; // Сбрасываем предыдущий ответ
-                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
+                displayAIResponse(''); // Скрываем контейнер с ответом
                 renderCards(cards, 'three');
             }, 500);
         });
@@ -1708,7 +1695,7 @@
                 currentSpread = cards;
                 currentSpreadType = 'celtic';
                 currentAIResponseText = ''; // Сбрасываем предыдущий ответ
-                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
+                displayAIResponse(''); // Скрываем контейнер с ответом
                 renderCards(cards, 'celtic');
             }, 500);
         });
