@@ -19,6 +19,9 @@ urlpatterns = [
     path('api/spreads/<int:spread_id>/delete/', views.delete_spread, name='delete-spread'),
     path('api/spreads/<int:spread_id>/favorite/', views.toggle_favorite, name='toggle-favorite'),
     path('api/spreads/<int:spread_id>/note/', views.update_spread_note, name='update-note'),
+
+    # Новый эндпоинт для нейросети
+    path('api/ai-interpret/', views.get_ai_interpretation, name='ai-interpret'),
 ]
 
 # Добавляем поддержку media файлов только в режиме DEBUG

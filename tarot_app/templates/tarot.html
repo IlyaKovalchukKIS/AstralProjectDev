@@ -35,6 +35,40 @@
         box-shadow: none;
     }
 
+    /* Стили для кнопки нейросети */
+    .ai-spread-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        margin-left: 1rem;
+    }
+
+    .ai-spread-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    }
+
+    .ai-spread-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .ai-spread-btn i {
+        font-size: 1.2rem;
+    }
+
     .saved-spreads-section {
         margin-top: 3rem;
         padding: 2rem;
@@ -147,6 +181,17 @@
         padding: 0.5rem;
         background: rgba(0, 0, 0, 0.2);
         border-radius: 10px;
+    }
+
+    .saved-spread-ai-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        margin-bottom: 0.5rem;
+        padding: 0.3rem 0.5rem;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 20px;
+        width: fit-content;
     }
 
     .saved-spread-actions {
@@ -286,6 +331,156 @@
         transform: translateY(-2px);
     }
 
+    /* Модальное окно для ответа нейросети */
+    .ai-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ai-modal.show {
+        display: flex;
+    }
+
+    .ai-modal-content {
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        border: 2px solid #10b981;
+        border-radius: 30px;
+        padding: 2rem;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .ai-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .ai-modal-title {
+        color: #10b981;
+        font-size: 1.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .ai-modal-close {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        line-height: 1;
+    }
+
+    .ai-modal-close:hover {
+        color: #ef4444;
+    }
+
+    .ai-response-content {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        font-size: 1rem;
+        white-space: pre-wrap;
+    }
+
+    .ai-response-content p {
+        margin-bottom: 1rem;
+    }
+
+    .ai-loading {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .ai-loading i {
+        font-size: 3rem;
+        color: #10b981;
+        animation: spin 2s linear infinite;
+    }
+
+    .ai-loading p {
+        margin-top: 1rem;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    .ai-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .ai-action-btn {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .ai-action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .ai-question-preview {
+        background: rgba(16, 185, 129, 0.1);
+        border-left: 3px solid #10b981;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        font-style: italic;
+    }
+
+    .ai-question-preview strong {
+        color: #10b981;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Индикатор загрузки */
+    .loading-dots:after {
+        content: '.';
+        animation: dots 1.5s steps(5, end) infinite;
+    }
+
+    @keyframes dots {
+        0%, 20% { content: '.'; }
+        40% { content: '..'; }
+        60% { content: '...'; }
+        80%, 100% { content: ''; }
+    }
+
     /* Индикатор сохранения */
     .save-notification {
         position: fixed;
@@ -304,6 +499,14 @@
         box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
     }
 
+    .save-notification.error {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .save-notification.warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+
     @keyframes slideIn {
         from {
             transform: translateX(100%);
@@ -312,6 +515,25 @@
         to {
             transform: translateX(0);
             opacity: 1;
+        }
+    }
+
+    /* Адаптация для мобильных */
+    @media (max-width: 768px) {
+        .ai-modal-content {
+            padding: 1.5rem;
+            width: 95%;
+        }
+
+        .ai-spread-btn {
+            margin-left: 0;
+            margin-top: 1rem;
+        }
+
+        .save-spread-btn, .ai-spread-btn {
+            width: 100%;
+            margin-left: 0;
+            justify-content: center;
         }
     }
 </style>
@@ -366,12 +588,16 @@
         </div>
     </div>
 
-    <!-- Кнопка сохранения расклада -->
+    <!-- Кнопки действий -->
     <div class="row">
         <div class="col-12 text-center">
             <button class="save-spread-btn" id="saveSpreadBtn" disabled>
                 <i class="bi bi-bookmark-star"></i>
                 Сохранить этот расклад
+            </button>
+            <button class="ai-spread-btn" id="getAIInterpretationBtn" disabled>
+                <i class="bi bi-magic"></i>
+                Получить ответ от нейросети
             </button>
         </div>
     </div>
@@ -434,6 +660,28 @@
         </div>
     </div>
 </div>
+
+<!-- Модальное окно для ответа нейросети -->
+<div class="ai-modal" id="aiModal">
+    <div class="ai-modal-content">
+        <div class="ai-modal-header">
+            <h3 class="ai-modal-title">
+                <i class="bi bi-magic"></i>
+                Толкование от нейросети
+            </h3>
+            <button class="ai-modal-close" id="closeAIModalBtn">&times;</button>
+        </div>
+        <div id="aiResponseContainer">
+            <!-- Контент будет загружаться сюда -->
+        </div>
+        <div class="ai-actions">
+            <button class="ai-action-btn" id="saveAIResponseBtn">
+                <i class="bi bi-bookmark-check"></i>
+                Сохранить в расклад
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -446,6 +694,7 @@
         const spreadContainer = document.getElementById('spreadContainer');
         const spreadPlaceholder = document.getElementById('spreadPlaceholder');
         const saveSpreadBtn = document.getElementById('saveSpreadBtn');
+        const getAIInterpretationBtn = document.getElementById('getAIInterpretationBtn');
         const savedSpreadsContainer = document.getElementById('savedSpreadsContainer');
         const questionModal = document.getElementById('questionModal');
         const questionInput = document.getElementById('questionInput');
@@ -461,6 +710,12 @@
         const modalFooter = document.getElementById('modalFooter');
         const showUpright = document.getElementById('showUpright');
         const showReversed = document.getElementById('showReversed');
+
+        // Элементы модального окна нейросети
+        const aiModal = document.getElementById('aiModal');
+        const closeAIModalBtn = document.getElementById('closeAIModalBtn');
+        const aiResponseContainer = document.getElementById('aiResponseContainer');
+        const saveAIResponseBtn = document.getElementById('saveAIResponseBtn');
 
         // Базовый URL для API
         const API_BASE_URL = '/api/spreads/';
@@ -481,6 +736,7 @@
         let currentCard = null;
         let currentSpread = null;
         let currentSpreadType = null;
+        let currentAIResponse = ''; // Для хранения текущего ответа нейросети
 
         // Функция для получения CSRF токена из куки
         function getCookie(name) {
@@ -566,11 +822,14 @@
         }
 
         // Сохранение расклада
-        async function saveSpread(question = '') {
+        async function saveSpread(question = '', aiResponse = '') {
             if (!currentSpread || !currentSpreadType) {
                 showNotification('Нет расклада для сохранения', 'error');
                 return;
             }
+
+            // Используем переданный ответ или текущий
+            const responseToSave = aiResponse || currentAIResponse || '';
 
             const spreadData = {
                 spread_type: currentSpreadType,
@@ -582,7 +841,8 @@
                     description_flip: card.description_flip || '',
                     is_upside_down: card.is_upside_down || false,
                     image_url: card.image_url || ''
-                }))
+                })),
+                ai_response: responseToSave
             };
 
             try {
@@ -595,7 +855,19 @@
                     showNotification('Расклад успешно сохранен!');
                     questionInput.value = '';
                     questionModal.classList.remove('show');
+
+                    // Обновляем текущий расклад с ID
+                    if (data.spread) {
+                        currentSpread.id = data.spread.id;
+                        currentSpread.ai_response = responseToSave;
+                    }
+
                     await loadSavedSpreads();
+
+                    // Если был ответ нейросети, показываем его
+                    if (responseToSave) {
+                        showNotification('Ответ нейросети сохранен!');
+                    }
                 } else {
                     showNotification('Ошибка при сохранении', 'error');
                 }
@@ -642,12 +914,15 @@
                 // Преобразуем данные для отображения
                 currentSpread = (data.cards || []).map(card => ({
                     ...card,
-                    is_upside_down: card.is_upside_down || false
+                    is_upside_down: card.is_upside_down || false,
+                    id: card.id
                 }));
                 currentSpreadType = data.type;
+                currentAIResponse = data.ai_response || ''; // Загружаем ответ нейросети
 
                 renderCards(currentSpread, data.type);
                 saveSpreadBtn.disabled = false;
+                getAIInterpretationBtn.disabled = false;
 
                 // Подсвечиваем активную кнопку
                 [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
@@ -660,6 +935,11 @@
                 }
 
                 spreadContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
+
+                // Если есть ответ нейросети, показываем уведомление
+                if (currentAIResponse) {
+                    showNotification('У этого расклада есть толкование от нейросети!', 'info');
+                }
             } catch (error) {
                 console.error('Error loading spread:', error);
                 showNotification('Ошибка загрузки расклада: ' + error.message, 'error');
@@ -729,6 +1009,16 @@
                     html += `<div class="saved-spread-question">"${spread.question}"</div>`;
                 }
 
+                // Добавляем индикатор наличия ответа нейросети
+                if (spread.ai_response) {
+                    html += `
+                        <div class="saved-spread-ai-indicator">
+                            <i class="bi bi-magic" style="color: #10b981;"></i>
+                            <span style="color: #10b981; font-size: 0.8rem;">Есть толкование</span>
+                        </div>
+                    `;
+                }
+
                 html += `
                         <div class="saved-spread-actions">
                             <button class="saved-spread-btn view" onclick="viewSavedSpread(${spread.id})">
@@ -746,12 +1036,121 @@
             savedSpreadsContainer.innerHTML = html;
         }
 
+        // Функция для получения ответа от нейросети
+        async function getAIInterpretation() {
+            if (!currentSpread || !currentSpreadType) {
+                showNotification('Сначала сделайте расклад', 'warning');
+                return;
+            }
+
+            // Показываем модальное окно с загрузкой
+            aiModal.classList.add('show');
+            aiResponseContainer.innerHTML = `
+                <div class="ai-loading">
+                    <i class="bi bi-arrow-repeat"></i>
+                    <p>Нейросеть анализирует ваш расклад<span class="loading-dots"></span></p>
+                </div>
+            `;
+            document.body.style.overflow = 'hidden';
+
+            try {
+                // Получаем вопрос из модального окна или используем вопрос из сохраненного расклада
+                const question = questionInput.value.trim() || 'Общее толкование расклада';
+
+                const response = await fetchAPI('/api/ai-interpret/', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        question: question,
+                        cards: currentSpread,
+                        spread_type: currentSpreadType
+                    })
+                });
+
+                if (response && response.success) {
+                    currentAIResponse = response.ai_response;
+
+                    // Форматируем ответ для отображения
+                    const formattedResponse = response.ai_response.replace(/\n/g, '<br>');
+
+                    aiResponseContainer.innerHTML = `
+                        <div class="ai-question-preview">
+                            <strong>Ваш вопрос:</strong>
+                            ${question}
+                        </div>
+                        <div class="ai-response-content">
+                            ${formattedResponse}
+                        </div>
+                    `;
+
+                    // Автоматически сохраняем ответ при получении
+                    saveAIResponseToCurrentSpread(response.ai_response);
+                } else {
+                    throw new Error('Не удалось получить ответ от нейросети');
+                }
+            } catch (error) {
+                console.error('Error getting AI interpretation:', error);
+                aiResponseContainer.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ef4444;"></i>
+                        <p class="mt-3" style="color: #ef4444;">Ошибка при получении ответа</p>
+                        <p class="text-secondary">${error.message}</p>
+                        <button class="ai-action-btn mt-3" onclick="getAIInterpretation()">
+                            <i class="bi bi-arrow-repeat"></i> Попробовать снова
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Функция для сохранения ответа нейросети в текущий расклад
+        function saveAIResponseToCurrentSpread(aiResponse) {
+            if (currentSpread) {
+                // Добавляем поле ai_response к текущему раскладу
+                currentSpread.ai_response = aiResponse;
+
+                // Показываем уведомление
+                showNotification('Ответ нейросети получен!');
+            }
+        }
+
+        // Функция для обновления расклада с ответом нейросети
+        async function updateSpreadWithAI(spreadId, aiResponse) {
+            try {
+                // Получаем текущий расклад
+                const spread = await fetchAPI(API_BASE_URL + spreadId + '/');
+
+                if (!spread) return;
+
+                // Обновляем расклад с новым ответом
+                const updateData = {
+                    spread_type: spread.type,
+                    question: spread.question,
+                    cards: spread.cards,
+                    ai_response: aiResponse
+                };
+
+                const response = await fetchAPI(API_BASE_URL + 'save/', {
+                    method: 'POST',
+                    body: JSON.stringify(updateData)
+                });
+
+                if (response && response.success) {
+                    showNotification('Ответ нейросети сохранен в раскладе!');
+                    closeAIModal();
+                    await loadSavedSpreads(); // Обновляем список раскладов
+                }
+            } catch (error) {
+                console.error('Error updating spread:', error);
+                showNotification('Ошибка при сохранении ответа', 'error');
+            }
+        }
+
         // Показать уведомление
         function showNotification(message, type = 'success') {
             const notification = document.createElement('div');
-            notification.className = 'save-notification';
+            notification.className = `save-notification ${type !== 'success' ? type : ''}`;
             notification.innerHTML = `
-                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
                 ${message}
             `;
             document.body.appendChild(notification);
@@ -834,14 +1233,6 @@
                 ];
 
                 cards.forEach((card, index) => {
-                    const cardData = encodeURIComponent(JSON.stringify({
-                        name: card.name,
-                        description: card.description,
-                        description_flip: card.description_flip || '',
-                        image_url: card.image_url || '',
-                        is_upside_down: card.is_upside_down
-                    }));
-
                     html += `
                         <div class="card-wrapper" onclick='showCardModal(${JSON.stringify(card).replace(/'/g, "\\'")})'>
                             <div class="card-position">${index + 1}. ${positions[index]}</div>
@@ -882,6 +1273,7 @@
             spreadContainer.innerHTML = html;
             spreadPlaceholder.style.display = 'none';
             saveSpreadBtn.disabled = false;
+            getAIInterpretationBtn.disabled = false;
         }
 
         // Показать модальное окно с картой
@@ -923,6 +1315,7 @@
                 const cards = getRandomCards(1);
                 currentSpread = cards;
                 currentSpreadType = 'one';
+                currentAIResponse = ''; // Сбрасываем предыдущий ответ
                 renderCards(cards, 'one');
             }, 500);
         });
@@ -942,6 +1335,7 @@
                 const cards = getRandomCards(3);
                 currentSpread = cards;
                 currentSpreadType = 'three';
+                currentAIResponse = ''; // Сбрасываем предыдущий ответ
                 renderCards(cards, 'three');
             }, 500);
         });
@@ -961,6 +1355,7 @@
                 const cards = getRandomCards(10);
                 currentSpread = cards;
                 currentSpreadType = 'celtic';
+                currentAIResponse = ''; // Сбрасываем предыдущий ответ
                 renderCards(cards, 'celtic');
             }, 500);
         });
@@ -991,6 +1386,83 @@
                 questionInput.focus();
             } else {
                 showNotification('Сначала сделайте расклад', 'warning');
+            }
+        });
+
+        // Обработчик кнопки получения ответа от нейросети
+        getAIInterpretationBtn.addEventListener('click', function() {
+            // Показываем модальное окно с вопросом, если вопрос не задан
+            if (!questionInput.value.trim()) {
+                questionModal.classList.add('show');
+                questionInput.focus();
+
+                // Меняем поведение кнопки сохранения в модальном окне вопроса
+                const originalConfirmHandler = confirmSaveBtn.onclick;
+                confirmSaveBtn.onclick = function() {
+                    questionModal.classList.remove('show');
+                    getAIInterpretation(); // После ввода вопроса получаем ответ
+                    // Восстанавливаем оригинальный обработчик
+                    confirmSaveBtn.onclick = originalConfirmHandler;
+                };
+
+                // Восстанавливаем обработчик при отмене
+                const restoreHandler = function() {
+                    confirmSaveBtn.onclick = originalConfirmHandler;
+                    cancelSaveBtn.removeEventListener('click', restoreHandler);
+                };
+                cancelSaveBtn.addEventListener('click', restoreHandler);
+            } else {
+                getAIInterpretation();
+            }
+        });
+
+        // Закрытие модального окна нейросети
+        function closeAIModal() {
+            aiModal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        closeAIModalBtn.addEventListener('click', closeAIModal);
+
+        aiModal.addEventListener('click', function(e) {
+            if (e.target === aiModal) {
+                closeAIModal();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && aiModal.classList.contains('show')) {
+                closeAIModal();
+            }
+        });
+
+        // Сохранение ответа нейросети в расклад
+        saveAIResponseBtn.addEventListener('click', function() {
+            if (currentAIResponse && currentSpread) {
+                // Если расклад еще не сохранен, предлагаем сохранить
+                if (!currentSpread.id) {
+                    questionModal.classList.add('show');
+
+                    // Меняем поведение кнопки сохранения
+                    const originalConfirmHandler = confirmSaveBtn.onclick;
+                    confirmSaveBtn.onclick = function() {
+                        saveSpread(questionInput.value, currentAIResponse);
+                        questionModal.classList.remove('show');
+                        closeAIModal();
+                        // Восстанавливаем оригинальный обработчик
+                        confirmSaveBtn.onclick = originalConfirmHandler;
+                    };
+
+                    // Восстанавливаем обработчик при отмене
+                    const restoreHandler = function() {
+                        confirmSaveBtn.onclick = originalConfirmHandler;
+                        cancelSaveBtn.removeEventListener('click', restoreHandler);
+                    };
+                    cancelSaveBtn.addEventListener('click', restoreHandler);
+                } else {
+                    // Если расклад уже сохранен, обновляем его через API
+                    updateSpreadWithAI(currentSpread.id, currentAIResponse);
+                }
             }
         });
 

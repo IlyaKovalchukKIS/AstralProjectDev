@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 import json
 from .models import TarotCard, TarotSpread
+from .services.gigachat_service import get_tarot_reading
 
 
 def home(request):
@@ -17,6 +18,7 @@ def tarot(request):
     """
     # Получаем все карты из базы данных
     cards = TarotCard.objects.all()
+    # get_random_cards(cards, request)
 
     context = {
         'cards': cards,  # Передаем все карты для JS
@@ -176,4 +178,92 @@ def about(request):
 
 
 def contacts(request):
-    return render(request, 'contacts.html')
+    return render(request, 'contacts.html')  # Импортируем функцию
+
+
+@login_required
+@require_http_methods(["POST"])
+def get_ai_interpretation(request):
+    """
+    API для получения толкования расклада от нейросети
+    """
+    try:
+        data = json.loads(request.body)
+
+        question = data.get('question', '')
+        cards = data.get('cards', [])
+        spread_type = data.get('spread_type', '')
+
+        if not cards:
+            return JsonResponse({
+                'success': False,
+                'error': 'Нет карт для толкования'
+            }, status=400)
+
+        # Если вопрос не задан, используем стандартный
+        if not question:
+            question = "Общее толкование расклада"
+
+        # Получаем ответ от нейросети
+        ai_response = get_tarot_reading(question, cards, spread_type)
+
+        return JsonResponse({
+            'success': True,
+            'ai_response': ai_response
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Неверный формат данных'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
+
+
+# Обновляем функцию save_spread, чтобы сохранять ответ нейросети
+@login_required
+@require_http_methods(["POST"])
+def save_spread(request):
+    """API для сохранения нового расклада"""
+    try:
+        data = json.loads(request.body)
+
+        spread_type = data.get('spread_type')
+        question = data.get('question', '')
+        cards = data.get('cards', [])
+        ai_response = data.get('ai_response', '')  # Добавляем поле для ответа нейросети
+
+        if not spread_type or not cards:
+            return JsonResponse({
+                'success': False,
+                'error': 'Не указан тип расклада или карты'
+            }, status=400)
+
+        # Создаем расклад
+        spread = TarotSpread.objects.create(
+            user=request.user,
+            spread_type=spread_type,
+            question=question,
+            cards_data={'cards': cards},
+            ai_response=ai_response  # Сохраняем ответ нейросети
+        )
+
+        return JsonResponse({
+            'success': True,
+            'spread': spread.to_dict()
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Неверный формат данных'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)

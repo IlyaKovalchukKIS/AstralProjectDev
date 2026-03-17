@@ -57,6 +57,10 @@ class TarotSpread(models.Model):
         verbose_name='Данные карт',
         help_text='JSON с информацией о картах в раскладе'
     )
+    ai_response = models.TextField(
+        blank=True,
+        verbose_name='Ответ нейросети'
+    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата создания'
@@ -100,6 +104,7 @@ class TarotSpread(models.Model):
             'date': self.created_at.isoformat(),
             'created_at': self.created_at.isoformat(),
             'cards': self.get_cards(),
+            'ai_response': self.ai_response,
             'is_favorite': self.is_favorite,
             'note': self.note
         }
