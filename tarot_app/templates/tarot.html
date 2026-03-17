@@ -872,23 +872,23 @@
         </div>
     </div>
 
-    <!-- Контейнер для ответа нейросети в текущем раскладе (аккордеон) -->
-    <div class="row" id="aiResponseContainer" style="display: none;">
-        <div class="col-12">
-            <div class="saved-ai-response">
-                <div class="saved-ai-response-header" id="aiAccordionHeader">
-                    <div class="accordion-trigger">
-                        <i class="bi bi-magic"></i>
-                        <h4>Толкование от нейросети</h4>
-                        <i class="bi bi-chevron-down accordion-icon" id="accordionIcon"></i>
-                    </div>
+<!-- Контейнер для ответа нейросети в текущем раскладе (аккордеон) -->
+<div class="row" id="aiResponseContainer" style="display: none;">
+    <div class="col-12">
+        <div class="saved-ai-response">
+            <div class="saved-ai-response-header" id="aiAccordionHeader">
+                <div class="accordion-trigger">
+                    <i class="bi bi-magic"></i>
+                    <h4>Толкование от нейросети</h4>
+                    <i class="bi bi-chevron-down accordion-icon" id="accordionIcon"></i>
                 </div>
-                <div class="saved-ai-response-content-wrapper" id="aiResponseContent">
-                    <div class="saved-ai-response-content" id="currentAIResponse"></div>
-                </div>
+            </div>
+            <div class="saved-ai-response-content-wrapper" id="aiResponseContent">
+                <div class="saved-ai-response-content" id="currentAIResponse"></div>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Кнопки действий -->
     <div class="row">
@@ -1085,34 +1085,42 @@
 
         // Функция для переключения аккордеона
         function toggleAccordion() {
-            const isExpanded = aiResponseContent.classList.contains('expanded');
+    const isExpanded = aiResponseContent.classList.contains('expanded');
 
-            if (isExpanded) {
-                aiResponseContent.classList.remove('expanded');
-                accordionIcon.classList.remove('rotated');
-            } else {
-                aiResponseContent.classList.add('expanded');
-                accordionIcon.classList.add('rotated');
-            }
-        }
+    if (isExpanded) {
+        // Сворачиваем
+        aiResponseContent.classList.remove('expanded');
+        accordionIcon.classList.remove('rotated');
+    } else {
+        // Раскрываем
+        aiResponseContent.classList.add('expanded');
+        accordionIcon.classList.add('rotated');
+
+        // Плавный скролл к контенту (опционально)
+        setTimeout(() => {
+            aiResponseContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 300);
+    }
+}
 
         // Функция для отображения ответа нейросети
         function displayAIResponse(response) {
-            if (response && response.trim() !== '') {
-                aiResponseContainer.style.display = 'block';
-                currentAIResponse.innerHTML = response.replace(/\n/g, '<br>');
+    if (response && response.trim() !== '') {
+        aiResponseContainer.style.display = 'block';
+        currentAIResponse.innerHTML = response.replace(/\n/g, '<br>');
 
-                // Автоматически раскрываем аккордеон при получении нового ответа
-                setTimeout(() => {
-                    aiResponseContent.classList.add('expanded');
-                    accordionIcon.classList.add('rotated');
-                }, 100);
-            } else {
-                aiResponseContainer.style.display = 'none';
-                aiResponseContent.classList.remove('expanded');
-                accordionIcon.classList.remove('rotated');
-            }
-        }
+        // Убеждаемся, что аккордеон по умолчанию СКРЫТ
+        aiResponseContent.classList.remove('expanded');
+        accordionIcon.classList.remove('rotated');
+
+        // НЕ раскрываем автоматически при получении ответа
+        // Пользователь сам решит, когда нажать на заголовок
+    } else {
+        aiResponseContainer.style.display = 'none';
+        aiResponseContent.classList.remove('expanded');
+        accordionIcon.classList.remove('rotated');
+    }
+}
 
         // Обработчик клика на заголовок аккордеона
         if (aiAccordionHeader) {
