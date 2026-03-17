@@ -6,7 +6,131 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/tarot.css' %}">
 <style>
-    /* Стили для кнопки сохранения и списка сохраненных раскладов */
+    /* Стили для ввода вопроса */
+    .question-section {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 30px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .question-section h3 {
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .question-section h3 i {
+        color: #8b5cf6;
+        font-size: 2rem;
+    }
+
+    .question-input-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .question-input-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8b5cf6;
+        font-size: 1.2rem;
+    }
+
+    .question-input-field {
+        width: 100%;
+        padding: 1rem 1rem 1rem 3rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 2px solid #8b5cf6;
+        border-radius: 50px;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .question-input-field:focus {
+        outline: none;
+        border-color: #ec4899;
+        box-shadow: 0 0 30px rgba(236, 72, 153, 0.3);
+    }
+
+    .question-input-field::placeholder {
+        color: rgba(255, 255, 255, 0.3);
+    }
+
+    .question-hint {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Стили для кнопок раскладов */
+    .spread-selector {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 2rem;
+    }
+
+    .spread-btn {
+        background: rgba(139, 92, 246, 0.1);
+        border: 2px solid #8b5cf6;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .spread-btn.active {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        border-color: transparent;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+    }
+
+    .spread-btn.enabled {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .spread-btn.enabled:hover {
+        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        border-color: transparent;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+    }
+
+    .spread-btn i {
+        font-size: 1.2rem;
+    }
+
+    /* Стили для кнопки сохранения и нейросети */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+
     .save-spread-btn {
         background: linear-gradient(135deg, #8b5cf6, #ec4899);
         color: white;
@@ -20,10 +144,9 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-top: 2rem;
     }
 
-    .save-spread-btn:hover {
+    .save-spread-btn:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
     }
@@ -31,11 +154,8 @@
     .save-spread-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
     }
 
-    /* Стили для кнопки нейросети */
     .ai-spread-btn {
         background: linear-gradient(135deg, #10b981, #059669);
         color: white;
@@ -49,11 +169,9 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        margin-top: 2rem;
-        margin-left: 1rem;
     }
 
-    .ai-spread-btn:hover {
+    .ai-spread-btn:hover:not(:disabled) {
         transform: translateY(-3px);
         box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
     }
@@ -61,14 +179,49 @@
     .ai-spread-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
     }
 
     .ai-spread-btn i {
         font-size: 1.2rem;
     }
 
+    /* Стили для ответа нейросети в сохраненном раскладе */
+    .saved-ai-response {
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+        border: 2px solid #10b981;
+        border-radius: 20px;
+        animation: fadeIn 0.5s ease;
+    }
+
+    .saved-ai-response-header {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .saved-ai-response-header i {
+        color: #10b981;
+        font-size: 1.5rem;
+    }
+
+    .saved-ai-response-header h4 {
+        color: #10b981;
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .saved-ai-response-content {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        white-space: pre-wrap;
+    }
+
+    /* Остальные стили (без изменений) */
     .saved-spreads-section {
         margin-top: 3rem;
         padding: 2rem;
@@ -104,6 +257,7 @@
         border-radius: 20px;
         padding: 1.5rem;
         transition: all 0.3s ease;
+        cursor: pointer;
     }
 
     .saved-spread-card:hover {
@@ -197,6 +351,7 @@
     .saved-spread-actions {
         display: flex;
         gap: 0.5rem;
+        margin-top: 1rem;
     }
 
     .saved-spread-btn {
@@ -246,8 +401,8 @@
         color: #8b5cf6;
     }
 
-    /* Модальное окно для ввода вопроса */
-    .question-modal {
+    /* Модальное окно для карты */
+    .custom-modal {
         display: none;
         position: fixed;
         top: 0;
@@ -261,74 +416,88 @@
         justify-content: center;
     }
 
-    .question-modal.show {
+    .custom-modal.show {
         display: flex;
     }
 
-    .question-modal-content {
+    .custom-modal-content {
         background: linear-gradient(135deg, #1a1a2e, #16213e);
         border: 2px solid #8b5cf6;
         border-radius: 30px;
         padding: 2rem;
         max-width: 500px;
         width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
         position: relative;
     }
 
-    .question-modal-title {
+    .custom-modal-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 2rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+        line-height: 1;
+    }
+
+    .custom-modal-close:hover {
+        color: #ef4444;
+    }
+
+    .custom-modal-title {
         color: #8b5cf6;
-        font-size: 1.5rem;
+        font-size: 1.8rem;
         margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        padding-right: 2rem;
     }
 
-    .question-input {
-        width: 100%;
-        padding: 1rem;
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid #8b5cf6;
+    .custom-modal-image {
+        max-width: 200px;
         border-radius: 15px;
-        color: white;
-        font-size: 1rem;
-        margin-bottom: 1.5rem;
+        margin: 1rem auto;
+        border: 2px solid #8b5cf6;
     }
 
-    .question-input:focus {
-        outline: none;
-        border-color: #ec4899;
-        box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+    .custom-modal-description {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.6;
+        margin: 1rem 0;
     }
 
-    .question-modal-buttons {
+    .custom-modal-footer {
         display: flex;
         gap: 1rem;
-        justify-content: flex-end;
+        justify-content: center;
+        margin-top: 1.5rem;
     }
 
-    .question-modal-btn {
-        padding: 0.75rem 1.5rem;
+    .modal-btn {
+        padding: 0.5rem 1rem;
         border: none;
         border-radius: 50px;
-        font-size: 1rem;
+        font-size: 0.9rem;
         cursor: pointer;
         transition: all 0.3s ease;
     }
 
-    .question-modal-btn.cancel {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.3);
+    #showUpright {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
         color: white;
     }
 
-    .question-modal-btn.save {
-        background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    #showReversed {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
         color: white;
     }
 
-    .question-modal-btn:hover {
+    .modal-btn:hover {
         transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
 
     /* Модальное окно для ответа нейросети */
@@ -401,10 +570,6 @@
         white-space: pre-wrap;
     }
 
-    .ai-response-content p {
-        margin-bottom: 1rem;
-    }
-
     .ai-loading {
         text-align: center;
         padding: 2rem;
@@ -468,7 +633,6 @@
         margin-bottom: 0.5rem;
     }
 
-    /* Индикатор загрузки */
     .loading-dots:after {
         content: '.';
         animation: dots 1.5s steps(5, end) infinite;
@@ -481,7 +645,6 @@
         80%, 100% { content: ''; }
     }
 
-    /* Индикатор сохранения */
     .save-notification {
         position: fixed;
         top: 20px;
@@ -518,24 +681,170 @@
         }
     }
 
-    /* Адаптация для мобильных */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     @media (max-width: 768px) {
-        .ai-modal-content {
-            padding: 1.5rem;
-            width: 95%;
+        .spread-selector {
+            flex-direction: column;
         }
 
-        .ai-spread-btn {
-            margin-left: 0;
-            margin-top: 1rem;
+        .spread-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .action-buttons {
+            flex-direction: column;
         }
 
         .save-spread-btn, .ai-spread-btn {
             width: 100%;
-            margin-left: 0;
             justify-content: center;
         }
+
+        .ai-modal-content {
+            padding: 1.5rem;
+            width: 95%;
+        }
     }
+    /* Стили для аккордеона */
+.saved-ai-response {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+    border: 2px solid #10b981;
+    border-radius: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+.saved-ai-response-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+.accordion-trigger {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #10b981;
+}
+
+.accordion-trigger i:first-child {
+    font-size: 1.5rem;
+}
+
+.accordion-trigger h4 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.2rem;
+}
+
+.accordion-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.accordion-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.saved-ai-response-content-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out, opacity 0.3s ease;
+    opacity: 0;
+    margin-top: 0;
+}
+
+.saved-ai-response-content-wrapper.expanded {
+    max-height: 1000px; /* Достаточно для длинного текста */
+    opacity: 1;
+    margin-top: 1rem;
+    transition: max-height 0.5s ease-in, opacity 0.3s ease 0.1s;
+}
+
+.saved-ai-response-content {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+    white-space: pre-wrap;
+    padding: 0.5rem 0;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Стили для форматированного текста внутри ответа */
+.saved-ai-response-content h1,
+.saved-ai-response-content h2,
+.saved-ai-response-content h3,
+.saved-ai-response-content h4 {
+    color: #10b981;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.saved-ai-response-content h1:first-child,
+.saved-ai-response-content h2:first-child,
+.saved-ai-response-content h3:first-child,
+.saved-ai-response-content h4:first-child {
+    margin-top: 0;
+}
+
+.saved-ai-response-content p {
+    margin-bottom: 1rem;
+}
+
+.saved-ai-response-content ul,
+.saved-ai-response-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.saved-ai-response-content li {
+    margin-bottom: 0.3rem;
+}
+
+.saved-ai-response-content strong {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.saved-ai-response-content em {
+    color: rgba(255, 255, 255, 0.8);
+    font-style: italic;
+}
+
+.saved-ai-response-content blockquote {
+    border-left: 3px solid #10b981;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}
+
+.saved-ai-response-content hr {
+    border: none;
+    border-top: 1px solid rgba(16, 185, 129, 0.3);
+    margin: 1.5rem 0;
+}
 </style>
 {% endblock %}
 
@@ -559,17 +868,38 @@
         </div>
     </div>
 
+    <!-- Секция ввода вопроса -->
+    <div class="row">
+        <div class="col-12">
+            <div class="question-section">
+                <h3>
+                    <i class="bi bi-question-circle"></i>
+                    Сформулируйте ваш вопрос
+                </h3>
+                <div class="question-input-wrapper">
+                    <i class="bi bi-pencil-fill"></i>
+                    <input type="text" class="question-input-field" id="questionInput"
+                           placeholder="Например: Что меня ждет в ближайшее время?" maxlength="200">
+                </div>
+                <div class="question-hint">
+                    <i class="bi bi-info-circle"></i>
+                    Введите вопрос, чтобы активировать кнопки раскладов
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Кнопки выбора расклада -->
-    <div class="row mt-4">
+    <div class="row">
         <div class="col-12">
             <div class="spread-selector">
-                <button class="spread-btn" id="spreadOne">
+                <button class="spread-btn" id="spreadOne" disabled>
                     <i class="bi bi-1-circle-fill"></i> Одна карта
                 </button>
-                <button class="spread-btn" id="spreadThree">
+                <button class="spread-btn" id="spreadThree" disabled>
                     <i class="bi bi-3-circle-fill"></i> Три карты
                 </button>
-                <button class="spread-btn" id="spreadCeltic">
+                <button class="spread-btn" id="spreadCeltic" disabled>
                     <i class="bi bi-grid-3x3-gap-fill"></i> Кельтский крест
                 </button>
             </div>
@@ -582,23 +912,43 @@
             <div class="spread-container" id="spreadContainer">
                 <div class="text-center text-secondary" id="spreadPlaceholder">
                     <i class="bi bi-hand-index-thumb" style="font-size: 3rem;"></i>
-                    <p class="mt-3">Выберите тип расклада, чтобы начать гадание</p>
+                    <p class="mt-3">Введите вопрос и выберите тип расклада</p>
                 </div>
             </div>
         </div>
     </div>
 
+<!-- Контейнер для ответа нейросети в текущем раскладе (аккордеон) -->
+<div class="row" id="aiResponseContainer" style="display: none;">
+    <div class="col-12">
+        <div class="saved-ai-response">
+            <div class="saved-ai-response-header" id="aiAccordionHeader">
+                <div class="accordion-trigger">
+                    <i class="bi bi-magic"></i>
+                    <h4>Толкование от нейросети</h4>
+                    <i class="bi bi-chevron-down accordion-icon" id="accordionIcon"></i>
+                </div>
+            </div>
+            <div class="saved-ai-response-content-wrapper" id="aiResponseContent">
+                <div class="saved-ai-response-content" id="currentAIResponse"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Кнопки действий -->
     <div class="row">
-        <div class="col-12 text-center">
-            <button class="save-spread-btn" id="saveSpreadBtn" disabled>
-                <i class="bi bi-bookmark-star"></i>
-                Сохранить этот расклад
-            </button>
-            <button class="ai-spread-btn" id="getAIInterpretationBtn" disabled>
-                <i class="bi bi-magic"></i>
-                Получить ответ от нейросети
-            </button>
+        <div class="col-12">
+            <div class="action-buttons">
+                <button class="save-spread-btn" id="saveSpreadBtn" disabled>
+                    <i class="bi bi-bookmark-star"></i>
+                    Сохранить этот расклад
+                </button>
+                <button class="ai-spread-btn" id="getAIInterpretationBtn" disabled>
+                    <i class="bi bi-magic"></i>
+                    Получить ответ от нейросети
+                </button>
+            </div>
         </div>
     </div>
 
@@ -641,26 +991,6 @@
     </div>
 </div>
 
-<!-- Модальное окно для ввода вопроса -->
-<div class="question-modal" id="questionModal">
-    <div class="question-modal-content">
-        <h3 class="question-modal-title">
-            <i class="bi bi-question-circle"></i>
-            Сохранить расклад
-        </h3>
-        <input type="text" class="question-input" id="questionInput"
-               placeholder="Введите ваш вопрос (необязательно)" maxlength="200">
-        <div class="question-modal-buttons">
-            <button class="question-modal-btn cancel" id="cancelSaveBtn">
-                <i class="bi bi-x"></i> Отмена
-            </button>
-            <button class="question-modal-btn save" id="confirmSaveBtn">
-                <i class="bi bi-check"></i> Сохранить
-            </button>
-        </div>
-    </div>
-</div>
-
 <!-- Модальное окно для ответа нейросети -->
 <div class="ai-modal" id="aiModal">
     <div class="ai-modal-content">
@@ -671,7 +1001,7 @@
             </h3>
             <button class="ai-modal-close" id="closeAIModalBtn">&times;</button>
         </div>
-        <div id="aiResponseContainer">
+        <div id="aiModalResponseContainer">
             <!-- Контент будет загружаться сюда -->
         </div>
         <div class="ai-actions">
@@ -696,10 +1026,9 @@
         const saveSpreadBtn = document.getElementById('saveSpreadBtn');
         const getAIInterpretationBtn = document.getElementById('getAIInterpretationBtn');
         const savedSpreadsContainer = document.getElementById('savedSpreadsContainer');
-        const questionModal = document.getElementById('questionModal');
         const questionInput = document.getElementById('questionInput');
-        const cancelSaveBtn = document.getElementById('cancelSaveBtn');
-        const confirmSaveBtn = document.getElementById('confirmSaveBtn');
+        const aiResponseContainer = document.getElementById('aiResponseContainer');
+        const currentAIResponse = document.getElementById('currentAIResponse');
 
         // Элементы модального окна карты
         const modal = document.getElementById('cardModal');
@@ -714,8 +1043,12 @@
         // Элементы модального окна нейросети
         const aiModal = document.getElementById('aiModal');
         const closeAIModalBtn = document.getElementById('closeAIModalBtn');
-        const aiResponseContainer = document.getElementById('aiResponseContainer');
+        const aiModalResponseContainer = document.getElementById('aiModalResponseContainer');
         const saveAIResponseBtn = document.getElementById('saveAIResponseBtn');
+
+        const aiAccordionHeader = document.getElementById('aiAccordionHeader');
+        const aiResponseContent = document.getElementById('aiResponseContent');
+        const accordionIcon = document.getElementById('accordionIcon');
 
         // Базовый URL для API
         const API_BASE_URL = '/api/spreads/';
@@ -736,7 +1069,7 @@
         let currentCard = null;
         let currentSpread = null;
         let currentSpreadType = null;
-        let currentAIResponse = ''; // Для хранения текущего ответа нейросети
+        let currentAIResponseText = ''; // Для хранения текущего ответа нейросети
 
         // Функция для получения CSRF токена из куки
         function getCookie(name) {
@@ -797,6 +1130,20 @@
             }
         }
 
+        // Следим за вводом вопроса
+        questionInput.addEventListener('input', function() {
+            const hasQuestion = this.value.trim().length > 0;
+            [spreadOne, spreadThree, spreadCeltic].forEach(btn => {
+                if (hasQuestion) {
+                    btn.classList.add('enabled');
+                    btn.disabled = false;
+                } else {
+                    btn.classList.remove('enabled');
+                    btn.disabled = true;
+                }
+            });
+        });
+
         // Загрузка сохраненных раскладов
         async function loadSavedSpreads() {
             try {
@@ -822,18 +1169,17 @@
         }
 
         // Сохранение расклада
-        async function saveSpread(question = '', aiResponse = '') {
+        async function saveSpread(aiResponse = '') {
             if (!currentSpread || !currentSpreadType) {
                 showNotification('Нет расклада для сохранения', 'error');
                 return;
             }
 
-            // Используем переданный ответ или текущий
-            const responseToSave = aiResponse || currentAIResponse || '';
+            const question = questionInput.value.trim() || 'Без вопроса';
 
             const spreadData = {
                 spread_type: currentSpreadType,
-                question: question.trim(),
+                question: question,
                 cards: currentSpread.map(card => ({
                     id: card.id,
                     name: card.name,
@@ -842,7 +1188,7 @@
                     is_upside_down: card.is_upside_down || false,
                     image_url: card.image_url || ''
                 })),
-                ai_response: responseToSave
+                ai_response: aiResponse || currentAIResponseText || ''
             };
 
             try {
@@ -853,19 +1199,16 @@
 
                 if (data && data.success) {
                     showNotification('Расклад успешно сохранен!');
-                    questionInput.value = '';
-                    questionModal.classList.remove('show');
 
                     // Обновляем текущий расклад с ID
                     if (data.spread) {
                         currentSpread.id = data.spread.id;
-                        currentSpread.ai_response = responseToSave;
+                        currentSpread.ai_response = aiResponse || currentAIResponseText;
                     }
 
                     await loadSavedSpreads();
 
-                    // Если был ответ нейросети, показываем его
-                    if (responseToSave) {
+                    if (aiResponse || currentAIResponseText) {
                         showNotification('Ответ нейросети сохранен!');
                     }
                 } else {
@@ -918,11 +1261,26 @@
                     id: card.id
                 }));
                 currentSpreadType = data.type;
-                currentAIResponse = data.ai_response || ''; // Загружаем ответ нейросети
+                currentAIResponseText = data.ai_response || '';
 
                 renderCards(currentSpread, data.type);
+
+                // Если есть вопрос, отображаем его в поле ввода
+                if (data.question) {
+                    questionInput.value = data.question;
+                }
+
+                // Активируем кнопки
                 saveSpreadBtn.disabled = false;
                 getAIInterpretationBtn.disabled = false;
+
+                // Отображаем ответ нейросети если есть
+                if (currentAIResponseText) {
+                    aiResponseContainer.style.display = 'block';
+                    currentAIResponse.innerHTML = currentAIResponseText.replace(/\n/g, '<br>');
+                } else {
+                    aiResponseContainer.style.display = 'none';
+                }
 
                 // Подсвечиваем активную кнопку
                 [spreadOne, spreadThree, spreadCeltic].forEach(btn => btn.classList.remove('active'));
@@ -936,10 +1294,6 @@
 
                 spreadContainer.scrollIntoView({behavior: 'smooth', block: 'start'});
 
-                // Если есть ответ нейросети, показываем уведомление
-                if (currentAIResponse) {
-                    showNotification('У этого расклада есть толкование от нейросети!', 'info');
-                }
             } catch (error) {
                 console.error('Error loading spread:', error);
                 showNotification('Ошибка загрузки расклада: ' + error.message, 'error');
@@ -970,7 +1324,7 @@
                      spread.type === 'three' ? 'Три карты' : 'Кельтский крест');
 
                 html += `
-                    <div class="saved-spread-card" data-spread-id="${spread.id}">
+                    <div class="saved-spread-card" onclick="viewSavedSpread(${spread.id})">
                         <div class="saved-spread-header">
                             <span class="saved-spread-type">${typeText}</span>
                             <span class="saved-spread-date">${formattedDate}</span>
@@ -1005,7 +1359,7 @@
 
                 html += `</div>`;
 
-                if (spread.question) {
+                if (spread.question && spread.question !== 'Без вопроса') {
                     html += `<div class="saved-spread-question">"${spread.question}"</div>`;
                 }
 
@@ -1020,7 +1374,7 @@
                 }
 
                 html += `
-                        <div class="saved-spread-actions">
+                        <div class="saved-spread-actions" onclick="event.stopPropagation()">
                             <button class="saved-spread-btn view" onclick="viewSavedSpread(${spread.id})">
                                 <i class="bi bi-eye"></i> Просмотр
                             </button>
@@ -1043,9 +1397,16 @@
                 return;
             }
 
+            const question = questionInput.value.trim();
+            if (!question) {
+                showNotification('Введите вопрос для получения толкования', 'warning');
+                questionInput.focus();
+                return;
+            }
+
             // Показываем модальное окно с загрузкой
             aiModal.classList.add('show');
-            aiResponseContainer.innerHTML = `
+            aiModalResponseContainer.innerHTML = `
                 <div class="ai-loading">
                     <i class="bi bi-arrow-repeat"></i>
                     <p>Нейросеть анализирует ваш расклад<span class="loading-dots"></span></p>
@@ -1054,9 +1415,6 @@
             document.body.style.overflow = 'hidden';
 
             try {
-                // Получаем вопрос из модального окна или используем вопрос из сохраненного расклада
-                const question = questionInput.value.trim() || 'Общее толкование расклада';
-
                 const response = await fetchAPI('/api/ai-interpret/', {
                     method: 'POST',
                     body: JSON.stringify({
@@ -1067,12 +1425,12 @@
                 });
 
                 if (response && response.success) {
-                    currentAIResponse = response.ai_response;
+                    currentAIResponseText = response.ai_response;
 
                     // Форматируем ответ для отображения
                     const formattedResponse = response.ai_response.replace(/\n/g, '<br>');
 
-                    aiResponseContainer.innerHTML = `
+                    aiModalResponseContainer.innerHTML = `
                         <div class="ai-question-preview">
                             <strong>Ваш вопрос:</strong>
                             ${question}
@@ -1082,14 +1440,17 @@
                         </div>
                     `;
 
-                    // Автоматически сохраняем ответ при получении
-                    saveAIResponseToCurrentSpread(response.ai_response);
+                    // Отображаем ответ в основном контейнере
+                    aiResponseContainer.style.display = 'block';
+                    currentAIResponse.innerHTML = formattedResponse;
+
+                    showNotification('Ответ нейросети получен!');
                 } else {
                     throw new Error('Не удалось получить ответ от нейросети');
                 }
             } catch (error) {
                 console.error('Error getting AI interpretation:', error);
-                aiResponseContainer.innerHTML = `
+                aiModalResponseContainer.innerHTML = `
                     <div class="text-center p-4">
                         <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #ef4444;"></i>
                         <p class="mt-3" style="color: #ef4444;">Ошибка при получении ответа</p>
@@ -1099,17 +1460,6 @@
                         </button>
                     </div>
                 `;
-            }
-        }
-
-        // Функция для сохранения ответа нейросети в текущий расклад
-        function saveAIResponseToCurrentSpread(aiResponse) {
-            if (currentSpread) {
-                // Добавляем поле ai_response к текущему раскладу
-                currentSpread.ai_response = aiResponse;
-
-                // Показываем уведомление
-                showNotification('Ответ нейросети получен!');
             }
         }
 
@@ -1315,7 +1665,8 @@
                 const cards = getRandomCards(1);
                 currentSpread = cards;
                 currentSpreadType = 'one';
-                currentAIResponse = ''; // Сбрасываем предыдущий ответ
+                currentAIResponseText = ''; // Сбрасываем предыдущий ответ
+                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
                 renderCards(cards, 'one');
             }, 500);
         });
@@ -1335,7 +1686,8 @@
                 const cards = getRandomCards(3);
                 currentSpread = cards;
                 currentSpreadType = 'three';
-                currentAIResponse = ''; // Сбрасываем предыдущий ответ
+                currentAIResponseText = ''; // Сбрасываем предыдущий ответ
+                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
                 renderCards(cards, 'three');
             }, 500);
         });
@@ -1355,7 +1707,8 @@
                 const cards = getRandomCards(10);
                 currentSpread = cards;
                 currentSpreadType = 'celtic';
-                currentAIResponse = ''; // Сбрасываем предыдущий ответ
+                currentAIResponseText = ''; // Сбрасываем предыдущий ответ
+                aiResponseContainer.style.display = 'none'; // Скрываем контейнер с ответом
                 renderCards(cards, 'celtic');
             }, 500);
         });
@@ -1382,8 +1735,7 @@
         // Обработчик кнопки сохранения
         saveSpreadBtn.addEventListener('click', function () {
             if (currentSpread) {
-                questionModal.classList.add('show');
-                questionInput.focus();
+                saveSpread();
             } else {
                 showNotification('Сначала сделайте расклад', 'warning');
             }
@@ -1391,29 +1743,7 @@
 
         // Обработчик кнопки получения ответа от нейросети
         getAIInterpretationBtn.addEventListener('click', function() {
-            // Показываем модальное окно с вопросом, если вопрос не задан
-            if (!questionInput.value.trim()) {
-                questionModal.classList.add('show');
-                questionInput.focus();
-
-                // Меняем поведение кнопки сохранения в модальном окне вопроса
-                const originalConfirmHandler = confirmSaveBtn.onclick;
-                confirmSaveBtn.onclick = function() {
-                    questionModal.classList.remove('show');
-                    getAIInterpretation(); // После ввода вопроса получаем ответ
-                    // Восстанавливаем оригинальный обработчик
-                    confirmSaveBtn.onclick = originalConfirmHandler;
-                };
-
-                // Восстанавливаем обработчик при отмене
-                const restoreHandler = function() {
-                    confirmSaveBtn.onclick = originalConfirmHandler;
-                    cancelSaveBtn.removeEventListener('click', restoreHandler);
-                };
-                cancelSaveBtn.addEventListener('click', restoreHandler);
-            } else {
-                getAIInterpretation();
-            }
+            getAIInterpretation();
         });
 
         // Закрытие модального окна нейросети
@@ -1438,48 +1768,15 @@
 
         // Сохранение ответа нейросети в расклад
         saveAIResponseBtn.addEventListener('click', function() {
-            if (currentAIResponse && currentSpread) {
-                // Если расклад еще не сохранен, предлагаем сохранить
+            if (currentAIResponseText && currentSpread) {
+                // Если расклад еще не сохранен, сохраняем с ответом
                 if (!currentSpread.id) {
-                    questionModal.classList.add('show');
-
-                    // Меняем поведение кнопки сохранения
-                    const originalConfirmHandler = confirmSaveBtn.onclick;
-                    confirmSaveBtn.onclick = function() {
-                        saveSpread(questionInput.value, currentAIResponse);
-                        questionModal.classList.remove('show');
-                        closeAIModal();
-                        // Восстанавливаем оригинальный обработчик
-                        confirmSaveBtn.onclick = originalConfirmHandler;
-                    };
-
-                    // Восстанавливаем обработчик при отмене
-                    const restoreHandler = function() {
-                        confirmSaveBtn.onclick = originalConfirmHandler;
-                        cancelSaveBtn.removeEventListener('click', restoreHandler);
-                    };
-                    cancelSaveBtn.addEventListener('click', restoreHandler);
+                    saveSpread(currentAIResponseText);
+                    closeAIModal();
                 } else {
                     // Если расклад уже сохранен, обновляем его через API
-                    updateSpreadWithAI(currentSpread.id, currentAIResponse);
+                    updateSpreadWithAI(currentSpread.id, currentAIResponseText);
                 }
-            }
-        });
-
-        // Обработчики модального окна вопроса
-        cancelSaveBtn.addEventListener('click', function () {
-            questionModal.classList.remove('show');
-            questionInput.value = '';
-        });
-
-        confirmSaveBtn.addEventListener('click', function () {
-            saveSpread(questionInput.value);
-        });
-
-        questionModal.addEventListener('click', function (e) {
-            if (e.target === questionModal) {
-                questionModal.classList.remove('show');
-                questionInput.value = '';
             }
         });
 
@@ -1496,6 +1793,7 @@
                 </div>
             `;
             spreadPlaceholder.style.display = 'none';
+            questionInput.disabled = true;
 
             [spreadOne, spreadThree, spreadCeltic].forEach(btn => {
                 btn.disabled = true;
@@ -1507,6 +1805,7 @@
         // Делаем функции глобальными
         window.viewSavedSpread = viewSavedSpread;
         window.deleteSpread = deleteSpread;
+        window.getAIInterpretation = getAIInterpretation;
     });
 </script>
 {% endblock %}
