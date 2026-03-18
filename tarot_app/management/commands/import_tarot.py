@@ -25,14 +25,26 @@ class Command(BaseCommand):
         created_count = 0
         updated_count = 0
 
+        # result = []
+        # for i in cards_data:
+        #     i['image'] = ""
+        #     result.append(i)
+        #
+        # with open('test_file.json', 'w') as f:
+        #     f.write(str(result).replace("'", '"'))
+        #     f.close()
+        # no_image_card = []
         for card_data in cards_data:
+            # if len(card_data['image']) == 0:
+            #     no_image_card.append(card_data['name'])
             card, created = TarotCard.objects.update_or_create(
                 name=card_data['name'],
                 defaults={
                     'arcana_type': card_data['arcana_type'],
                     'number': card_data['number'],
                     'description': card_data['description'],
-                    'description_flip': card_data['description_flip']
+                    'description_flip': card_data['description_flip'],
+                    'image': "tarot/" + card_data['image']
                 }
             )
 
@@ -46,3 +58,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'\nГотово! Создано: {created_count}, Обновлено: {updated_count}'
         ))
+
+        # print(no_image_card)
